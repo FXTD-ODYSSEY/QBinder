@@ -9,14 +9,10 @@ import functools
 
 
 class MFieldMixin(object):
-    computed_dict = None
-    props_dict = None
+    computed_dict = {}
+    props_dict = {}
 
     def register_field(self, name, getter=None, setter=None, required=False):
-        if self.computed_dict is None:
-            self.computed_dict = {}
-        if self.props_dict is None:
-            self.props_dict = {}
         if callable(getter):
             value = getter()
             self.computed_dict[name] = {
@@ -29,7 +25,6 @@ class MFieldMixin(object):
             self.props_dict[name] = {'value': getter,
                                      'require': required,
                                      'bind': []}
-        return
 
     def bind(self, data_name, widget, qt_property, index=None, signal=None, callback=None):
         data_dict = {'data_name': data_name,

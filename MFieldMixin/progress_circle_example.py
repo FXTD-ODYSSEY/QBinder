@@ -9,14 +9,14 @@
 import functools
 
 import sys
-MODULE = r"C:\Users\timmyliang\Desktop\repo\dayu_widgets_mvc"
-if MODULE not in sys.path:
-    sys.path.append(MODULE)
 
-MODULE = r"C:\Users\timmyliang\Desktop\repo\dayu_widgets"
+# MODULE = r"C:\Users\timmyliang\Desktop\repo\dayu_widgets"
+MODULE = r"D:\Users\82047\Desktop\repo\dayu_widgets"
 if MODULE not in sys.path:
     sys.path.append(MODULE)
-MODULE = r"C:\Users\timmyliang\Desktop\repo\dayu_path"
+    
+# MODULE = r"C:\Users\timmyliang\Desktop\repo\dayu_path"
+MODULE = r"D:\Users\82047\Desktop\repo\dayu_path"
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 

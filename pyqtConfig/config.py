@@ -177,6 +177,7 @@ def build_tuple_mapper(mlist):
     :rtype: 2-tuple of lambdas that perform forward and reverse map
                 
     '''
+    mdict = {k: v for k, v in mlist}
     rdict = {v: k for k, v in mlist}
     return (
         lambda x: mdict[x] if x in mdict else x,
