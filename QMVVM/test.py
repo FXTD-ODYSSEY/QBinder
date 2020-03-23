@@ -12,8 +12,41 @@ from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
 
+import sys
 import inspect
+import traceback
+import dis
+
 # import QRedux
+
+from functools import wraps
+
+def initDeco(func):
+
+	def trace_func(frame,event,arg):
+		# NOTE 获取局部变量 a 并修改变量
+		if event == 'return':
+			caller_code = frame.f_code
+			lineno = frame.f_lineno
+			# print lineno
+			
+			print dis.dis(caller_code.co_code)
+			# try:
+			# 	print "caller_code",caller_code.co_code.encode('utf-8')
+			# except:
+			# 	pass
+		return trace_func
+
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+
+		# sys.settrace(trace_func)
+		ret = func(*args, **kwargs)
+		# sys.settrace(None)
+
+		return ret
+	return wrapper
+
 
 class Counter(QtWidgets.QWidget):
 
@@ -29,6 +62,7 @@ class Counter(QtWidgets.QWidget):
 	# 	],
 	# 	"actions":{},
 	# })
+
 	_count = 0
 	@property
 	def count(self):
@@ -39,8 +73,11 @@ class Counter(QtWidgets.QWidget):
 		# print inspect.getframeinfo(caller_frame)
 
 		caller_code = caller_frame.f_code
-		print caller_code.co_varnames
+		f_lineno = caller_frame.f_lineno
+		print f_lineno
 		# print inspect.getmodule(caller_code)
+
+		# print inspect.getmembers(caller_frame)
 
 		# NOTE get caller method name
 		# curframe = inspect.currentframe()
@@ -53,19 +90,21 @@ class Counter(QtWidgets.QWidget):
 		print "set count"
 		self._count = val
 
+	@initDeco
 	def __init__(self):
 		super(Counter,self).__init__()
 	
-		# self.count = QtCore.Property(int,self.getCount,self.setCount)
-		
-		print self.count
 		self.count = 0
 
+		self.initialize()
+
+	def initialize(self):
+		
 		layout = QtWidgets.QVBoxLayout()
 		self.setLayout(layout)
 
 		label = QtWidgets.QLabel()
-		label.setaText("<center>%s</center>" % self.count)
+		label.setText("<center>%s</center>" % self.count)
 
 		plus_button = QtWidgets.QPushButton("+")
 		minus_button = QtWidgets.QPushButton("-")
@@ -80,6 +119,7 @@ class Counter(QtWidgets.QWidget):
 		
 		plus_button.clicked.connect(self.add)
 		minus_button.clicked.connect(self.subtract)
+
 
 	def add(self):
 		self.count += 1
