@@ -1,1 +1,0 @@
-from PySide.QtCore import Property
