@@ -1,0 +1,2 @@
+Value of <__main__.X object at 0x0000023FC231FD68> . foo changed! 99
+###### Before this line:

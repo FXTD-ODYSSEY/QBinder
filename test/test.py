@@ -16,6 +16,8 @@ import sys
 import inspect
 import traceback
 import dis
+import pdb
+from optparse import OptionParser
 
 # import QRedux
 
@@ -41,6 +43,7 @@ def initDeco(func):
 	def wrapper(*args, **kwargs):
 
 		# sys.settrace(trace_func)
+		print func.__doc__
 		ret = func(*args, **kwargs)
 		# sys.settrace(None)
 
@@ -51,16 +54,17 @@ def initDeco(func):
 class Counter(QtWidgets.QWidget):
 
 	# @QRedux.store({
-	# 	"count":{
-	# 		"setter":0,
-	# 		"getter":0,
-	# 		"updater":0,
+	# 	"state":{
+	# 		"count":0,
+	# 		"count2":{
+	# 			"val":1,
+	# 			"getter":"add",
+	# 			"setter":"subtract",
+	# 		},
 	# 	},
-	# 	"mutations":[
-	# 		"add",
-	# 		"subtract",
-	# 	],
-	# 	"actions":{},
+	# 	"binding":{
+
+	# 	},
 	# })
 
 	_count = 0
@@ -95,11 +99,12 @@ class Counter(QtWidgets.QWidget):
 		super(Counter,self).__init__()
 	
 		self.count = 0
-
+		pdb.set_trace()
 		self.initialize()
 
 	def initialize(self):
-		
+
+
 		layout = QtWidgets.QVBoxLayout()
 		self.setLayout(layout)
 
@@ -120,6 +125,7 @@ class Counter(QtWidgets.QWidget):
 		plus_button.clicked.connect(self.add)
 		minus_button.clicked.connect(self.subtract)
 
+		print inspect.getmembers(OptionParser, predicate=inspect.ismethod)
 
 	def add(self):
 		self.count += 1
