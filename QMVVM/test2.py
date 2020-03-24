@@ -28,16 +28,20 @@ class Counter(QtWidgets.QWidget):
 	@QMVVM.store({
 		"state":{
 			"count":0,
+			"count2":" yes",
 		},
 		"binding":{
 			"count":{
 				"label.setText":"str",
 				"@label2.setText":{
-					"set_callback_args":["count"],
-					"set_callback":lambda count: "<center>%s</center>"%count,
+					"set_callback_args":["count","count2"],
+					"set_callback":lambda count,count2: "<center>%s%s</center>"%(count,count2),
 				},
 				"@label3.setText":lambda count: "<center>%s</center>" % count,
 			},
+			"count2":{
+				"@label2.setText":lambda count: "<center>%s</center>" % count,
+			}
 		},
 	})
 	def __init__(self):
@@ -71,10 +75,10 @@ class Counter(QtWidgets.QWidget):
 
 	def add(self):
 		print self.state.count
-		self.state.count = 1
+		self.state.count += 1
 
 	def subtract(self):
-		self.state.count = 4
+		self.state.count -= 1
 
 		
 def main():

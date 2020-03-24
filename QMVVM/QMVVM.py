@@ -32,67 +32,67 @@ from state import StateFactory
 #     },
 # })
 
-class StateSignal(QtCore.QObject):
-
-    updated = QtCore.Signal()
-
-    def __init__(self):
-        super(StateSignal,self).__init__()
-
 class State(object):
 
-    def __init__(self,manager,val):
+    def __init__(self,var,this,val):
         super(State,self).__init__()
+        self.var = var
         self.val = val
-        self.manager = manager
-        self.singal = StateSignal()
+        self.this = this
 
     def __get__(self, instance, owner):
-        print "get"
         return self.val
 
     def __set__(self,instance, value):
-        print "set",value
         self.val = value
-        self.singal.updated.emit()
-
-    def bind(self,method,option):
-        self.setSignal(method,option)
-        self.singal.updated.connect(partial(self.setSignal,method,option))
-    
-    def setSignal(self,method,option):
-        if not option:
-            val = self.val
-        elif option == "str":
-            val = str(self.val)
-        elif option == "int":
-            val = int(self.val)
-        elif option == "float":
-            val = float(self.val)
-        elif callable(option):
-            val = option(self.val)
-        elif type(option) == dict:
-            callback_args = option.get("set_callback_args",[])
-            arg_list = [self.manager.get(arg).val for arg in callback_args]
-            arg_list = arg_list if arg_list else [self.val]
-            callback = option.get("set_callback")
-            val = callback(*arg_list) if callback else self.val
-        method(val)
+        getattr(self.this.state,"%s_signal" % self.var).emit()
 
 class StateManager(object):
     
-    def __init__(self):
-        pass
+    def __init__(self,parent):
+        self.parent = parent
 
-    def add(self,var,val):
-        setattr(self,var,State(self,val))
-        # setattr(self,"%s_signal" % var,val)
+    def add(self,options):
+        
+        manager = self
+        # NOTE 获取可用的 descriptor 
+        class StateDescriptor(QtCore.QObject):
+            signal_dict = {}
+            var_dict = {}
+            for var,val in options["state"].items():
+                signal_dict["%s_signal" % var] = QtCore.Signal()
+                var_dict[var] = State(var,manager.parent,val)
+            locals().update(signal_dict)
+            locals().update(var_dict)
+
+        self.parent.state = StateDescriptor()
     
     def get(self,var):
-        return getattr(self,var)
+        return getattr(self.parent.state,var)
 
     def bind(self,var,method,option):
-        getattr(self,var).bind(method,option)
+        self.setSignal(var,method,option)
+        getattr(self.parent.state,"%s_signal" % var).connect(partial(self.setSignal,var,method,option))
+    
+    def setSignal(self,var,method,option):
+        state = self.parent.state
+        if option == "str":
+            val = str(getattr(state,var))
+        elif option == "int":
+            val = int(getattr(state,var))
+        elif option == "float":
+            val = float(getattr(state,var))
+        elif callable(option):
+            val = option(getattr(state,var))
+        elif type(option) == dict:
+            callback_args = option.get("set_callback_args",[])
+            arg_list = [self.get(arg) for arg in callback_args]
+            arg_list = arg_list if arg_list else [getattr(state,var)]
+            callback = option.get("set_callback")
+            val = callback(*arg_list) if callback else getattr(state,var)
+        else:
+            val = getattr(state,var)
+        method(val)
 
 def store(options):
     def handler(func):
@@ -111,9 +111,11 @@ def store(options):
 
         @wraps(func)
         def wrapper(self,*args, **kwargs):
-            self.state = StateManager()
-            for var,val in options["state"].items():
-                self.state.add(var,val)
+            self.manager = StateManager(self)
+
+            # NOTE 初始化变量
+            self.manager.add(options)
+            
             
             # NOTE https://stackoverflow.com/questions/9186395
             # NOTE 获取函数中的 locals 变量
@@ -126,10 +128,7 @@ def store(options):
                 for method,option in data.items():
                     # NOTE 获取 local 或 self 相关处理 method 
                     method = parseMethod(self,method)
-                    
-                    # method(val)
-                    self.state.bind(var,method,option)
-                    
+                    self.manager.bind(var,method,option)
                 
             return res
         return wrapper
