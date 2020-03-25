@@ -38,22 +38,20 @@ class Counter(QtWidgets.QWidget):
 			"count2":6,
 		},
 		"bindings":{
-			"variable":{
-				"count":{
-					"label.setText":"str",
-					"@label3.setText":lambda count: "<center>%s</center>" % count,
-				},
+			"count":{
+				"label.setText":"str",
+				"@label3.setText":lambda count: "<center>%s</center>" % count,
 			},
-			"callback":{
-				"@label2.setText":{
-					"set_callback_args":["count","count2"],
-					"set_callback":lambda count,count2: "<center>%s %s</center>"%(count,count2),
-				},
-				"@label4.setText":{
-					"set_callback_args":["$count","count3"],
-					"set_callback":"calculate",
-				},
-			}
+		},
+		"actions":{
+			"@label2.setText":{
+				"args":["$count","count2"],
+				"mutation":lambda count,count2: "<center>%s %s</center>"%(count,count2),
+			},
+			"@label4.setText":{
+				"args":["$count","count3"],
+				"mutation":"calculate",
+			},
 		},
 	})
 	def __init__(self):

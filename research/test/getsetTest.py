@@ -19,10 +19,16 @@ class Int_validation(object):
             self.value=value        #这个要注意 要用value，不能用instance 否则会陷入死循环
         else:
             print("请输入合法的数字")
+    
+    def checkTest(self):
+        return "check"
 
 class Student(object):
     age=Int_validation()
+    getAge = [age]
 
 stu=Student()   
 stu.age=50
 print(stu.age)
+
+print stu.getAge[0].checkTest()
