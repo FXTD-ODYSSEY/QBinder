@@ -87,8 +87,8 @@ class StateManager(object):
         elif type(option) == dict:
             callback_args = option.get("set_callback_args",[])
             # NOTE 从 state 获取变量 | 获取不到则从 self 里面获取
-            arg_list = [self.get(arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("@")]
-            arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("@")])
+            arg_list = [self.get(arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("$")]
+            arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("$")])
             arg_list = arg_list if arg_list else [val]
             callback = option.get("set_callback")
             callback = getattr(self.parent,callback) if type(callback) == str else callback

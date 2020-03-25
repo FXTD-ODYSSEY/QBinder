@@ -12,6 +12,7 @@ from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
 
+import os
 import sys
 import inspect
 import traceback
@@ -20,6 +21,12 @@ import pdb
 from optparse import OptionParser
 
 from functools import wraps
+
+DIR = os.path.dirname(__file__)
+import sys
+MODULE = os.path.join(DIR,"..")
+if MODULE not in sys.path:
+	sys.path.append(MODULE)
 
 import QMVVM
 
@@ -43,7 +50,7 @@ class Counter(QtWidgets.QWidget):
 					"set_callback":lambda count,count2: "<center>%s %s</center>"%(count,count2),
 				},
 				"@label4.setText":{
-					"set_callback_args":["@count","count3"],
+					"set_callback_args":["$count","count3"],
 					"set_callback":"calculate",
 				},
 			}
@@ -90,7 +97,7 @@ class Counter(QtWidgets.QWidget):
 		self.state.count -= 1
 
 	def calculate(self,a,b):
-		return str(a * b)
+		return str(a * b + self.state.count)
 		
 def main():
 	app = QtWidgets.QApplication([])
