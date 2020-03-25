@@ -14,7 +14,6 @@ import inspect
 from functools import wraps
 from functools import partial
 from PySide2 import QtCore
-from state import StateFactory
 
 # @QMVVM.store({
 #     "state":{
@@ -76,22 +75,24 @@ class StateManager(object):
     
     def setSignal(self,var,method,option):
         state = self.parent.state
+        val = getattr(state,var)
         if option == "str":
-            val = str(getattr(state,var))
+            val = str(val)
         elif option == "int":
-            val = int(getattr(state,var))
+            val = int(val)
         elif option == "float":
-            val = float(getattr(state,var))
+            val = float(val)
         elif callable(option):
-            val = option(getattr(state,var))
+            val = option(val)
         elif type(option) == dict:
             callback_args = option.get("set_callback_args",[])
-            arg_list = [self.get(arg) for arg in callback_args]
-            arg_list = arg_list if arg_list else [getattr(state,var)]
+            # NOTE 从 state 获取变量 | 获取不到则从 self 里面获取
+            arg_list = [self.get(arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("@")]
+            arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("@")])
+            arg_list = arg_list if arg_list else [val]
             callback = option.get("set_callback")
-            val = callback(*arg_list) if callback else getattr(state,var)
-        else:
-            val = getattr(state,var)
+            callback = getattr(self.parent,callback) if type(callback) == str else callback
+            val = callback(*arg_list) if callable(callback) else val
         method(val)
 
 def store(options):
@@ -107,7 +108,6 @@ def store(options):
             for attr in data[1:]:
                 method = getattr(method,attr)
             return method
-        
 
         @wraps(func)
         def wrapper(self,*args, **kwargs):
@@ -124,11 +124,16 @@ def store(options):
             res = func(self,*args, **kwargs)
             sys.setprofile(None)
 
-            for var,data in options["binding"].items():
+            # for var,data in options["binding"].items():
+                # for method,option in variable.items():
+            
+            for var,data in options["bindings"]["variable"].items():
                 for method,option in data.items():
-                    # NOTE 获取 local 或 self 相关处理 method 
                     method = parseMethod(self,method)
                     self.manager.bind(var,method,option)
+            for method,option in options["bindings"]["callback"].items():
+                method = parseMethod(self,method)
+                self.manager.bind(var,method,option)
                 
             return res
         return wrapper

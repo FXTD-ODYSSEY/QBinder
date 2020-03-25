@@ -28,24 +28,31 @@ class Counter(QtWidgets.QWidget):
 	@QMVVM.store({
 		"state":{
 			"count":0,
-			"count2":" yes",
+			"count2":6,
 		},
-		"binding":{
-			"count":{
-				"label.setText":"str",
+		"bindings":{
+			"variable":{
+				"count":{
+					"label.setText":"str",
+					"@label3.setText":lambda count: "<center>%s</center>" % count,
+				},
+			},
+			"callback":{
 				"@label2.setText":{
 					"set_callback_args":["count","count2"],
-					"set_callback":lambda count,count2: "<center>%s%s</center>"%(count,count2),
+					"set_callback":lambda count,count2: "<center>%s %s</center>"%(count,count2),
 				},
-				"@label3.setText":lambda count: "<center>%s</center>" % count,
-			},
-			"count2":{
-				"@label2.setText":lambda count: "<center>%s</center>" % count,
+				"@label4.setText":{
+					"set_callback_args":["@count","count3"],
+					"set_callback":"calculate",
+				},
 			}
 		},
 	})
 	def __init__(self):
 		super(Counter,self).__init__()
+		self.count = 4
+		self.count3 = 15
 		self.initialize()
 
 	def initialize(self):
@@ -60,6 +67,7 @@ class Counter(QtWidgets.QWidget):
 
 		label2 = QtWidgets.QLabel()
 		label3 = QtWidgets.QLabel()
+		label4 = QtWidgets.QLabel()
 		# label2.setText("<center>%s</center>" % self.count)
 
 		layout.addWidget(self.label)
@@ -67,6 +75,7 @@ class Counter(QtWidgets.QWidget):
 		layout.addWidget(minus_button)
 		layout.addWidget(label2)
 		layout.addWidget(label3)
+		layout.addWidget(label4)
 		
 		plus_button.clicked.connect(self.add)
 		minus_button.clicked.connect(self.subtract)
@@ -80,6 +89,8 @@ class Counter(QtWidgets.QWidget):
 	def subtract(self):
 		self.state.count -= 1
 
+	def calculate(self,a,b):
+		return str(a * b)
 		
 def main():
 	app = QtWidgets.QApplication([])
