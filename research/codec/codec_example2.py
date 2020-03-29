@@ -221,7 +221,7 @@ codec_map = {
     name: codecs.CodecInfo(
         name=name,
         encode=utf_8.encode,
-        decode=decode,
+        decode=utf_8.decode,
         incrementalencoder=utf_8.incrementalencoder,
         # incrementaldecoder=IncrementalDecoder,
         incrementaldecoder=utf_8.incrementaldecoder,

@@ -1,8 +1,7 @@
 # -*- coding: future_fstrings -*-
-text = 'hello '
-print f"{text} abc"
 
 import codecs
+import pdb
 import string
 
 # NOTE https://stackoverflow.com/questions/38777818/how-do-i-properly-create-custom-text-codecs
@@ -40,14 +39,15 @@ def main():
 
     binary = 'abcdefg'
     # decode letters to numbers
+    pdb.set_trace()
     text = binary.decode('Reasons')
     print(text)
     # encode numbers to letters
     binary2 = text.encode('Reasons') 
     print(binary2)
 
-    fstring = 'f"hello {text}"'.decode('future-fstrings')
-    print fstring
+    # fstring = 'f"hello {text}"'.decode('future-fstrings')
+    # print fstring
     # encode(decode(...)) should be an identity function
     assert binary == binary2
 
