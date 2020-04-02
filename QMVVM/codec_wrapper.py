@@ -1,18 +1,29 @@
+# coding:utf-8
+
+__author__ =  'timmyliang'
+__email__ =  '820472580@qq.com'
+__date__ = '2020-04-02 21:12:08'
+
+"""
+
+"""
+
+import re
 import codecs
 import string
 import encodings
-import ast
 from functools import wraps
 
-
+import source_parser
 
 def sourceCodeHandler(func,*args):
 
     @wraps(func)
     def wrapper(source,*args,**kwargs):
         source , length = func(source,*args,**kwargs)
-        code = ast.parse(source)
-        print ast.dump(code)
+        source = source_parser.parse(source)
+        # code = ast.parse(source)
+        # print ast.dump(code)
         return source , length 
 
     return wrapper
@@ -36,6 +47,8 @@ def QMVVM_search_function(encoding_name):
     )
 
     return CODING
+
+
 
 def test():
     
@@ -67,17 +80,15 @@ def test():
             
                 self.line = QtWidgets.QLineEdit()
                 self.line.setText(self.state.text)
+                line = QtWidgets.QLineEdit()
+                line.setText(self.state.text)
                 label = QtWidgets.QLabel()
                 layout.addWidget(self.line)
+                layout.addWidget(line)
                 layout.addWidget(label)
                 
     """)
-    code = dedent("""
-        x = {'a': 1, 'b': 2}
-        y = {'b': 3, 'c': 4}
-        z = {**x, **y}
-                
-    """)
+    
     text = code.decode('QMVVM;;utf-8')
 
 if __name__ == '__main__':
