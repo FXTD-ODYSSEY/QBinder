@@ -69,10 +69,22 @@ def test():
                 "state":{
                     "text":"",
                 },
+                "actions":{
+                    "@label2.setText":{
+                        "args":["$count","count2"],
+                        "mutation":lambda count,count2: "<center>%s %s</center>"%(count,count2),
+                    },
+                    "@label4.setText":{
+                        "args":["$count","count3"],
+                        "mutation":"calculate",
+                    },
+                },
             })
             def __init__(self):
                 super(Counter,self).__init__()
                 self.initialize()
+    
+                self.test()
 
             def initialize(self):
                 layout = QtWidgets.QVBoxLayout()
@@ -86,6 +98,14 @@ def test():
                 layout.addWidget(self.line)
                 layout.addWidget(line)
                 layout.addWidget(label)
+                self.line = ''
+
+            def test(self):
+                print "123"
+
+        class test(object):
+            def __init__(self):
+                print "test"
                 
     """)
     

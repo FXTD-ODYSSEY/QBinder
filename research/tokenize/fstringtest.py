@@ -47,8 +47,8 @@ def _fstring_parse_outer(s, i, level, parts, exprs):
         raise AssertionError('unreachable')
     parts.append(q)
     print "_fstring_parse_outer after",s
-    ret = _fstring_parse(s, i, level, parts, exprs)
-    parts.append(q)
+    # ret = _fstring_parse(s, i, level, parts, exprs)
+    # parts.append(q)
     return ret
 
 def _make_fstring(tokens):
@@ -58,7 +58,6 @@ def _make_fstring(tokens):
     exprs = []
 
     for i, token in enumerate(tokens):
-        print token
         if token.name == 'STRING' and _is_f(token):
             prefix, s = tokenize_rt.parse_string_literal(token.src)
             parts = []
@@ -91,6 +90,7 @@ to_replace = []
 start = end = seen_f = None
 
 for i, token in enumerate(tokens):
+    print token
     if start is None:
         if token.name == 'STRING':
             start, end = i, i + 1

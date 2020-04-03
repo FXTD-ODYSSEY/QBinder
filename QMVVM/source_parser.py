@@ -9,48 +9,56 @@ __date__ = '2020-04-02 21:12:27'
 """
 
 import re
-
+import pprint
 def getClassContent(source):
-    keyword = "class "
+    reg = r'''
+        (\d{5}?)\|class\s+(\S+?)\s*?\((.*?)\):    (?# 匹配类名和继承)
+        ((?:.|\n)*?)                                       (?# 匹配换行符或者任意内容)
+        (?:(\d{5}?)\|\S|\Z)
+    '''
+    # start_lineno,class_name,class_type,class_content,end_lineno = re.findall(re.compile(reg,re.X|re.M),source)
+    match = re.findall(re.compile(reg,re.X|re.M),source)
+    return match
+    
+    # keyword = "class "
 
-    class_content_split_list = []
-    # Note 清空无关class的文件信息
-    check = False
-    split_string = ""
-    for line in source.split("\n"):
-        if line.startswith("class"):
-            split_string += "\n" + line + "\n"
-            check = True
-        # Note 清除if开头的语句
-        elif line.startswith("if") or line.startswith("def"):
-            check = False
+    # class_content_split_list = []
+    # # Note 清空无关class的文件信息
+    # check = False
+    # split_string = ""
+    # for line in source.split("\n"):
+    #     if line.startswith("class"):
+    #         split_string += "\n" + line + "\n"
+    #         check = True
+    #     # Note 清除if开头的语句
+    #     elif line.startswith("if") or line.startswith("def"):
+    #         check = False
 
-        if check and line.startswith(" "):
-            split_string += line + "\n"
+    #     if check and line.startswith(" "):
+    #         split_string += line + "\n"
 
-    split_list = re.split(r"\s%s"%keyword, split_string)
-    for i,content in enumerate(split_list):
-        if not content:
-            continue
-        elif i!=0:
-            # Note 获取切除之后 class 之前的字符串信息
-            tmp = split_list[i-1].split("\n")[-1]
-            # Note 将文件的内容切成数组 每个元素只有一个class
-            class_content_split_list.append(tmp + keyword + content)
-        else:
-            class_content_split_list.append(content)
+    # split_list = re.split(r"\s%s"%keyword, split_string)
+    # for i,content in enumerate(split_list):
+    #     if not content:
+    #         continue
+    #     elif i!=0:
+    #         # Note 获取切除之后 class 之前的字符串信息
+    #         tmp = split_list[i-1].split("\n")[-1]
+    #         # Note 将文件的内容切成数组 每个元素只有一个class
+    #         class_content_split_list.append(tmp + keyword + content)
+    #     else:
+    #         class_content_split_list.append(content)
 
-    return class_content_split_list
+    # return class_content_split_list
 
 def getQMVVMDecorator(content):
     reg = r'''
-        ^class(.*?)\((.*?)\):                       (?# 匹配类名和继承)
-        (?:.|\n)*?                                  (?# 匹配换行符或者任意内容)
-        @(?:QMVVM\.store|store)\(((?:.|\n)*?)\)     (?# 匹配 QMVVM sotre 装饰器 | 获取传入的参数)
-        (\s*)def\s*__init__.*?:                      (?# 匹配 __init__)
-        ((?:.|\n)*?)\4(?:\Z|\S)                     (?# 匹配 __init__函数内部的代码 基于缩进)
+        @(?:QMVVM\.store|store)\s*?\(((?:.|\n)*)\)     (?# 匹配 QMVVM sotre 装饰器 | 获取传入的参数)
+        (?:.|\n)*?
+        \d{5}?\|(\s*)def\ +__init__.*?:                      (?# 匹配 __init__)
+        ((?:.|\n)*?)\d{5}?\|\2(?:\Z|\S)                     (?# 匹配 __init__函数内部的代码 基于缩进)
     '''
-    match = re.match(re.compile(reg,re.X|re.M),content)
+    match = re.findall(re.compile(reg,re.X|re.M),content)
     return match
     
 def getInitDef(init):
@@ -61,33 +69,65 @@ def getInitDef(init):
     return match
 
 def getDefContent(Def,content):
-    # TODO 获取 Def 内容
     reg = r'''
-        (\s*)def\s*%s\(.*?\):\n
-        \1\1(.*?)
-    ''' % Def
-    print content
+        \d{5}?\|(\s*?)def\ *%s\((?:.*?)\):
+        ((?:.|\n)*?)(?:\Z|\d{5}?\|\1\S)   
+    ''' % Def 
+    match = re.findall(re.compile(reg,re.X|re.M),content)
+    return match[0][1] if match else ''
+
+    # match = match if match else []
+    # return [m for i,m in match]
+
+def getStateRelationship(content):
+    reg = r'''
+        (\S*?)\(self\.state\.(\S*?)\)
+    '''
     match = re.findall(re.compile(reg,re.X|re.M),content)
     return match
 
-def getStateRelationship(content):
-    reg = r'(\S*?)\(self\.state\.(\S*?)\)'
+def getWidgetType(widget,content):
+    reg = r'''
+        (\d{5}?)\|\s*%s\s*=\s*(\S*)
+    ''' % widget
     match = re.findall(re.compile(reg,re.X|re.M),content)
     return match
 
 def parse(source):
-    for class_content in getClassContent(source):
+    lineno_source = '\n'.join('%s|%s' % (str(i).zfill(5),line) for i,line in enumerate(source.split("\n"),1))
+    for start_lineno,class_name,class_type,class_content,end_lineno in getClassContent(lineno_source):
         match = getQMVVMDecorator(class_content)
         if not match:continue
-        class_name = match.group(1).strip()
-        class_type = match.group(2).strip()
-        option = match.group(3).strip()
-        init = match.group(5)
+        option,_,init = match[0]
         state_list = getStateRelationship(init)
-        
+        all_def_content = init
         for Def in getInitDef(init):
-            print getDefContent(Def,class_content)
-            # state_list.extend(getStateRelationship(Def))
-            # print match
+            def_content = getDefContent(Def,class_content)
+            all_def_content += '\n%s' % def_content
+            state_list.extend(getStateRelationship(def_content))
+
+        # print all_def_content
+        binding = {}
+        for setter,state in state_list:
+            widget,_,_ = setter.rpartition(".")
+            if not binding.has_key(state):
+                binding[state] = []
+            
+            widget = widget[5:] if widget.startswith("self.") else "@%s" % widget
+            
+            binding[state].append(widget)
+            # # NOTE 判断是否存在变量多次赋值的情况
+            # for lineno,valuewidget_type in getWidgetType(widget,all_def_content)
+            #     pass
+        
+        
+        # NOTE 去掉行号 并且 转换为 字典
+        option = eval('\n'.join([line for line in re.split("\d{5}?\|",option)]))
+        for state,val in option["state"].items():
+            val = val() if callable(val) else val
+            
+
+        print option
+        # print state_list
     
     return source
