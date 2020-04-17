@@ -13,8 +13,8 @@ import inspect
 
 from functools import wraps
 from functools import partial
-from PySide2 import QtCore
-
+from Qt import QtCore
+from hook import HOOKS
 class State(object):
 
     def __init__(self,var,widget,val):
@@ -24,7 +24,7 @@ class State(object):
         self.widget = widget
 
     def __get__(self, instance, owner):
-        print 'asd'
+        # print 'asd'
         return self.val() if callable(self.val) else self.val
 
     def __set__(self,instance, value):
@@ -59,11 +59,10 @@ class StateManager(object):
 
         self.parent.state = StateDescriptor()
     
-    def get(self,var):
-        return getattr(self.parent.state,var)
-
     def bind(self,var,method,option=None):
+        # NOTE 赋予初值
         self.setSignal(var,method,option)
+        # NOTE 连接信号槽
         getattr(self.parent.state,"_%s_signal" % var).connect(partial(self.setSignal,var,method,option))
 
     def setSignal(self,var,method,option):
@@ -77,55 +76,69 @@ class StateManager(object):
             val = float(val)
         elif callable(option):
             val = option(val)
-        elif type(option) == dict:
+        elif type(option) is dict:
             callback_args = option.get("args",[])
             # NOTE 从 state 获取变量 | 获取不到则从 self 里面获取
-            arg_list = [self.get(arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("$")]
-            arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("$")])
-            arg_list = arg_list if arg_list else [val]
-            callback = option.get("mutation")
-            callback = getattr(self.parent,callback) if type(callback) == str else callback
+            arg_list = []
+            for arg in callback_args:
+                if arg.startswith("$"):
+                    arg = getattr(self.parent,arg[1:])
+                elif hasattr(self.parent.state,arg):
+                    arg = getattr(self.parent.state,arg)
+                else:
+                    arg = getattr(self.parent,arg)
+                arg_list.append(arg)
+
+            # arg_list = [getattr(self.parent.state,arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("$")]
+            # arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("$")])
+            # arg_list = arg_list if arg_list else [val]
+            callback = option.get("action")
+            # NOTE 如果 callback 是字符串则获取 parent 的方法
+            callback = getattr(self.parent,callback) if type(callback) is str else callback
+            # NOTE 如果 callback 是字符串则获取 parent 的方法
             val = callback(*arg_list) if callable(callback) else val
         method(val)
 
 def store(options):
     def handler(func):
         
-        def parseMethod(self,method):
+        def parseMethod(self,method,ret_widget=False):
             if method.startswith("@"):
                 data = method[1:].split(".")
-                method = self._locals[data[0]]
+                widget = self._locals[data[0]]
             else:
                 data = method.split(".")
-                method = getattr(self,data[0])
-            for attr in data[1:]:
-                method = getattr(method,attr)
-            return method
+                widget = getattr(self,data[0])
+            
+            for attr in data[1:-1]:
+                widget = getattr(widget,attr)
+            
+            return (getattr(widget,data[-1]),widget) if ret_widget else getattr(widget,data[-1])
 
         def parseGetter(self,val):
             default = None
             data = val()
-            if type(data) == str:
+            if type(data) is str:
                 return [parseMethod(self,data)],default
-            elif type(data) == dict:
+            elif type(data) is dict:
                 default = data["default"]
                 updater = data["updater"]
-                if type(updater) == str:
+                if type(updater) is str:
                     return [parseMethod(self,updater)],default
-                elif type(updater) == tuple or type(updater) == list:
+                elif type(updater) is tuple or type(updater) is list:
                     return [parseMethod(self,u) for u in updater],default
 
-            elif type(data) == tuple or type(data) == list:
+            elif type(data) is tuple or type(data) is list:
                 return [parseMethod(self,u) for u in data],default
             else:
                 raise NotImplementedError('unknown return val')
 
         @wraps(func)
         def wrapper(self,*args, **kwargs):
-            self.manager = StateManager(self)
+            self.__state_manager = StateManager(self)
 
-            # NOTE 初始化变量
-            self.manager.add(options)
+            # NOTE 初始化变量 | 初始化 self.state 变量
+            self.__state_manager.add(options)
             
             # NOTE https://stackoverflow.com/questions/9186395
             # NOTE 获取函数中的 locals 变量
@@ -139,6 +152,7 @@ def store(options):
                 if not callable(val):continue
                 updaters,default = parseGetter(self,val) 
                 self.state._var_dict[var].setUpdater(updaters)
+                # NOTE 根据 state 设定初值
                 if options["state"][var] == self.state._var_dict[var].val:
                     self.state._var_dict[var].val = default
 
@@ -148,16 +162,26 @@ def store(options):
                 if type(data) == dict:
                     for method,option in data.items():
                         method = parseMethod(self,method)
-                        self.manager.bind(var,method,option)
+                        self.__state_manager.bind(var,method,option)
                 elif type(data) == list or type(data) == tuple:
                     for method in data:
                         method = parseMethod(self,method)
-                        self.manager.bind(var,method)
+                        self.__state_manager.bind(var,method)
 
-            actions = options.get("actions",{})
-            for method,option in actions.items():
-                method = parseMethod(self,method)
-                self.manager.bind(var,method,option)
+            methods = options.get("methods",{})
+            for _method,option in methods.items():
+                method,widget = parseMethod(self,_method,True)
+                rel = HOOKS.get(type(widget),None)
+                # NOTE 过滤不在 HOOKS 里面的绑定 
+                if rel is None: continue
+                
+                # TODO 判断是否在 hooks 里面记录的类型
+                # print type(method)
+                # if str(type(method)) != "<type 'builtin_function_or_method'>":
+                #     continue
+                # NOTE 默认自动将方法绑定到所有的 state setter 里面
+                for var in option.get("bindings",state):
+                    self.__state_manager.bind(var,method,option)
                 
             return res
         return wrapper

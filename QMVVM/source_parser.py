@@ -5,11 +5,20 @@ __email__ =  '820472580@qq.com'
 __date__ = '2020-04-02 21:12:27'
 
 """
-
+正则表达式 提取分析源码
 """
 
 import re
-import pprint
+import time
+
+def printTime(func):
+    def wrapper(*args, **kwargs):
+        cur = time.time()
+        res = func(*args, **kwargs)
+        print "elapsed time:",time.time() - cur
+        return res
+    return wrapper
+
 def getClassContent(source):
     reg = r'''
         (\d{5}?)\|class\s+(\S+?)\s*?\((.*?)\):    (?# 匹配类名和继承)
@@ -62,32 +71,58 @@ def getWidgetType(widget,content):
     match = re.findall(re.compile(reg,re.X|re.M),content)
     return match
 
+def getDefCall(content):
+    reg = r'''
+        (\S*?)\s*?\((.*)\)
+    '''
+    return {method:arg for method,arg in re.findall(re.compile(reg,re.X|re.M),content) if "." in method and arg}
+
+def getDefCall(content):
+    reg = r'''
+        (\S*?)\s*?\((.*)\)
+    '''
+    match = re.findall(re.compile(reg,re.X|re.M),content)
+    return {method:arg for method,arg in re.findall(re.compile(reg,re.X|re.M),content) if "." in method and arg}
+
+# @printTime
 def parse(source):
+    # NOTE 加入行号
     lineno_source = '\n'.join('%s|%s' % (str(i).zfill(5),line) for i,line in enumerate(source.split("\n"),1))
+    # NOTE 清空注释
+    lineno_source = re.sub(r'[ \t\r\f]*?(#.*)','',lineno_source)
     for start_lineno,class_name,class_type,class_content,end_lineno in getClassContent(lineno_source):
         match = getQMVVMDecorator(class_content)
         if not match:continue
         option,_,init = match[0]
-        state_list = getStateRelationship(init)
+        # NOTE 获取 init 下相关的所有函数内容
         all_def_content = init
         for Def in getInitDef(init):
             def_content = getDefContent(Def,class_content)
             all_def_content += '\n%s' % def_content
-            state_list.extend(getStateRelationship(def_content))
-
-        # print all_def_content
-        binding = {}
-        for setter,state in state_list:
-            widget,_,_ = setter.rpartition(".")
-            if not binding.has_key(state):
-                binding[state] = []
+    
+        # NOTE 截取所有带参数的 Def 
+        methods = {}
+        for method,arg in getDefCall(all_def_content).items():
+            print method,arg
+            # NOTE 如果没有 self 则将 method 转为 local
+            if not method.startswith("self."):
+                method = "@%s" % method
             
-            widget = widget[5:] if widget.startswith("self.") else "@%s" % widget
             
-            binding[state].append(widget)
-            # # NOTE 判断是否存在变量多次赋值的情况
-            # for lineno,valuewidget_type in getWidgetType(widget,all_def_content)
-            #     pass
+        
+        # # print all_def_content
+        # binding = {}
+        # for setter,state in state_list:
+        #     widget,_,_ = setter.rpartition(".")
+        #     if not binding.has_key(state):
+        #         binding[state] = []
+            
+        #     widget = widget[5:] if widget.startswith("self.") else "@%s" % widget
+            
+        #     binding[state].append(widget)
+        #     # # NOTE 判断是否存在变量多次赋值的情况
+        #     # for lineno,valuewidget_type in getWidgetType(widget,all_def_content)
+        #     #     pass
         
         
         # # NOTE 去掉行号 并且 转换为 字典
@@ -96,7 +131,4 @@ def parse(source):
         #     val = val() if callable(val) else val
             
 
-        print binding
-        # print state_list
-    
-    return source
+    return lineno_source
