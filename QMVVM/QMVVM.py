@@ -24,6 +24,7 @@ class State(object):
         self.widget = widget
 
     def __get__(self, instance, owner):
+        print 'asd'
         return self.val() if callable(self.val) else self.val
 
     def __set__(self,instance, value):

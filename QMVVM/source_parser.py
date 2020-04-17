@@ -19,37 +19,6 @@ def getClassContent(source):
     # start_lineno,class_name,class_type,class_content,end_lineno = re.findall(re.compile(reg,re.X|re.M),source)
     match = re.findall(re.compile(reg,re.X|re.M),source)
     return match
-    
-    # keyword = "class "
-
-    # class_content_split_list = []
-    # # Note 清空无关class的文件信息
-    # check = False
-    # split_string = ""
-    # for line in source.split("\n"):
-    #     if line.startswith("class"):
-    #         split_string += "\n" + line + "\n"
-    #         check = True
-    #     # Note 清除if开头的语句
-    #     elif line.startswith("if") or line.startswith("def"):
-    #         check = False
-
-    #     if check and line.startswith(" "):
-    #         split_string += line + "\n"
-
-    # split_list = re.split(r"\s%s"%keyword, split_string)
-    # for i,content in enumerate(split_list):
-    #     if not content:
-    #         continue
-    #     elif i!=0:
-    #         # Note 获取切除之后 class 之前的字符串信息
-    #         tmp = split_list[i-1].split("\n")[-1]
-    #         # Note 将文件的内容切成数组 每个元素只有一个class
-    #         class_content_split_list.append(tmp + keyword + content)
-    #     else:
-    #         class_content_split_list.append(content)
-
-    # return class_content_split_list
 
 def getQMVVMDecorator(content):
     reg = r'''
@@ -121,13 +90,13 @@ def parse(source):
             #     pass
         
         
-        # NOTE 去掉行号 并且 转换为 字典
-        option = eval('\n'.join([line for line in re.split("\d{5}?\|",option)]))
-        for state,val in option["state"].items():
-            val = val() if callable(val) else val
+        # # NOTE 去掉行号 并且 转换为 字典
+        # option = eval('\n'.join([line for line in re.split("\d{5}?\|",option)]))
+        # for state,val in option["state"].items():
+        #     val = val() if callable(val) else val
             
 
-        print option
+        print binding
         # print state_list
     
     return source
