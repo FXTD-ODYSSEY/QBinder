@@ -58,13 +58,13 @@ class StateManager(object):
 
         self.parent.state = StateDescriptor()
     
-    def bind(self,var,method,option=None):
+    def bind(self,var,method,option=None,typ=None):
         # NOTE 赋予初值
-        self.setSignal(var,method,option)
+        self.setSignal(var,method,option,typ)
         # NOTE 连接信号槽
-        getattr(self.parent.state,"_%s_signal" % var).connect(partial(self.setSignal,var,method,option))
+        getattr(self.parent.state,"_%s_signal" % var).connect(partial(self.setSignal,var,method,option,typ))
 
-    def parseAction(self,option):
+    def parseAction(self,option,val=None):
         callback_args = option.get("args",[])
         # arg_list = [getattr(self.parent.state,arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("$")]
         # arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("$")])
@@ -87,7 +87,7 @@ class StateManager(object):
         val = callback(*arg_list) if callable(callback) else val
         return val
         
-    def setSignal(self,var,method,option):
+    def setSignal(self,var,method,option,typ=None):
         state = self.parent.state
         val = getattr(state,var)
         if option == "str":
@@ -99,8 +99,10 @@ class StateManager(object):
         elif callable(option):
             val = option(val)
         elif type(option) is dict:
-            val = self.parseAction(option)
-        method(val)
+            val = self.parseAction(option,val)
+
+        print val
+        method(typ(val) if typ else val)
 
 def store(options):
     def handler(func):
@@ -184,29 +186,24 @@ def store(options):
 
                 # NOTE 获取 setter
                 setter = hook.get("setter",setter)
+                typ = hook.get("type")
                 setter = getattr(widget,setter)
                 # NOTE 默认自动将方法绑定到所有的 state setter 里面
                 state_list = option.get("bindings",state)
+
+                # TODO bindings 只代表变量变化进行 setter 同步
                 if type(state_list) is str:
-                    self.__state_manager.bind(state_list,setter,option=option)
+                    self.__state_manager.bind(state_list,setter,option=option,typ=typ)
                 else:
                     for var in state_list:
-                        self.__state_manager.bind(var,setter,option=option)
+                        self.__state_manager.bind(var,setter,option=option,typ=typ)
 
                 # NOTE 获取 updater
                 updater = hook.get("updater")
-                if updater is not None:
-                    setState = None
-                    if type(updater) is str:
-                        updater = getattr(widget,updater)
-                        var = option.get("action")
-                        setState = lambda val: self.state._var_dict[var].setVal(val)
-                    elif type(updater) is dict:
-                        self.__state_manager.parseAction(option)
-
-                    if setState:
-                        self.state._var_dict[var].setUpdater((updater))
-                        updater.connect(setState)
+                if updater is not None and type(updater) is str:
+                    updater = getattr(widget,updater)
+                    var = option.get("action")
+                    self.state._var_dict[var].setUpdater([updater])
                     
             return res
         return wrapper

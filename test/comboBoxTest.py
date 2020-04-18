@@ -30,6 +30,7 @@ class Counter(QtWidgets.QWidget):
     @QMVVM.store({
         "state":{
             "text":"123",
+            "enable":True,
         },
         "methods":{
         	# "combo.addItem":{
@@ -41,7 +42,14 @@ class Counter(QtWidgets.QWidget):
             },
             "label.setText":{
                 "bindings": "text",
-                "action": "text",
+                "args":["text"],
+                "action": "enable",
+                # "updater": "text",
+            },
+            "cb.setChecked":{
+                # "bindings": "text",
+                "action": "enable",
+                # "updater": "text",
             }
         },
     })
@@ -58,21 +66,25 @@ class Counter(QtWidgets.QWidget):
         self.combo._QMVVM_Bindings = {}
 
         self.line = QtWidgets.QLineEdit()
-        self.btn = QtWidgets.QPushButton('123')
+        self.btn = QtWidgets.QPushButton('change enable')
         self.label = QtWidgets.QLabel()
+        self.cb = QtWidgets.QCheckBox('disable')
 
         layout.addWidget(self.btn)
         layout.addWidget(self.line)
         layout.addWidget(self.label)
+        layout.addWidget(self.cb)
         layout.addWidget(self.combo)
         
-        self.line.setText(self.state.text)
-        self.label.setText(self.state.text)
+        # self.line.setText(self.state.text)
+        # self.label.setText(self.state.enable)
+        # self.cb.setChecked(self.state.enable)
+
         # self.line.textChanged.connect(self.modify)
         self.btn.clicked.connect(self.clickEvent)
 
     def clickEvent(self):
-        self.state.text = "566778"
+        self.state.enable = not self.state.enable
         
     def modify(self,text):
         self.state.text = text

@@ -34,14 +34,7 @@ HOOKS = {
     QtWidgets.QLineEdit: {
         "setText":{
             "type":str,
-            "updater": {
-                "textChanged":{
-                    "type":str,
-                },
-                "cursorPositionChanged":{
-
-                },
-            },
+            "updater": "textChanged",
         }
     },
     
@@ -51,20 +44,16 @@ HOOKS = {
         }
     },
 
-
-
-
-
-
-
-
     QtWidgets.QCheckBox: {
-        bool:{
-            "getter": "isChecked",
-            "setter": "setChecked",
+        "setChecked":{
+            "type":bool,
             "updater": "stateChanged",
         }
     },
+
+
+
+
     QtWidgets.QAction: {
         bool:{
             "getter": "isChecked",
