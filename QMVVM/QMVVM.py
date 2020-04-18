@@ -24,8 +24,7 @@ class State(object):
         self.widget = widget
 
     def __get__(self, instance, owner):
-        # print 'asd'
-        return self.val() if callable(self.val) else self.val
+        return self.val().get("default") if callable(self.val) else self.val
 
     def __set__(self,instance, value):
         self.val = value
@@ -65,6 +64,29 @@ class StateManager(object):
         # NOTE 连接信号槽
         getattr(self.parent.state,"_%s_signal" % var).connect(partial(self.setSignal,var,method,option))
 
+    def parseAction(self,option):
+        callback_args = option.get("args",[])
+        # arg_list = [getattr(self.parent.state,arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("$")]
+        # arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("$")])
+        # arg_list = arg_list if arg_list else [val]
+        # NOTE 从 state 获取变量 | 获取不到则从 self 里面获取
+        arg_list = []
+        for arg in callback_args:
+            if arg.startswith("$"):
+                arg = getattr(self.parent,arg[1:])
+            elif hasattr(self.parent.state,arg):
+                arg = getattr(self.parent.state,arg)
+            else:
+                arg = getattr(self.parent,arg)
+            arg_list.append(arg)
+
+        callback = option.get("action")
+        # NOTE 如果 callback 是字符串则获取 parent 的方法
+        callback = callback if type(callback) is not str else getattr(self.parent,callback[1:]) if callback.startswith("$") else getattr(self.parent.state,callback)
+        # NOTE 如果 callback 是字符串则获取 parent 的方法
+        val = callback(*arg_list) if callable(callback) else val
+        return val
+        
     def setSignal(self,var,method,option):
         state = self.parent.state
         val = getattr(state,var)
@@ -77,32 +99,13 @@ class StateManager(object):
         elif callable(option):
             val = option(val)
         elif type(option) is dict:
-            callback_args = option.get("args",[])
-            # NOTE 从 state 获取变量 | 获取不到则从 self 里面获取
-            arg_list = []
-            for arg in callback_args:
-                if arg.startswith("$"):
-                    arg = getattr(self.parent,arg[1:])
-                elif hasattr(self.parent.state,arg):
-                    arg = getattr(self.parent.state,arg)
-                else:
-                    arg = getattr(self.parent,arg)
-                arg_list.append(arg)
-
-            # arg_list = [getattr(self.parent.state,arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("$")]
-            # arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("$")])
-            # arg_list = arg_list if arg_list else [val]
-            callback = option.get("action")
-            # NOTE 如果 callback 是字符串则获取 parent 的方法
-            callback = getattr(self.parent,callback) if type(callback) is str else callback
-            # NOTE 如果 callback 是字符串则获取 parent 的方法
-            val = callback(*arg_list) if callable(callback) else val
+            val = self.parseAction(option)
         method(val)
 
 def store(options):
     def handler(func):
         
-        def parseMethod(self,method,ret_widget=False):
+        def parseMethod(self,method,parse=True):
             if method.startswith("@"):
                 data = method[1:].split(".")
                 widget = self._locals[data[0]]
@@ -112,8 +115,11 @@ def store(options):
             
             for attr in data[1:-1]:
                 widget = getattr(widget,attr)
-            
-            return (getattr(widget,data[-1]),widget) if ret_widget else getattr(widget,data[-1])
+            if parse:
+                return getattr(widget,data[-1])
+            else:
+                return (widget,data[-1]) 
+
 
         def parseGetter(self,val):
             default = None
@@ -156,33 +162,52 @@ def store(options):
                 if options["state"][var] == self.state._var_dict[var].val:
                     self.state._var_dict[var].val = default
 
-            # NOTE 根据设置进行绑定
-            bindings = options.get("bindings",{})
-            for var,data in bindings.items():
-                if type(data) == dict:
-                    for method,option in data.items():
-                        method = parseMethod(self,method)
-                        self.__state_manager.bind(var,method,option)
-                elif type(data) == list or type(data) == tuple:
-                    for method in data:
-                        method = parseMethod(self,method)
-                        self.__state_manager.bind(var,method)
+            # # NOTE 根据设置进行绑定
+            # bindings = options.get("bindings",{})
+            # for var,data in bindings.items():
+            #     if type(data) == dict:
+            #         for method,option in data.items():
+            #             setter = parseMethod(self,method)
+            #             self.__state_manager.bind(var,setter,option=option)
+            #     elif type(data) == list or type(data) == tuple:
+            #         for method in data:
+            #             setter = parseMethod(self,method)
+            #             self.__state_manager.bind(var,setter)
 
             methods = options.get("methods",{})
             for _method,option in methods.items():
-                method,widget = parseMethod(self,_method,True)
-                rel = HOOKS.get(type(widget),None)
+                widget,setter = parseMethod(self,_method,False)
+                ref = HOOKS.get(type(widget))
                 # NOTE 过滤不在 HOOKS 里面的绑定 
-                if rel is None: continue
-                
-                # TODO 判断是否在 hooks 里面记录的类型
-                # print type(method)
-                # if str(type(method)) != "<type 'builtin_function_or_method'>":
-                #     continue
+                if ref is None or setter not in ref: continue
+                hook = ref[setter]
+
+                # NOTE 获取 setter
+                setter = hook.get("setter",setter)
+                setter = getattr(widget,setter)
                 # NOTE 默认自动将方法绑定到所有的 state setter 里面
-                for var in option.get("bindings",state):
-                    self.__state_manager.bind(var,method,option)
-                
+                state_list = option.get("bindings",state)
+                if type(state_list) is str:
+                    self.__state_manager.bind(state_list,setter,option=option)
+                else:
+                    for var in state_list:
+                        self.__state_manager.bind(var,setter,option=option)
+
+                # NOTE 获取 updater
+                updater = hook.get("updater")
+                if updater is not None:
+                    setState = None
+                    if type(updater) is str:
+                        updater = getattr(widget,updater)
+                        var = option.get("action")
+                        setState = lambda val: self.state._var_dict[var].setVal(val)
+                    elif type(updater) is dict:
+                        self.__state_manager.parseAction(option)
+
+                    if setState:
+                        self.state._var_dict[var].setUpdater((updater))
+                        updater.connect(setState)
+                    
             return res
         return wrapper
     return handler

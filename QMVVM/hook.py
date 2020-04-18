@@ -5,7 +5,7 @@ __email__ = '820472580@qq.com'
 __date__ = '2020-04-17 15:35:39'
 
 """
-
+自动绑定配置表
 """
 
 from Qt import QtCore
@@ -14,29 +14,62 @@ from Qt import QtGui
 
 HOOKS = {
     QtWidgets.QComboBox: {
-        int: {
+        "setCurrentIndex": {
+            "type":int,   
             "getter": "currentIndex",
-            "setter": "setCurrentIndex",
-            "updatter": "currentIndexChanged",
+            "updater": "currentIndexChanged",
         },
-        str: {
+        "setItemText": {
+            "type":str,
             "getter": "currentText",
-            "setter": "setItemText",
-            "updatter": "currentIndexChanged",
+            "updater": "currentIndexChanged",
+        },
+        "addItem": {
+            "type":str,                         # 返回值类型
+            "setter": "setItemText",            # setter 
+            "getter": "currentText",
+            "updater": "currentIndexChanged",
         },
     },
+    QtWidgets.QLineEdit: {
+        "setText":{
+            "type":str,
+            "updater": {
+                "textChanged":{
+                    "type":str,
+                },
+                "cursorPositionChanged":{
+
+                },
+            },
+        }
+    },
+    
+    QtWidgets.QLabel: {
+        "setText":{
+            "type":str,
+        }
+    },
+
+
+
+
+
+
+
+
     QtWidgets.QCheckBox: {
         bool:{
             "getter": "isChecked",
             "setter": "setChecked",
-            "updatter": "stateChanged",
+            "updater": "stateChanged",
         }
     },
     QtWidgets.QAction: {
         bool:{
             "getter": "isChecked",
             "setter": "setChecked",
-            "updatter": "toggled",
+            "updater": "toggled",
         }
     },
     # QtWidgets.QActionGroup: (_get_QActionGroup, _set_QActionGroup, _event_QActionGroup),
@@ -44,31 +77,30 @@ HOOKS = {
         bool:{
             "getter": "isChecked",
             "setter": "setChecked",
-            "updatter": "toggled",
+            "updater": "toggled",
         }
     },
     QtWidgets.QSpinBox: {
         int:{
             "getter": "value",
             "setter": "setValue",
-            "updatter": "valueChanged",
+            "updater": "valueChanged",
         }
     },
     QtWidgets.QDoubleSpinBox: {
         float:{
             "getter": "value",
             "setter": "setValue",
-            "updatter": "valueChanged",
+            "updater": "valueChanged",
         }
     },
     # QtWidgets.QPlainTextEdit: {
     #     str:{
     #         "getter": "value",
     #         "setter": "setPlainText",
-    #         "updatter": "valueChanged",
+    #         "updater": "valueChanged",
     #     }
     # },
-    # QtWidgets.QLineEdit: (_get_QLineEdit, _set_QLineEdit, _event_QLineEdit),
     # QtWidgets.QListWidget: (_get_QListWidget, _set_QListWidget, _event_QListWidget),
     # QtWidgets.QSlider: (_get_QSlider, _set_QSlider, _event_QSlider),
     # QtWidgets.QButtonGroup: (_get_QButtonGroup, _set_QButtonGroup, _event_QButtonGroup),

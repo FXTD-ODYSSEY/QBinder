@@ -14,13 +14,7 @@ import string
 import encodings
 from functools import wraps
 
-import source_parser
-
-import sys
-MODULE = r"C:\Users\timmyliang\Desktop\repo\QtConfig\QMVVM"
-if MODULE not in sys.path:
-    sys.path.append(MODULE)
-
+import codec_parser
 import QMVVM
 
 
@@ -29,7 +23,7 @@ def sourceCodeHandler(func,*args):
     @wraps(func)
     def wrapper(source,*args,**kwargs):
         source , length = func(source,*args,**kwargs)
-        source = source_parser.parse(source)
+        source = codec_parser.parse(source)
         # exec source in globals(),locals()
         print 'complete'
         # code = ast.parse(source)

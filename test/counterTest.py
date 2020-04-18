@@ -59,13 +59,11 @@ class Counter(QtWidgets.QWidget):
             },
             "@label4.setText":{
                 "args":["$count","count2"],
-                "action":"calculate",
+                "action":"$calculate",
             },
             "@label5.setText":{
-                "action":"mul",
-            },
-            "@label2.text":{
-                "action":"mul",
+                "args":["count2"],
+                "action":lambda a :str(a),
             },
         },
     })
@@ -96,7 +94,7 @@ class Counter(QtWidgets.QWidget):
         label2.setText("<center>%s %s</center>"%(self.count,self.state.count))
         label3.setText("<center>%s</center>" % self.count)
         label4.setText(self.calculate(self.count,self.count3))
-        label5.setText(self.mul())
+        label5.setText(str(self.state.count2))
 
         layout.addWidget(self.label)
         layout.addWidget(plus_button)
@@ -134,7 +132,6 @@ class Counter(QtWidgets.QWidget):
         return str(a * b + self.state.count)
     
     def mul(self):
-        # self.state.count2 += self.count3
         return str(self.state.count2 + self.state.count)
 
 def main():
