@@ -43,11 +43,11 @@ class ComboTest(QtWidgets.QWidget):
                 "action": "text2",
                 # "updater": "text",
             },
-            # "cb.setChecked":{
-            #     # "bindings": "text",
-            #     "action": "enable",
-            #     # "updater": "text",
-            # }
+            "cb.setChecked":{
+                # "bindings": "text",
+                "action": "enable",
+                # "updater": "text",
+            }
         },
     })
     def __init__(self):
@@ -81,9 +81,9 @@ class ComboTest(QtWidgets.QWidget):
         self.btn.clicked.connect(self.clickEvent)
 
     def clickEvent(self):
-        # self.state.enable = not self.state.enable
-        print self.state.text2
-        self.state.text2 = "abxcs"
+        self.state.enable = not self.state.enable
+        # print self.state.text2
+        # self.state.text2 = "abxcs"
         
         
     def modify(self,text):
