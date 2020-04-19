@@ -14,7 +14,9 @@ import inspect
 from functools import wraps
 from functools import partial
 from Qt import QtCore
-from hook import HOOKS
+from .hook import HOOKS
+from .exception import SchemeParseError
+
 class State(object):
 
     def __init__(self,var,widget,val):
@@ -63,8 +65,12 @@ class StateManager(object):
         self.setSignal(var,method,option,typ)
         # NOTE 连接信号槽
         getattr(self.parent.state,"_%s_signal" % var).connect(partial(self.setSignal,var,method,option,typ))
+    
+    def sync(self,var,method):
+        # NOTE 连接信号槽
+        getattr(self.parent.state,"_%s_signal" % var).connect(method)
 
-    def parseAction(self,option,val=None):
+    def parseAction(self,option):
         callback_args = option.get("args",[])
         # arg_list = [getattr(self.parent.state,arg) if hasattr(self.parent.state,arg) else getattr(self.parent,arg) for arg in callback_args if not arg.startswith("$")]
         # arg_list.extend([getattr(self.parent,arg[1:]) for arg in callback_args if arg.startswith("$")])
@@ -83,8 +89,7 @@ class StateManager(object):
         callback = option.get("action")
         # NOTE 如果 callback 是字符串则获取 parent 的方法
         callback = callback if type(callback) is not str else getattr(self.parent,callback[1:]) if callback.startswith("$") else getattr(self.parent.state,callback)
-        # NOTE 如果 callback 是字符串则获取 parent 的方法
-        val = callback(*arg_list) if callable(callback) else val
+        val = callback(*arg_list) if callable(callback) else callback
         return val
         
     def setSignal(self,var,method,option,typ=None):
@@ -99,9 +104,8 @@ class StateManager(object):
         elif callable(option):
             val = option(val)
         elif type(option) is dict:
-            val = self.parseAction(option,val)
-
-        print val
+            val = self.parseAction(option)
+    
         method(typ(val) if typ else val)
 
 def store(options):
@@ -122,7 +126,6 @@ def store(options):
             else:
                 return (widget,data[-1]) 
 
-
         def parseGetter(self,val):
             default = None
             data = val()
@@ -140,7 +143,7 @@ def store(options):
                 return [parseMethod(self,u) for u in data],default
             else:
                 raise NotImplementedError('unknown return val')
-
+        
         @wraps(func)
         def wrapper(self,*args, **kwargs):
             self.__state_manager = StateManager(self)
@@ -156,13 +159,13 @@ def store(options):
             sys.setprofile(None)
 
             state = options.get("state",{})
-            for var,val in state.items():
-                if not callable(val):continue
-                updaters,default = parseGetter(self,val) 
-                self.state._var_dict[var].setUpdater(updaters)
-                # NOTE 根据 state 设定初值
-                if options["state"][var] == self.state._var_dict[var].val:
-                    self.state._var_dict[var].val = default
+            # for var,val in state.items():
+            #     if not callable(val):continue
+            #     updaters,default = parseGetter(self,val) 
+            #     self.state._var_dict[var].setUpdater(updaters)
+            #     # NOTE 根据 state 设定初值
+            #     if options["state"][var] == self.state._var_dict[var].val:
+            #         self.state._var_dict[var].val = default
 
             # # NOTE 根据设置进行绑定
             # bindings = options.get("bindings",{})
@@ -178,33 +181,50 @@ def store(options):
 
             methods = options.get("methods",{})
             for _method,option in methods.items():
+                option = {"action":option} if type(option) is str else option
+                # NOTE 如果 option 非字符串和字典 报错
+                if type(option) is not dict:
+                    raise SchemeParseError("Invalid Scheme Args").parseErrorLine(_method)
+
                 widget,setter = parseMethod(self,_method,False)
                 ref = HOOKS.get(type(widget))
                 # NOTE 过滤不在 HOOKS 里面的绑定 
                 if ref is None or setter not in ref: continue
                 hook = ref[setter]
 
-                # NOTE 获取 setter
-                setter = hook.get("setter",setter)
-                typ = hook.get("type")
-                setter = getattr(widget,setter)
-                # NOTE 默认自动将方法绑定到所有的 state setter 里面
-                state_list = option.get("bindings",state)
-
-                # TODO bindings 只代表变量变化进行 setter 同步
-                if type(state_list) is str:
-                    self.__state_manager.bind(state_list,setter,option=option,typ=typ)
-                else:
-                    for var in state_list:
-                        self.__state_manager.bind(var,setter,option=option,typ=typ)
-
+                action = option.get("action")
                 # NOTE 获取 updater
                 updater = hook.get("updater")
                 if updater is not None and type(updater) is str:
                     updater = getattr(widget,updater)
-                    var = option.get("action")
-                    self.state._var_dict[var].setUpdater([updater])
-                    
+                    # NOTE 如果 callback 是字符串则获取 parent 的方法
+                    var = None if type(action) is not str else None if action.startswith("$") else self.state._var_dict[action]
+                    if var:
+                        var.setUpdater([updater])
+
+                # NOTE 获取 setter
+                setter = hook.get("setter",setter)
+                typ = hook.get("type")
+                setter = getattr(widget,setter)
+
+                sync_setter = lambda: setter(typ(self.__state_manager.parseAction(option)) if typ else self.__state_manager.parseAction(option))
+
+                # NOTE 设置初值
+                # sync_setter()
+                # NOTE 默认自动将方法绑定到所有的 state setter 里面
+                state_list = option.get("bindings",state)
+                if type(state_list) is str:
+                    print "bindings",state_list,getattr(self.state,"_%s_signal" % state_list)
+                    # self.__state_manager.sync(state_list,sync_setter)
+                    getattr(self.state,"_%s_signal" % state_list).connect(sync_setter)
+                else:
+                    for var in state_list:
+                        getattr(self.state,"_%s_signal" % var).connect(sync_setter)
+                        # self.__state_manager.sync(var,sync_setter)
+
+            for var in state_list:
+                print var,getattr(self.state,"_%s_signal" % var)
+                getattr(self.state,"_%s_signal" % var).emit()
             return res
         return wrapper
     return handler

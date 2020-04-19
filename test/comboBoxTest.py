@@ -25,36 +25,33 @@ if MODULE not in sys.path:
 
 import QMVVM
 
-class Counter(QtWidgets.QWidget):
+class ComboTest(QtWidgets.QWidget):
 
     @QMVVM.store({
         "state":{
             "text":"123",
+            "text2":"1234",
             "enable":True,
         },
         "methods":{
         	# "combo.addItem":{
         	# 	"action": "text"
         	# },
-            "line.setText":{
-                "bindings": "text",
-                "action": "text",
-            },
+            "line.setText":"text2",
             "label.setText":{
-                "bindings": "text",
-                "args":["text"],
-                "action": "enable",
+                # "args":["text"],
+                "action": "text2",
                 # "updater": "text",
             },
-            "cb.setChecked":{
-                # "bindings": "text",
-                "action": "enable",
-                # "updater": "text",
-            }
+            # "cb.setChecked":{
+            #     # "bindings": "text",
+            #     "action": "enable",
+            #     # "updater": "text",
+            # }
         },
     })
     def __init__(self):
-        super(Counter,self).__init__()
+        super(ComboTest,self).__init__()
         self.initialize()
 
     def initialize(self):
@@ -84,7 +81,10 @@ class Counter(QtWidgets.QWidget):
         self.btn.clicked.connect(self.clickEvent)
 
     def clickEvent(self):
-        self.state.enable = not self.state.enable
+        # self.state.enable = not self.state.enable
+        print self.state.text2
+        self.state.text2 = "abxcs"
+        
         
     def modify(self,text):
         self.state.text = text
@@ -92,7 +92,7 @@ class Counter(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication([])
 
-    counter = Counter()
+    counter = ComboTest()
     counter.show()
 
     app.exec_()
