@@ -16,12 +16,10 @@ HOOKS = {
     QtWidgets.QComboBox: {
         "setCurrentIndex": {
             "type":int,   
-            "getter": "currentIndex",
             "updater": "currentIndexChanged",
         },
         "setItemText": {
             "type":str,
-            "getter": "currentText",
             "updater": "currentIndexChanged",
         },
         "addItem": {

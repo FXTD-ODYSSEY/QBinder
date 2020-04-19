@@ -31,6 +31,7 @@ class ComboTest(QtWidgets.QWidget):
         "state":{
             "text":"123",
             "text2":"1234",
+            "num":123,
             "enable":True,
         },
         "methods":{
@@ -39,14 +40,15 @@ class ComboTest(QtWidgets.QWidget):
         	# },
             "line.setText":"text2",
             "label.setText":{
-                # "args":["text"],
-                "action": "text2",
-                # "updater": "text",
+                "args":["text2","enable"],
+                "action": lambda a,b: "%s %s" % (a,b),
+            },
+            "label2.setText":{
+                "action": "$modifyTest",
             },
             "cb.setChecked":{
-                # "bindings": "text",
+                # "bindings": "text2",
                 "action": "enable",
-                # "updater": "text",
             }
         },
     })
@@ -66,12 +68,14 @@ class ComboTest(QtWidgets.QWidget):
         self.btn = QtWidgets.QPushButton('change enable')
         self.label = QtWidgets.QLabel()
         self.cb = QtWidgets.QCheckBox('disable')
+        self.label2 = QtWidgets.QLabel()
 
         layout.addWidget(self.btn)
         layout.addWidget(self.line)
         layout.addWidget(self.label)
         layout.addWidget(self.cb)
         layout.addWidget(self.combo)
+        layout.addWidget(self.label2)
         
         # self.line.setText(self.state.text)
         # self.label.setText(self.state.enable)
@@ -82,10 +86,14 @@ class ComboTest(QtWidgets.QWidget):
 
     def clickEvent(self):
         self.state.enable = not self.state.enable
+        self.state.num += 1
         # print self.state.text2
         # self.state.text2 = "abxcs"
         
-        
+    def modifyTest(self):
+        return "%s %s %s" % (self.state.text2, self.state.text, self.state.num+1) 
+
+
     def modify(self,text):
         self.state.text = text
         

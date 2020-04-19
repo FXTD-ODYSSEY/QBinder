@@ -178,13 +178,13 @@ def store(options):
             #             self.__state_manager.bind(var,setter)
 
             methods = options.get("methods",{})
-            for _method,option in methods.items():
+            for method,option in methods.items():
                 option = {"action":option} if type(option) is str else option
                 # NOTE 如果 option 非字符串和字典 报错
                 if type(option) is not dict:
-                    raise SchemeParseError("Invalid Scheme Args").parseErrorLine(_method)
+                    raise SchemeParseError("Invalid Scheme Args").parseErrorLine(method)
 
-                widget,setter = parseMethod(self,_method,False)
+                widget,setter = parseMethod(self,method,False)
                 ref = HOOKS.get(type(widget))
                 # NOTE 过滤不在 HOOKS 里面的绑定 
                 if ref is None or setter not in ref: continue
@@ -206,11 +206,14 @@ def store(options):
                 typ = hook.get("type")
                 # NOTE 默认自动将方法绑定到所有的 state setter 里面
                 state_list = option.get("bindings",state)
-                if type(state_list) is str:
-                    self.__state_manager.bind(state_list,setter,option=option,typ=typ)
-                else:
-                    for var in state_list:
-                        self.__state_manager.bind(var,setter,option=option,typ=typ)
+                try:
+                    if type(state_list) is str:
+                        self.__state_manager.bind(state_list,setter,option=option,typ=typ)
+                    else:
+                        for var in state_list:
+                            self.__state_manager.bind(var,setter,option=option,typ=typ)
+                except AttributeError:
+                    raise SchemeParseError("Unknown Action Attribute").parseErrorLine(method)
 
                     
             return res
