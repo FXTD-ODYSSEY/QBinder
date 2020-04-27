@@ -1,0 +1,6 @@
+[submodule "research/py-qt-mvc"]
+	path = research/py-qt-mvc
+	url = git@github.com:morefigs/Py-Qt-MVC.git
+[submodule "research/mvc_pyqt"]
+	path = research/mvc_pyqt
+	url = git@github.com:DevGim/mvc_pyqt.git
