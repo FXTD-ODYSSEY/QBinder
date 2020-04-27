@@ -16,23 +16,29 @@ HOOKS = {
     QtWidgets.QComboBox: {
         "setCurrentIndex": {
             "type":int,   
-            "updater": "currentIndexChanged",
+            "signals": "currentIndexChanged",
         },
         "setItemText": {
             "type":str,
-            "updater": "currentIndexChanged",
+            "signals": "currentIndexChanged",
         },
-        "addItem": {
-            "type":str,                         # 返回值类型
-            "setter": "setItemText",            # setter 
-            "getter": "currentText",
-            "updater": "currentIndexChanged",
-        },
+        # "addItem": {
+        #     "type":str,                         # 返回值类型
+        #     "setter": "setItemText",            # setter 
+        #     "getter": "currentText",
+        #     "signals": "currentIndexChanged",
+        # },
+        # "addItems": {
+        #     "type":str,                         # 返回值类型
+        #     "setter": "setItemText",            # setter 
+        #     "getter": "currentText",
+        #     "signals": "currentIndexChanged",
+        # },
     },
     QtWidgets.QLineEdit: {
         "setText":{
             "type":str,
-            "updater": "textChanged",
+            "signals": "textChanged",
         }
     },
     
@@ -45,8 +51,9 @@ HOOKS = {
     QtWidgets.QCheckBox: {
         "setChecked":{
             "type":bool,
-            "updater": "stateChanged",
-        }
+            "signals": "stateChanged",
+        },
+        # "@signals"
     },
 
 
@@ -56,7 +63,7 @@ HOOKS = {
         bool:{
             "getter": "isChecked",
             "setter": "setChecked",
-            "updater": "toggled",
+            "signals": "toggled",
         }
     },
     # QtWidgets.QActionGroup: (_get_QActionGroup, _set_QActionGroup, _event_QActionGroup),
@@ -64,28 +71,28 @@ HOOKS = {
         bool:{
             "getter": "isChecked",
             "setter": "setChecked",
-            "updater": "toggled",
+            "signals": "toggled",
         }
     },
     QtWidgets.QSpinBox: {
         int:{
             "getter": "value",
             "setter": "setValue",
-            "updater": "valueChanged",
+            "signals": "valueChanged",
         }
     },
     QtWidgets.QDoubleSpinBox: {
         float:{
             "getter": "value",
             "setter": "setValue",
-            "updater": "valueChanged",
+            "signals": "valueChanged",
         }
     },
     # QtWidgets.QPlainTextEdit: {
     #     str:{
     #         "getter": "value",
     #         "setter": "setPlainText",
-    #         "updater": "valueChanged",
+    #         "signals": "valueChanged",
     #     }
     # },
     # QtWidgets.QListWidget: (_get_QListWidget, _set_QListWidget, _event_QListWidget),

@@ -16,14 +16,15 @@ from functools import partial
 from Qt import QtCore
 from .hook import HOOKS
 from .exception import SchemeParseError
+from collections import OrderedDict
 
 def notify(func):
     def wrapper(self,*args,**kwargs):
-        print "notify",args
         # NOTE 更新数据
         res = func(self,*args,**kwargs)
-        # NOTE 更新组件信息
-        getattr(self.STATE.widget.state,"_%s_signal" % self.STATE.var).emit()
+        # NOTE 更新组件数据
+        if hasattr(self,"STATE"):
+            getattr(self.STATE.widget.state,"_%s_signal" % self.STATE.var).emit()
         return res
     return wrapper
 
@@ -33,7 +34,7 @@ class NotifyList(list):
     监听数组的内置函数更新组件数据
     """
     def __init__(self,val,STATE):
-        list.__init__(self,val)
+        super(NotifyList, self).__init__(val)
         self.STATE = STATE
 
     extend = notify(list.extend)
@@ -60,87 +61,112 @@ class NotifyList(list):
 
     @notify
     def __setitem__(self,key,value):
-        if type(value) is dict:
+        if isinstance(value, dict):
             value = NotifyDict(value,self.STATE)
-        elif type(value) is list:
+        elif isinstance(value, list):
             value = NotifyList(value,self.STATE)
         list.__setitem__(self,key,value)
-
-class NotifyDict(dict):
+        
+class NotifyDict(OrderedDict):
     """
     https://stackoverflow.com/questions/5186520/python-property-change-listener-pattern
     """
     def __init__(self,val,STATE):
-        dict.__init__(self,val)
+        super(NotifyDict, self).__init__(val)
         self.STATE = STATE
 
-    # __setitem__ = notify(dict.__setitem__)
-    clear = notify(dict.clear)
-    pop = notify(dict.pop)
-    popitem = notify(dict.popitem)
-    setdefault = notify(dict.setdefault)
-    update =  notify(dict.update)
-    __delitem__ = notify(dict.__delitem__)
+    clear = notify(OrderedDict.clear)
+    pop = notify(OrderedDict.pop)
+    popitem = notify(OrderedDict.popitem)
+    setdefault = notify(OrderedDict.setdefault)
+    update =  notify(OrderedDict.update)
+    __delitem__ = notify(OrderedDict.__delitem__)
 
     @notify
     def __setitem__(self,key,value):
-        if type(value) is dict:
-            value = NotifyDict(value,self.STATE)
-        elif type(value) is list:
-            value = NotifyList(value,self.STATE)
-        dict.__setitem__(self,key,value)
+        if hasattr(self,"STATE"):
+            if isinstance(value, dict):
+                value = NotifyDict(value,self.STATE)
+            elif isinstance(value, list):
+                value = NotifyList(value,self.STATE)
+        return OrderedDict.__setitem__(self,key,value)
     
 
 class State(object):
-    __map_type = {
-        list:NotifyList,
-        dict:NotifyDict,
-    }
+
     def __init__(self,var,widget,val):
         super(State,self).__init__()
         self.var = var
         self.widget = widget
 
-        self.retrieveVal(val,self)
-        self.val = self.__map_type.get(type(val),lambda *arg:arg[0])(val,self)
+        self.val = self.retrieveVal(val)
         # self.val = val
 
     def __get__(self, instance, owner):
         return self.val().get("default") if callable(self.val) else self.val
 
     def __set__(self,instance, value):
-        self.val = value
+        self.val = self.retrieveVal(value)
         getattr(self.widget.state,"_%s_signal" % self.var).emit()
 
-    def setUpdater(self,updaters):
-        for updater in updaters:
-            updater.connect(self.setVal)
+    def setUpdater(self,signals,updater=None):
+        for signal in signals:
+            signal.connect(updater if updater else self.setVal)
             
     def setVal(self,val):
         self.val = val
         getattr(self.widget.state,"_%s_signal" % self.var).emit()
 
-    def retrieveVal(self,val,STATE):
+    def retrieveVal(self,val,initialize=True):
         """
         遍历所有字典和数组对象，转换为 Notify 对象
         """
         itr = val.items() if type(val) is dict else enumerate(val) if type(val) is list else []
         for k,v in itr:        
             if isinstance(v, dict):
-                self.retrieveVal(v,STATE)
-                val[k] = NotifyDict(v,STATE)
+                self.retrieveVal(v,initialize=False)
+                val[k] = NotifyDict(v,self)
             elif isinstance(v, list):            
-                self.retrieveVal(v,STATE)
-                val[k] = NotifyList(v,STATE)
+                self.retrieveVal(v,initialize=False)
+                val[k] = NotifyList(v,self)
+        
+        if initialize:
+            if isinstance(val, dict):
+                return NotifyDict(val,self)
+            elif isinstance(val, list):
+                return NotifyList(val,self)
+            else:
+                return val
 
 class StateManager(object):
     
     def __init__(self,parent):
         self.parent = parent
 
+    # def retrieveVal(self,val,STATE):
+    #     """
+    #     遍历所有字典和数组对象，转换为 Notify 对象
+    #     """
+    #     itr = val.items() if type(val) is dict else enumerate(val) if type(val) is list else []
+    #     for k,v in itr:        
+    #         if isinstance(v, dict):
+    #             self.retrieveVal(v,STATE)
+    #             val[k] = NotifyDict(v,STATE)
+    #         elif isinstance(v, list):            
+    #             self.retrieveVal(v,STATE)
+    #             val[k] = NotifyList(v,STATE)
+
     def add(self,options):
         
         manager = self
+        container_list = {}
+        state_list = {}
+        # for var,val in options["state"].items():
+        #     if type(val) is list or type(val) is dict:
+        #         container_list[var] = val 
+        #     else:
+        #         state_list[var] = val 
+                
         # NOTE 获取可用的 descriptor 
         class StateDescriptor(QtCore.QObject):
             
@@ -149,6 +175,9 @@ class StateManager(object):
             for var,val in options["state"].items():
                 __signal_dict["_%s_signal" % var] = QtCore.Signal()
                 _var_dict[var] = State(var,manager.parent,val)
+
+            # TODO 处理 container 
+
             locals().update(__signal_dict)
             locals().update(_var_dict)
 
@@ -215,23 +244,23 @@ def store(options):
                 return (widget,data[-1]) 
 
 
-        def parseGetter(self,val):
-            default = None
-            data = val()
-            if type(data) is str:
-                return [parseMethod(self,data)],default
-            elif type(data) is dict:
-                default = data["default"]
-                updater = data["updater"]
-                if type(updater) is str:
-                    return [parseMethod(self,updater)],default
-                elif type(updater) is tuple or type(updater) is list:
-                    return [parseMethod(self,u) for u in updater],default
+        # def parseGetter(self,val):
+        #     default = None
+        #     data = val()
+        #     if type(data) is str:
+        #         return [parseMethod(self,data)],default
+        #     elif type(data) is dict:
+        #         default = data["default"]
+        #         updater = data["updater"]
+        #         if type(updater) is str:
+        #             return [parseMethod(self,updater)],default
+        #         elif type(updater) is tuple or type(updater) is list:
+        #             return [parseMethod(self,u) for u in updater],default
 
-            elif type(data) is tuple or type(data) is list:
-                return [parseMethod(self,u) for u in data],default
-            else:
-                raise NotImplementedError('unknown return val')
+        #     elif type(data) is tuple or type(data) is list:
+        #         return [parseMethod(self,u) for u in data],default
+        #     else:
+        #         raise NotImplementedError('unknown return val')
 
         @wraps(func)
         def wrapper(self,*args, **kwargs):
@@ -248,13 +277,13 @@ def store(options):
             sys.setprofile(None)
 
             state = options.get("state",{})
-            for var,val in state.items():
-                if not callable(val):continue
-                updaters,default = parseGetter(self,val) 
-                self.state._var_dict[var].setUpdater(updaters)
-                # NOTE 根据 state 设定初值
-                if options["state"][var] == self.state._var_dict[var].val:
-                    self.state._var_dict[var].val = default
+            # for var,val in state.items():
+            #     if not callable(val):continue
+            #     updaters,default = parseGetter(self,val) 
+            #     self.state._var_dict[var].setUpdater(updaters)
+            #     # NOTE 根据 state 设定初值
+            #     if options["state"][var] == self.state._var_dict[var].val:
+            #         self.state._var_dict[var].val = default
 
             # # NOTE 根据设置进行绑定
             # bindings = options.get("bindings",{})
@@ -282,14 +311,14 @@ def store(options):
                 hook = ref[setter]
 
                 action = option.get("action")
+                updater = option.get("updater")
                 # NOTE 获取 updater
-                updater = hook.get("updater")
-                if updater is not None and type(updater) is str:
-                    updater = getattr(widget,updater)
-                    # NOTE 如果 callback 是字符串则获取 parent 的方法
-                    var = None if type(action) is not str else None if action.startswith("$") else self.state._var_dict[action]
-                    if var:
-                        var.setUpdater([updater])
+                signals = hook.get("signals",[])
+                signals = [signals] if type(signals) is str else signals
+                var = None if type(action) is not str else None if action.startswith("$") else self.state._var_dict[action]
+                # NOTE 如果 callback 是字符串则获取 parent 的方法
+                if var:
+                    var.setUpdater([getattr(widget,signal) for signal in signals],updater)
 
                 # NOTE 获取 setter
                 setter = hook.get("setter",setter)
