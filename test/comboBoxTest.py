@@ -27,17 +27,18 @@ import QMVVM
 class ComboTest(QtWidgets.QWidget):
 
     @QMVVM.store({
+        "ui":r"",
         "state": {
             "text": "123",
             "text2": "1234",
             "num": 123,
             "enable": True,
-            # "data_list": {
-            #     1:{2:'a'},
-            #     2:["b"],
-            #     3:"c",
-            # },
-            "data_list": [{1:2},3,4],
+            "data_list": {
+                1:{2:'a'},
+                2:["b"],
+                3:"c",
+            },
+            # "data_list": ["${enable}",""],
         },
         "methods": {
             # "combo.addItem":{
@@ -45,7 +46,7 @@ class ComboTest(QtWidgets.QWidget):
             # },
             "line.setText": "text",
             "label.setText": {
-                 "args": ["text2", "enable"],
+                "args": ["text2", "enable"],
                 "action": lambda a, b: "%s %s" % (a, b),
             },
             "label2.setText": {
@@ -93,11 +94,11 @@ class ComboTest(QtWidgets.QWidget):
     def clickEvent(self):
         # self.state.enable = not self.state.enable
         # self.state.num += 1
-        self.state.data_list[0] = [1234,1]
-        self.state.data_list[0].append(1)
-        self.state.data_list[0].append(2)
-        # self.state.data_list[2].extend([1])
-        # self.state.data_list.update({4:"4444"})
+        # self.state.data_list = [1234,1]
+        # self.state.data_list.append(1)
+        # self.state.data_list.append(2)
+        # print self.state.data_list
+        self.state.data_list[1][4] = {123:"4444" }
         # print self.state.text2
         # self.state.text2 = "abxcs"
 
