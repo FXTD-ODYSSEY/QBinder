@@ -23,14 +23,14 @@ HOOKS = {
             "signals": "currentIndexChanged",
         },
         # "addItem": {
-        #     "type":str,                         # 返回值类型
-        #     "setter": "setItemText",            # setter 
+        #     "type":str,                         
+        #     "setter": "setItemText",            
         #     "getter": "currentText",
         #     "signals": "currentIndexChanged",
         # },
         # "addItems": {
-        #     "type":str,                         # 返回值类型
-        #     "setter": "setItemText",            # setter 
+        #     "type":str,                         
+        #     "setter": "setItemText",            
         #     "getter": "currentText",
         #     "signals": "currentIndexChanged",
         # },
@@ -53,7 +53,6 @@ HOOKS = {
             "type":bool,
             "signals": "stateChanged",
         },
-        # "@signals"
     },
 
 

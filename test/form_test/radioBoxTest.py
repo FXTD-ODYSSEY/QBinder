@@ -36,6 +36,10 @@ class WidgetTest(QtWidgets.QWidget):
             	"action": lambda a:"Picked %s" %  a,
             },
         },
+        "signals":{
+            "rb1.toggled":"$updateRB",
+            "rb2.toggled":"$updateRB",
+        }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -60,8 +64,8 @@ class WidgetTest(QtWidgets.QWidget):
 
         # self.label.setText("CheckedNames %s" %  self.state.checkedNames)
 
-        for rb in groupBox.findChildren(QtWidgets.QRadioButton):
-            rb.toggled.connect(partial(self.updateRB,rb))
+        # for rb in groupBox.findChildren(QtWidgets.QRadioButton):
+        #     rb.toggled.connect(partial(self.updateRB,rb))
 
     def updateRB(self,rb,state):
         if state:

@@ -8,6 +8,7 @@ __date__ = '2020-03-24 14:44:34'
 
 """
 
+import re
 import sys
 import inspect
 
@@ -98,36 +99,30 @@ class State(object):
         super(State,self).__init__()
         self.var = var
         self.widget = widget
-
-        self.val = self.retrieveVal(val)
-        # self.val = val
+        self.val = self.retrieve2Notify(val)
 
     def __get__(self, instance, owner):
         return self.val().get("default") if callable(self.val) else self.val
 
     def __set__(self,instance, value):
-        self.val = self.retrieveVal(value)
+        self.val = self.retrieve2Notify(value)
         getattr(self.widget.state,"_%s_signal" % self.var).emit()
 
-    def setUpdater(self,signals,updater=None):
-        for signal in signals:
-            signal.connect(updater if updater else self.setVal)
-            
-    def setVal(self,val):
-        self.val = val
+    def setVal(self,value):
+        self.val = self.retrieve2Notify(value)
         getattr(self.widget.state,"_%s_signal" % self.var).emit()
 
-    def retrieveVal(self,val,initialize=True):
+    def retrieve2Notify(self,val,initialize=True):
         """
         遍历所有字典和数组对象，转换为 Notify 对象
         """
         itr = val.items() if type(val) is dict else enumerate(val) if type(val) is list else []
         for k,v in itr:        
             if isinstance(v, dict):
-                self.retrieveVal(v,initialize=False)
+                self.retrieve2Notify(v,initialize=False)
                 val[k] = NotifyDict(v,self)
             elif isinstance(v, list):            
-                self.retrieveVal(v,initialize=False)
+                self.retrieve2Notify(v,initialize=False)
                 val[k] = NotifyList(v,self)
         
         if initialize:
@@ -142,19 +137,6 @@ class StateManager(object):
     
     def __init__(self,parent):
         self.parent = parent
-
-    # def retrieveVal(self,val,STATE):
-    #     """
-    #     遍历所有字典和数组对象，转换为 Notify 对象
-    #     """
-    #     itr = val.items() if type(val) is dict else enumerate(val) if type(val) is list else []
-    #     for k,v in itr:        
-    #         if isinstance(v, dict):
-    #             self.retrieveVal(v,STATE)
-    #             val[k] = NotifyDict(v,STATE)
-    #         elif isinstance(v, list):            
-    #             self.retrieveVal(v,STATE)
-    #             val[k] = NotifyList(v,STATE)
 
     def add(self,options):
         
@@ -176,7 +158,7 @@ class StateManager(object):
                 __signal_dict["_%s_signal" % var] = QtCore.Signal()
                 _var_dict[var] = State(var,manager.parent,val)
 
-            # TODO 处理 container 
+            # TODO handle container state injection 
 
             locals().update(__signal_dict)
             locals().update(_var_dict)
@@ -184,10 +166,8 @@ class StateManager(object):
         self.parent.state = StateDescriptor()
     
     def bind(self,var,method,option=None,typ=None):
-        # NOTE 赋予初值
         setter = lambda:self.setSignal(var,method,option,typ)
         setter()
-        # NOTE 连接信号槽
         getattr(self.parent.state,"_%s_signal" % var).connect(setter)
 
     def parseAction(self,option):
@@ -205,8 +185,18 @@ class StateManager(object):
 
         callback = option.get("action")
         # NOTE 如果 callback 是字符串则获取 parent 的方法
+        if type(callback) is str and callback.startswith("`") and callback.endswith("`"):
+            def callbackHandler(m):
+                # NOTE remove ${ } pattern
+                match = m.group()[2:-1].strip()
+                if re.match(r"^\$[0-9]+",match):
+                    return re.sub(r"^\$[0-9]+",lambda m: "{%s}" % m.group()[1:],match)
+                var = getattr(self.parent,match[1:]) if match.startswith("$") else getattr(self.parent.state,match)
+                return str(var)
+            res_str = re.sub(r"\$\{(\S*?)\}",callbackHandler,callback[1:-1])
+            callback = lambda *args:res_str.format(*args)
+
         callback = callback if type(callback) is not str else getattr(self.parent,callback[1:]) if callback.startswith("$") else getattr(self.parent.state,callback)
-        # NOTE 如果 callback 是字符串则获取 parent 的方法
         val = callback(*arg_list) if callable(callback) else callback
         return val
         
@@ -241,26 +231,7 @@ def store(options):
             if parse:
                 return getattr(widget,data[-1])
             else:
-                return (widget,data[-1]) 
-
-
-        # def parseGetter(self,val):
-        #     default = None
-        #     data = val()
-        #     if type(data) is str:
-        #         return [parseMethod(self,data)],default
-        #     elif type(data) is dict:
-        #         default = data["default"]
-        #         updater = data["updater"]
-        #         if type(updater) is str:
-        #             return [parseMethod(self,updater)],default
-        #         elif type(updater) is tuple or type(updater) is list:
-        #             return [parseMethod(self,u) for u in updater],default
-
-        #     elif type(data) is tuple or type(data) is list:
-        #         return [parseMethod(self,u) for u in data],default
-        #     else:
-        #         raise NotImplementedError('unknown return val')
+                return (widget,data[-1])
 
         @wraps(func)
         def wrapper(self,*args, **kwargs):
@@ -277,65 +248,69 @@ def store(options):
             sys.setprofile(None)
 
             state = options.get("state",{})
-            # for var,val in state.items():
-            #     if not callable(val):continue
-            #     updaters,default = parseGetter(self,val) 
-            #     self.state._var_dict[var].setUpdater(updaters)
-            #     # NOTE 根据 state 设定初值
-            #     if options["state"][var] == self.state._var_dict[var].val:
-            #         self.state._var_dict[var].val = default
-
-            # # NOTE 根据设置进行绑定
-            # bindings = options.get("bindings",{})
-            # for var,data in bindings.items():
-            #     if type(data) == dict:
-            #         for method,option in data.items():
-            #             setter = parseMethod(self,method)
-            #             self.__state_manager.bind(var,setter,option=option)
-            #     elif type(data) == list or type(data) == tuple:
-            #         for method in data:
-            #             setter = parseMethod(self,method)
-            #             self.__state_manager.bind(var,setter)
 
             methods = options.get("methods",{})
             for method,option in methods.items():
                 option = {"action":option} if type(option) is str else option
-                # NOTE 如果 option 非字符串和字典 报错
                 if type(option) is not dict:
                     raise SchemeParseError("Invalid Scheme Args").parseErrorLine(method)
-
+                
                 widget,setter = parseMethod(self,method,False)
                 ref = HOOKS.get(type(widget))
-                # NOTE 过滤不在 HOOKS 里面的绑定 
-                if ref is None or setter not in ref: continue
-                hook = ref[setter]
+                if ref is None:
+                    for widget_type,ref in HOOKS.items():
+                        if isinstance(widget_type,widget):
+                            break
+                    else:
+                        continue
+                hook = ref.get(setter)
 
                 action = option.get("action")
-                updater = option.get("updater")
-                # NOTE 获取 updater
-                signals = hook.get("signals",[])
-                signals = [signals] if type(signals) is str else signals
-                var = None if type(action) is not str else None if action.startswith("$") else self.state._var_dict[action]
-                # NOTE 如果 callback 是字符串则获取 parent 的方法
-                if var:
-                    var.setUpdater([getattr(widget,signal) for signal in signals],updater)
 
-                # NOTE 获取 setter
+                signals = option.get("signals")
+                signals = [signals] if type(signals) is str else signals
+                # NOTE get hook.py config as default signals
+                if signals is None:
+                    signals = hook.get("signals",[])
+                    signals = [signals] if type(signals) is str else signals
+
+                # NOTE 获取 updater
+                updaters = option.get("updaters",{})
+                default_updater = None if type(action) is not str else None if action.startswith("$") or action.startswith("`") else self.state._var_dict[action].setVal
+                updaters.setdefault("default",updaters if type(updaters) is str else default_updater)
+
+                for i,signal in enumerate(signals):
+                    updater = updaters.get(signal,updaters.get("default"))
+                    if not updater: continue
+                    updater = updater if callable(updater) else getattr(self,updater[1:]) if updater.startswith("$") else getattr(self,updater)
+                    signal = getattr(widget,signal)
+                    signal.connect(updater)
+                    
                 setter = hook.get("setter",setter)
                 setter = getattr(widget,setter)
                 typ = hook.get("type")
-                # NOTE 默认自动将方法绑定到所有的 state setter 里面
                 state_list = option.get("bindings",state)
                 try:
                     if type(state_list) is str:
                         self.__state_manager.bind(state_list,setter,option=option,typ=typ)
                     else:
+                        # NOTE 默认自动将方法绑定到所有的 state 里面
                         for var in state_list:
                             self.__state_manager.bind(var,setter,option=option,typ=typ)
-                except AttributeError:
-                    raise SchemeParseError("Unknown Action Attribute").parseErrorLine(method)
+                except AttributeError as err:
+                    raise SchemeParseError().parseErrorLine(method,err)
 
-                    
+            signals = options.get("signals",{})
+            try:
+                for signal,attrs in signals.items():
+                    attrs = [attrs] if type(attrs) is str else attrs
+                    widget,_signal = parseMethod(self,signal,False)
+                    _signal = getattr(widget,_signal)
+                    for attr in attrs:
+                        _signal.connect(partial(getattr(self,attr[1:]),widget) if attr.startswith("$") else self.state._var_dict[attr].setVal)
+            except AttributeError as err:
+                raise SchemeParseError().parseErrorLine(signal,err)
+                        
             return res
         return wrapper
     return handler

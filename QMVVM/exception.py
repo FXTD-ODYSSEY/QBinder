@@ -46,7 +46,7 @@ def getErrorLine(key,content):
 class SchemeParseError(Exception,object):
 
     @returnSelfWrapper
-    def parseErrorLine(self,option):
+    def parseErrorLine(self,option,err=None):
         option = {"method":option} if type(option) is str else option
         frame = sys._getframe().f_back.f_back.f_back
         file_path = os.path.realpath(frame.f_code.co_filename)
@@ -87,3 +87,5 @@ class SchemeParseError(Exception,object):
         err_print = ["%-5s%-2s%s" % (l,'' if l != lineno else '->',linecache.getline(file_path,l)) for l in range(lineno-2,lineno+3)]
         print ('*> "%s", line %s' % (file_path,lineno))
         print ("".join(err_print))
+        if err:
+            raise err

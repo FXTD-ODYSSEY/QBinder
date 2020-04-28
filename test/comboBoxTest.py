@@ -27,7 +27,7 @@ import QMVVM
 class ComboTest(QtWidgets.QWidget):
 
     @QMVVM.store({
-        "ui":r"",
+        "ui":"#/../",
         "state": {
             "text": "123",
             "text2": "1234",
@@ -44,10 +44,11 @@ class ComboTest(QtWidgets.QWidget):
             # "combo.addItem":{
             # 	"action": "text"
             # },
-            "line.setText": "text",
+            "line.setText": "text2",
             "label.setText": {
                 "args": ["text2", "enable"],
-                "action": lambda a, b: "%s %s" % (a, b),
+                "action": "`${text2} ${enable}`",
+                # "updaters": "modify",
             },
             "label2.setText": {
                 # "action": "$modifyTest",

@@ -29,13 +29,20 @@ class WidgetTest(QtWidgets.QWidget):
     @QMVVM.store({
         "state": {
             "checkedNames": [],
+            "test": "asd",
         },
         "methods": {
             "label.setText":{
-                "args":["checkedNames"],
-            	"action": lambda a:"CheckedNames %s" %  a,
+                "args":["checkedNames","test"],
+            	# "action": lambda a:"CheckedNames %s" %  a,
+            	"action": "`CheckedNames: ${$0}`",
             },
         },
+        "signals": {
+            "cb1.stateChanged":"$updateCB",
+            "cb2.stateChanged":"$updateCB",
+            "cb3.stateChanged":"$updateCB",
+        }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -61,9 +68,9 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(groupBox)
         layout.addWidget(self.label)
 
-        self.cb1.stateChanged.connect(partial(self.updateCB,self.cb1))
-        self.cb2.stateChanged.connect(partial(self.updateCB,self.cb2))
-        self.cb3.stateChanged.connect(partial(self.updateCB,self.cb3))
+        # self.cb1.stateChanged.connect(partial(self.updateCB,self.cb1))
+        # self.cb2.stateChanged.connect(partial(self.updateCB,self.cb2))
+        # self.cb3.stateChanged.connect(partial(self.updateCB,self.cb3))
 
     def updateCB(self,widget,state):
         method = self.state.checkedNames.append if state else self.state.checkedNames.remove

@@ -32,10 +32,13 @@ class WidgetTest(QtWidgets.QWidget):
         },
         "methods": {
             "label.setText":{
-                "args":["selected"],
-            	"action": lambda a:"Selected: %s" %  a,
+                # "args":["selected"],
+            	"action":"`Selected: ${selected}`",
             },
         },
+        "signals":{
+            "listWidget.itemSelectionChanged":"$update"
+        }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -53,8 +56,6 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.listWidget)
         layout.addWidget(self.label)
 
-        self.listWidget.itemSelectionChanged.connect(lambda:self.update(self.listWidget))
-      
     def update(self,widget):
         self.state.selected = [item.text() for item in widget.selectedItems()]
 

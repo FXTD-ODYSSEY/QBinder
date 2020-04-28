@@ -34,8 +34,13 @@ class WidgetTest(QtWidgets.QWidget):
             "label.setText":{
                 "args":["selected"],
             	"action": lambda a:"Selected: %s" %  a,
+            	# "action":"`Selected: ${selected}`",
             },
         },
+        "signals":{
+            "combo.currentTextChanged":"$update",
+            # "combo.currentTextChanged":"selected",
+        }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -52,7 +57,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.combo)
         layout.addWidget(self.label)
 
-        self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
+        # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
         self.state.selected = self.combo.currentText()
 
     def update(self,widget,text):

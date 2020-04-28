@@ -41,6 +41,9 @@ class WidgetTest(QtWidgets.QWidget):
             	"action": lambda a:"Selected: %s" %  a,
             },
         },
+        "signals":{
+            "combo.currentTextChanged":"$update"
+        }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -51,20 +54,15 @@ class WidgetTest(QtWidgets.QWidget):
         self.setLayout(layout)
 
         self.combo = QtWidgets.QComboBox()
-        a = OrderedDict([
-                ('One', 'A'),
-                ('Two', 'B'),
-                ('Three', 'C'),
-            ])
         self.combo.addItems([text for text in self.state.options])
 
         self.label = QtWidgets.QLabel()
         layout.addWidget(self.combo)
         layout.addWidget(self.label)
 
-        self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
-        self.state.selected = self.combo.currentText()
-
+        # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
+        self.state.selected =  self.state.options.get(self.combo.currentText())
+        
     def update(self,widget,text):
         self.state.selected = self.state.options.get(text)
 
