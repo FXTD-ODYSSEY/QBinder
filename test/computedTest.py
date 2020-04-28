@@ -1,0 +1,113 @@
+# coding:utf-8
+
+__author__ = 'timmyliang'
+__email__ = '820472580@qq.com'
+__date__ = '2020-03-22 22:55:38'
+
+"""
+
+"""
+
+from PySide2 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+
+import os
+import sys
+
+from functools import wraps,partial
+from collections import OrderedDict
+DIR = os.path.dirname(__file__)
+MODULE = os.path.join(DIR, "..")
+if MODULE not in sys.path:
+    sys.path.append(MODULE)
+
+import QMVVM
+
+class WidgetTest(QtWidgets.QWidget):
+
+    @QMVVM.store({
+        "state": {
+            "selected": ['asd'],
+            "option_A": "A",
+            "option_B": "B",
+            "option_C": "C",
+        },
+        # "computed":{
+        #     # "item_list": ["`${option_A}`","`${option_B}`","`${option_C}`",True],
+        #     "item_list":OrderedDict([
+        #         ('One', "`${option_A}`"),
+        #         ('`${selected}`', "`${option_B}`"),
+        #         ('Three', "`${option_C}`"),
+        #     ]),
+        # },
+        "methods": {
+            "label.setText":{
+                # "args":["selected"],
+            	# "action": lambda a:"Selected: %s" %  a,
+            	"action":"`Selected: ${selected}`",
+            },
+        },
+        "signals":{
+            "combo.currentTextChanged":"$update",
+            # "combo.currentTextChanged":"selected",
+        }
+    })
+    def __init__(self):
+        super(WidgetTest, self).__init__()
+        self.initialize()
+        self.__list = [self.state._var_dict["selected"],self.state._var_dict["option_A"],self.state._var_dict["option_B"],self.state._var_dict["option_C"]]
+
+    def initialize(self):
+        layout = QtWidgets.QVBoxLayout()
+        self.setLayout(layout)
+
+        self.combo = QtWidgets.QComboBox()
+        # self.combo.addItems(self.state.item_list)
+        self.combo.addItems(['A','B','C'])
+
+        self.label = QtWidgets.QLabel()
+        self.button = QtWidgets.QPushButton('click')
+        layout.addWidget(self.combo)
+        layout.addWidget(self.label)
+        layout.addWidget(self.button)
+
+        self.button.clicked.connect(self.getData)
+        # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
+        self.state.selected = self.combo.currentText()
+    
+    def getData(self):
+        from copy import copy
+        print 1,self.item_list
+        self.item_list.append('asd')
+        # self.item_list.insert(1,'d')
+        print 2,self.item_list
+        self.state.option_B = "BBC"
+        print 3,self.item_list
+        # self.item_list[0] += 'aA'
+        print self.item_list[0].replace('A','sds')
+        print self.item_list
+        print self.item_list[0]
+        # print self.item_list[0].replace
+
+        # print self.item_list
+
+    def update(self,widget,text):
+        self.state.selected = text
+
+    @property
+    def item_list(self):
+        return self.__list
+
+def main():
+    app = QtWidgets.QApplication([])
+
+    widget = WidgetTest()
+    widget.show()
+
+    app.exec_()
+
+
+
+if __name__ == "__main__":
+    main()

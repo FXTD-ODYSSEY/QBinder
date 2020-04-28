@@ -17,100 +17,96 @@ from functools import partial
 from Qt import QtCore
 from .hook import HOOKS
 from .exception import SchemeParseError
-from collections import OrderedDict
-
-def notify(func):
-    def wrapper(self,*args,**kwargs):
-        # NOTE 更新数据
-        res = func(self,*args,**kwargs)
-        # NOTE 更新组件数据
-        if hasattr(self,"STATE"):
-            getattr(self.STATE.widget.state,"_%s_signal" % self.STATE.var).emit()
-        return res
-    return wrapper
-
-class NotifyList(list):
-    """
-    https://stackoverflow.com/questions/13259179/list-callbacks
-    监听数组的内置函数更新组件数据
-    """
-    def __init__(self,val,STATE):
-        super(NotifyList, self).__init__(val)
-        self.STATE = STATE
-
-    extend = notify(list.extend)
-    append = notify(list.append)
-    remove = notify(list.remove)
-    pop = notify(list.pop)
-    __iadd__ = notify(list.__iadd__)
-    __imul__ = notify(list.__imul__)
-
-    #Take care to return a new NotifyList if we slice it.
-    if sys.version_info[0] < 3:
-        __setslice__ = notify(list.__setslice__)
-        __delslice__ = notify(list.__delslice__)
-        def __getslice__(self,*args):
-            return self.__class__(list.__getslice__(self,*args))
-
-    __delitem__ = notify(list.__delitem__)
-    
-    def __getitem__(self,item):
-        if isinstance(item,slice):
-            return self.__class__(list.__getitem__(self,item))
-        else:
-            return list.__getitem__(self,item)
-
-    @notify
-    def __setitem__(self,key,value):
-        if isinstance(value, dict):
-            value = NotifyDict(value,self.STATE)
-        elif isinstance(value, list):
-            value = NotifyList(value,self.STATE)
-        list.__setitem__(self,key,value)
-        
-class NotifyDict(OrderedDict):
-    """
-    https://stackoverflow.com/questions/5186520/python-property-change-listener-pattern
-    """
-    def __init__(self,val,STATE):
-        super(NotifyDict, self).__init__(val)
-        self.STATE = STATE
-
-    clear = notify(OrderedDict.clear)
-    pop = notify(OrderedDict.pop)
-    popitem = notify(OrderedDict.popitem)
-    setdefault = notify(OrderedDict.setdefault)
-    update =  notify(OrderedDict.update)
-    __delitem__ = notify(OrderedDict.__delitem__)
-
-    @notify
-    def __setitem__(self,key,value):
-        if hasattr(self,"STATE"):
-            if isinstance(value, dict):
-                value = NotifyDict(value,self.STATE)
-            elif isinstance(value, list):
-                value = NotifyList(value,self.STATE)
-        return OrderedDict.__setitem__(self,key,value)
-    
+from .type import NotifyList,NotifyDict,BaseState
 
 class State(object):
+    __repr__ = lambda self: self.val.__repr__()
+    # __str__ = lambda self:self.val.__str__(),
+    
+    operator_list = {
+        "__add__"      : lambda self,x:self.val.__add__(x),
+        "__sub__"      : lambda self,x:self.val.__sub__(x),
+        "__mul__"      : lambda self,x:self.val.__mul__(x),
+        "__floordiv__" : lambda self,x:self.val.__floordiv__(x),
+        "__truediv__"  : lambda self,x:self.val.__truediv__(x),
+        "__mod__"      : lambda self,x:self.val.__mod__(x),
+        "__pow__"      : lambda self,x:self.val.__pow__(x),
+        "__lshift__"   : lambda self,x:self.val.__lshift__(x),
+        "__rshift__"   : lambda self,x:self.val.__rshift__(x),
+        "__and__"      : lambda self,x:self.val.__and__(x),
+        "__xor__"      : lambda self,x:self.val.__xor__(x),
+        "__or__"       : lambda self,x:self.val.__or__(x),
 
-    def __init__(self,var,widget,val):
+        "__iadd__"      : lambda self,x:self.val.__iadd__(x),
+        "__isub__"      : lambda self,x:self.val.__isub__(x),
+        "__imul__"      : lambda self,x:self.val.__imul__(x),
+        "__idiv__"      : lambda self,x:self.val.__idiv__(x),
+        "__ifloordiv__" : lambda self,x:self.val.__ifloordiv__(x),
+        "__imod__"      : lambda self,x:self.val.__imod__(x),
+        "__ipow__"      : lambda self,x:self.val.__ipow__(x),
+        "__ilshift__"   : lambda self,x:self.val.__ilshift__(x),
+        "__irshift__"   : lambda self,x:self.val.__irshift__(x),
+        "__iand__"      : lambda self,x:self.val.__iand__(x),
+        "__ixor__"      : lambda self,x:self.val.__ixor__(x),
+        "__ior__"       : lambda self,x:self.val.__ior__(x),
+        
+        "__neg__"     : lambda self,x:self.val.__neg__(x),
+        "__pos__"     : lambda self,x:self.val.__pos__(x),
+        "__abs__"     : lambda self,x:self.val.__abs__(x),
+        "__invert__"  : lambda self,x:self.val.__invert__(x),
+        "__complex__" : lambda self,x:self.val.__complex__(x),
+        "__int__"     : lambda self,x:self.val.__int__(x),
+        "__long__"    : lambda self,x:self.val.__long__(x),
+        "__float__"   : lambda self,x:self.val.__float__(x),
+        "__oct__"     : lambda self,x:self.val.__oct__(x),
+        "__hex__"     : lambda self,x:self.val.__hex__(x),
+        
+        "__lt__" : lambda self,x:self.val.__lt__(x),
+        "__le__" : lambda self,x:self.val.__le__(x),
+        "__eq__" : lambda self,x:self.val.__eq__(x),
+        "__ne__" : lambda self,x:self.val.__ne__(x),
+        "__ge__" : lambda self,x:self.val.__ge__(x),
+        "__gt__" : lambda self,x:self.val.__gt__(x),
+    }
+    def __init__(self,var,widget,val,writable=True):
         super(State,self).__init__()
         self.var = var
         self.widget = widget
         self.val = self.retrieve2Notify(val)
+        self.writable = writable
+        self.overrideInit(val)
 
     def __get__(self, instance, owner):
-        return self.val().get("default") if callable(self.val) else self.val
+        return self.val() if callable(self.val) else self.val
 
     def __set__(self,instance, value):
         self.val = self.retrieve2Notify(value)
+        self.sync()
+        self.overrideInit(value)
+    
+    def overrideInit(self,val):
+        """ sync the val operator and method """
+        self.overrideOperator(val)
+        self.overrideDataHandler(val)
+
+    @classmethod
+    def overrideOperator(cls,val):
+        for attr in dir(val):
+            func = cls.operator_list.get(attr)
+            if func is not None:
+                setattr(cls,attr,func)
+    
+    def overrideDataHandler(self,val):
+        for attr in dir(val):
+            if not attr.startswith("_"):
+                setattr(self,attr,getattr(self.val,attr))
+
+    def sync(self):
         getattr(self.widget.state,"_%s_signal" % self.var).emit()
 
     def setVal(self,value):
         self.val = self.retrieve2Notify(value)
-        getattr(self.widget.state,"_%s_signal" % self.var).emit()
+        self.sync()
 
     def retrieve2Notify(self,val,initialize=True):
         """
@@ -143,25 +139,48 @@ class StateManager(object):
         manager = self
         container_list = {}
         state_list = {}
-        # for var,val in options["state"].items():
-        #     if type(val) is list or type(val) is dict:
-        #         container_list[var] = val 
-        #     else:
-        #         state_list[var] = val 
                 
         # NOTE 获取可用的 descriptor 
         class StateDescriptor(QtCore.QObject):
             
             __signal_dict = {}
             _var_dict = {}
-            for var,val in options["state"].items():
+            
+            for var,val in options.get("state",{}).items():
                 __signal_dict["_%s_signal" % var] = QtCore.Signal()
                 _var_dict[var] = State(var,manager.parent,val)
 
-            # TODO handle container state injection 
-
             locals().update(__signal_dict)
             locals().update(_var_dict)
+
+            # # TODO handle container state injection 
+            # for var,element_list in options.get("computed",{}).items():
+            #     __signal_dict["_%s_signal" % var] = QtCore.Signal()
+            #     def temp(var,element_list,_var_dict,*args):
+            #         print var,locals().get(var)
+            #         if hasattr(self,var):
+            #             print "TEMP",getattr(self,var)
+            #         if isinstance(element_list,list):
+            #             res_list = []
+            #             for element in element_list:
+            #                 element = self.parseFromatString(element,_var_dict)
+            #                 element = element() if callable(element) else element
+            #                 res_list.append(element)
+            #             return res_list
+            #         elif isinstance(element_list,dict):
+            #             res_dict = {} if type(element_list) is dict else OrderedDict() 
+            #             for key,val in element_list.items():
+            #                 key = self.parseFromatString(key,_var_dict)
+            #                 key = key() if callable(key) else key
+            #                 val = self.parseFromatString(val,_var_dict)
+            #                 val = val() if callable(val) else val
+            #                 res_dict[key] = val
+            #             return res_dict
+
+            #     _var_dict[var] = property(partial(temp,var,element_list,_var_dict))
+            
+            # locals().update(__signal_dict)
+            # locals().update(_var_dict)
 
         self.parent.state = StateDescriptor()
     
@@ -170,6 +189,20 @@ class StateManager(object):
         setter()
         getattr(self.parent.state,"_%s_signal" % var).connect(setter)
 
+    def parseFromatString(self,callback):
+        # NOTE 如果 callback 是字符串则获取 parent 的方法
+        if type(callback) is str and callback.startswith("`") and callback.endswith("`"):
+            def callbackHandler(m):
+                # NOTE remove ${ } pattern
+                match = m.group()[2:-1].strip()
+                if re.match(r"^\$[0-9]+",match):
+                    return re.sub(r"^\$[0-9]+",lambda m: "{%s}" % m.group()[1:],match)
+                var = getattr(self.parent,match[1:]) if match.startswith("$") else getattr(self.parent.state,match)
+                return str(var)
+            res_str = re.sub(r"\$\{(\S*?)\}",callbackHandler,callback[1:-1])
+            callback = lambda *args:res_str.format(*args)
+        return callback
+        
     def parseAction(self,option):
         callback_args = option.get("args",[])
         # NOTE 从 state 获取变量 | 获取不到则从 self 里面获取
@@ -184,18 +217,7 @@ class StateManager(object):
             arg_list.append(arg)
 
         callback = option.get("action")
-        # NOTE 如果 callback 是字符串则获取 parent 的方法
-        if type(callback) is str and callback.startswith("`") and callback.endswith("`"):
-            def callbackHandler(m):
-                # NOTE remove ${ } pattern
-                match = m.group()[2:-1].strip()
-                if re.match(r"^\$[0-9]+",match):
-                    return re.sub(r"^\$[0-9]+",lambda m: "{%s}" % m.group()[1:],match)
-                var = getattr(self.parent,match[1:]) if match.startswith("$") else getattr(self.parent.state,match)
-                return str(var)
-            res_str = re.sub(r"\$\{(\S*?)\}",callbackHandler,callback[1:-1])
-            callback = lambda *args:res_str.format(*args)
-
+        callback = self.parseFromatString(callback)
         callback = callback if type(callback) is not str else getattr(self.parent,callback[1:]) if callback.startswith("$") else getattr(self.parent.state,callback)
         val = callback(*arg_list) if callable(callback) else callback
         return val
@@ -215,6 +237,17 @@ class StateManager(object):
             val = self.parseAction(option)
         method(typ(val) if typ else val)
 
+
+def elapsedTime(func):
+    def wrapper(*args, **kwargs):
+        import time
+        elapsed = time.time()
+        res = func(*args, **kwargs)
+        print "elpased time :",time.time() - elapsed
+        return res
+    return wrapper
+
+@elapsedTime
 def store(options):
     def handler(func):
         

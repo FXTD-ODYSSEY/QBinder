@@ -29,11 +29,10 @@ class WidgetTest(QtWidgets.QWidget):
     @QMVVM.store({
         "state": {
             "checkedNames": [],
-            "test": "asd",
         },
         "methods": {
             "label.setText":{
-                "args":["checkedNames","test"],
+                "args":["checkedNames"],
             	# "action": lambda a:"CheckedNames %s" %  a,
             	"action": "`CheckedNames: ${$0}`",
             },
