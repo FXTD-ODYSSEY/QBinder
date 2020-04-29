@@ -8,9 +8,6 @@ __date__ = '2020-03-22 22:55:38'
 
 """
 
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
 
 import os
 import sys
@@ -23,6 +20,7 @@ if MODULE not in sys.path:
     sys.path.append(MODULE)
 
 import QMVVM
+from Qt import QtGui,QtWidgets, QtCore
 
 class WidgetTest(QtWidgets.QWidget):
 
@@ -42,7 +40,7 @@ class WidgetTest(QtWidgets.QWidget):
             },
         },
         "signals":{
-            "combo.currentTextChanged":"$update"
+            "combo.currentTextChanged": lambda self,widget,text: self.state._var_dict["selected"].setVal(self.state.options.get(text))
         }
     })
     def __init__(self):
@@ -63,8 +61,9 @@ class WidgetTest(QtWidgets.QWidget):
         # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
         self.state.selected =  self.state.options.get(self.combo.currentText())
         
-    def update(self,widget,text):
-        self.state.selected = self.state.options.get(text)
+    # def update(self,widget,text):
+    #     self.state._var_dict["selected"].setVal(self.state.options.get(text))
+        # self.state.selected = self.state.options.get(text)
 
 def main():
     app = QtWidgets.QApplication([])

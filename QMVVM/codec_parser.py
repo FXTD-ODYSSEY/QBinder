@@ -1,4 +1,5 @@
 # coding:utf-8
+from __future__ import print_function
 
 __author__ =  'timmyliang'
 __email__ =  '820472580@qq.com'
@@ -15,7 +16,7 @@ def printTime(func):
     def wrapper(*args, **kwargs):
         cur = time.time()
         res = func(*args, **kwargs)
-        print "elapsed time:",time.time() - cur
+        print("elapsed time:",time.time() - cur)
         return res
     return wrapper
 
@@ -103,7 +104,7 @@ def parse(source):
         # NOTE 截取所有带参数的 Def 
         methods = {}
         for method,arg in getDefCall(all_def_content).items():
-            print method,arg
+            print(method,arg)
             # NOTE 如果没有 self 则将 method 转为 local
             if not method.startswith("self."):
                 method = "@%s" % method

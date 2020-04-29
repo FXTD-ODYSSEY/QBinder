@@ -11,6 +11,6 @@ except:
         sys.path.append(MODULE)
     import Qt
 
-from QMVVM import store
-import codec_wrapper as _codec
-from hook import HOOKS
+from . import codec_wrapper as _codec
+from .hook import HOOKS
+from .QMVVM import store

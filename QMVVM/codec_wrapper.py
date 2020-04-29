@@ -1,4 +1,5 @@
 # coding:utf-8
+from __future__ import print_function
 
 __author__ =  'timmyliang'
 __email__ =  '820472580@qq.com'
@@ -14,7 +15,7 @@ import string
 import encodings
 from functools import wraps
 
-import codec_parser
+from . import codec_parser
 import QMVVM
 
 
@@ -25,7 +26,7 @@ def sourceCodeHandler(func,*args):
         source , length = func(source,*args,**kwargs)
         source = codec_parser.parse(source)
         # exec source in globals(),locals()
-        print 'complete'
+        print('complete')
         # code = ast.parse(source)
         # print ast.dump(code)
         return source , length 

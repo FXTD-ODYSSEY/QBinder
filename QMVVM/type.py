@@ -13,9 +13,7 @@ from collections import OrderedDict
 
 def notify(func):
     def wrapper(self,*args,**kwargs):
-        # NOTE 更新数据
         res = func(self,*args,**kwargs)
-        # NOTE 更新组件数据
         if hasattr(self,"STATE"):
             getattr(self.STATE.widget.state,"_%s_signal" % self.STATE.var).emit()
         return res
@@ -83,34 +81,4 @@ class NotifyDict(OrderedDict):
             elif isinstance(value, list):
                 value = NotifyList(value,self.STATE)
         return OrderedDict.__setitem__(self,key,value)
-    
-
-class BaseState(object):
-
-    def sync(self):
-        getattr(self.widget.state,"_%s_signal" % self.var).emit()
-
-    def setVal(self,value):
-        self.val = self.retrieve2Notify(value)
-        self.sync()
-
-    def retrieve2Notify(self,val,initialize=True):
-        """
-        遍历所有字典和数组对象，转换为 Notify 对象
-        """
-        itr = val.items() if type(val) is dict else enumerate(val) if type(val) is list else []
-        for k,v in itr:        
-            if isinstance(v, dict):
-                self.retrieve2Notify(v,initialize=False)
-                val[k] = NotifyDict(v,self)
-            elif isinstance(v, list):            
-                self.retrieve2Notify(v,initialize=False)
-                val[k] = NotifyList(v,self)
         
-        if initialize:
-            if isinstance(val, dict):
-                return NotifyDict(val,self)
-            elif isinstance(val, list):
-                return NotifyList(val,self)
-            else:
-                return val

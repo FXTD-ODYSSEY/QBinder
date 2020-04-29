@@ -28,24 +28,25 @@ class WidgetTest(QtWidgets.QWidget):
 
     @QMVVM.store({
         "state": {
-            "selected": ['asd'],
+            "selected": "",
             "option_A": "A",
             "option_B": "B",
             "option_C": "C",
         },
-        # "computed":{
-        #     # "item_list": ["`${option_A}`","`${option_B}`","`${option_C}`",True],
-        #     "item_list":OrderedDict([
-        #         ('One', "`${option_A}`"),
-        #         ('`${selected}`', "`${option_B}`"),
-        #         ('Three', "`${option_C}`"),
-        #     ]),
-        # },
+        "computed":{
+            "item_list": ["${selected}","${option_B}","${option_C}",True],
+            # "item_list":OrderedDict([
+            #     ('One', "${option_A}"),
+            #     ('${selected}', "${option_B}"),
+            #     ('Three', "${option_C}"),
+            # ]),
+        },
         "methods": {
             "label.setText":{
+                # "bindings":["item_list"],
                 # "args":["selected"],
             	# "action": lambda a:"Selected: %s" %  a,
-            	"action":"`Selected: ${selected}`",
+            	"action":"`selected ${item_list}`",
             },
         },
         "signals":{
@@ -56,7 +57,7 @@ class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-        self.__list = [self.state._var_dict["selected"],self.state._var_dict["option_A"],self.state._var_dict["option_B"],self.state._var_dict["option_C"]]
+        self.__list = [self.state.selected,self.state._var_dict["option_A"],self.state._var_dict["option_B"],self.state._var_dict["option_C"]]
 
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
@@ -72,25 +73,34 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.button)
 
-        self.button.clicked.connect(self.getData)
+        self.button.clicked.connect(self.testComputed)
         # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
         self.state.selected = self.combo.currentText()
     
-    def getData(self):
-        from copy import copy
-        print 1,self.item_list
-        self.item_list.append('asd')
-        # self.item_list.insert(1,'d')
-        print 2,self.item_list
-        self.state.option_B = "BBC"
-        print 3,self.item_list
-        # self.item_list[0] += 'aA'
-        print self.item_list[0].replace('A','sds')
-        print self.item_list
-        print self.item_list[0]
-        # print self.item_list[0].replace
+    # def getData(self):
+    #     print 1,self.item_list
+    #     self.item_list.append('asd')
+    #     self.item_list.insert(1,'d')
+    #     print 2,self.item_list
+    #     self.state.option_B = "BBC"
+    #     print 3,self.item_list
+    #     self.item_list[0] += 'aA'
+    #     # print self.item_list[0].replace('A','sds')
+    #     # print self.item_list[0].append('A')
+    #     print self.item_list
+    #     print self.item_list[0]
+    #     print str(self.item_list[0])
+    #     # print self.item_list[0].replace
+    #     # print self.item_list
 
-        # print self.item_list
+    def testComputed(self):
+        print self.state.item_list
+        # self.state.item_list[0].append(1)
+        self.state.selected += '2'
+        print self.state.item_list
+        # self.state.option_B = 'BBC'
+        # print self.state.item_list
+        # self.state.item_list = 1
 
     def update(self,widget,text):
         self.state.selected = text

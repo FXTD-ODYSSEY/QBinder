@@ -14,7 +14,7 @@ import sys
 import linecache
 import re
 
-from codec_parser import getQMVVMDecorator,getClassContent
+from .codec_parser import getQMVVMDecorator,getClassContent
 
 def returnSelfWrapper(func):
     def wrapper(self,*args, **kwargs):
