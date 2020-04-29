@@ -9,9 +9,7 @@ __date__ = '2020-04-29 17:07:57'
 
 """
 
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
+
 
 import os
 import sys
@@ -24,6 +22,9 @@ if MODULE not in sys.path:
     sys.path.append(MODULE)
 
 import QMVVM
+from Qt import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
 
 class WidgetTest(QtWidgets.QWidget):
 
@@ -35,25 +36,20 @@ class WidgetTest(QtWidgets.QWidget):
             "option_C": "C",
         },
         "computed":{
-            "item_list": ["${selected}","${option_B}","${option_C}",True],
-            # "item_list":OrderedDict([
-            #     ('One', "${option_A}"),
-            #     ('${selected}', "${option_B}"),
-            #     ('Three', "${option_C}"),
-            # ]),
+            "*item_list": ["${selected}","${option_B}","${option_C}"],
         },
-        "methods": {
-            "label.setText":{
-                # "bindings":["item_list"],
-                # "args":["selected"],
-            	# "action": lambda a:"Selected: %s" %  a,
-            	"action":"`selected ${item_list}`",
-            },
-        },
-        "signals":{
-            "combo.currentTextChanged":"$update",
-            # "combo.currentTextChanged":"selected",
-        }
+        # "methods": {
+        #     "label.setText":{
+        #         # "bindings":["item_list"],
+        #         # "args":["selected"],
+        #     	# "action": lambda a:"Selected: %s" %  a,
+        #     	"action":"`selected ${item_list}`",
+        #     },
+        # },
+        # "signals":{
+        #     "combo.currentTextChanged":"$update",
+        #     # "combo.currentTextChanged":"selected",
+        # }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -81,12 +77,12 @@ class WidgetTest(QtWidgets.QWidget):
         columnCount = 6
 
         item_list = [red, "green", "blue"]
-        print(item_list)
+        self.model = item_list
         
-        listView.setModel(self.model)
-        comboBox.setModel(self.model)
-        tableView.setModel(self.model)
-        treeView.setModel(self.model)
+        # listView.setModel(self.model)
+        # comboBox.setModel(self.model)
+        # tableView.setModel(self.model)
+        # treeView.setModel(self.model)
 
         button = QtWidgets.QPushButton("change")
         button.clicked.connect(self.changeOrder)
@@ -95,7 +91,7 @@ class WidgetTest(QtWidgets.QWidget):
         button.clicked.connect(partial(self.addComboBox,comboBox))
         layout.addWidget(button)
 
-        self.model.dataChanged.connect(self.modifyData)
+        # self.model.dataChanged.connect(self.modifyData)
 
     def modifyData(self,topLeft,bottomRight,roles):
         pass
@@ -110,12 +106,6 @@ class WidgetTest(QtWidgets.QWidget):
         comboBox.addItem("asdasd")
         
     def changeOrder(self):
-        # index = self.model.index(2,0)
-        # self.model.setData(index,QtGui.QColor(100,233,255))
-        # print(self.model.getColors())
-        # colors = self.model.getColors()
-        # colors.insert(0,QtGui.QColor(0,233,255))
-        # self.model.setColors(colors)
         self.model.setData([])
         self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         

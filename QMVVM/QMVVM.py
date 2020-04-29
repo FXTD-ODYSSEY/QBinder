@@ -14,16 +14,16 @@ import inspect
 
 from functools import wraps,partial
 from collections import OrderedDict
-from collections.abc import Iterable
+# from collections.abc import Iterable
 from Qt import QtCore
 from .hook import HOOKS
 from .exception import SchemeParseError
 from .type import NotifyList,NotifyDict
 
-class ComputedModel(QtCore.QAbstractListModel):
+class StateModel(QtCore.QAbstractListModel):
 
     def __init__(self, data = None, parent = None):
-        super(ComputedModel,self).__init__( parent)
+        super(StateModel,self).__init__( parent)
         self._data = data if data else []
 
     def rowCount(self, index):
@@ -33,6 +33,8 @@ class ComputedModel(QtCore.QAbstractListModel):
         # NOTE https://stackoverflow.com/questions/5125619/why-doesnt-list-have-safe-get-method-like-dictionary
         val = self._data[index.row()] if len(self._data) > index.row() else next(iter(self._data), '')
 
+        # TODO handle column
+        
         if role == QtCore.Qt.DisplayRole:
             return val
 
@@ -382,7 +384,7 @@ def store(options):
             signals = options.get("signals",{})
             try:
                 for signal,attrs in signals.items():
-                    attrs = attrs if isinstance(attrs,Iterable) else [attrs]
+                    attrs = attrs if hasattr(attrs, '__iter__') else [attrs]
                     widget,_signal = parseMethod(self,signal,False)
                     _signal = getattr(widget,_signal)
                     for attr in attrs:

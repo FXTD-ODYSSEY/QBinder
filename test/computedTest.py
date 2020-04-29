@@ -57,7 +57,6 @@ class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-        self.__list = [self.state.selected,self.state._var_dict["option_A"],self.state._var_dict["option_B"],self.state._var_dict["option_C"]]
 
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
@@ -104,10 +103,6 @@ class WidgetTest(QtWidgets.QWidget):
 
     def update(self,widget,text):
         self.state.selected = text
-
-    @property
-    def item_list(self):
-        return self.__list
 
 def main():
     app = QtWidgets.QApplication([])
