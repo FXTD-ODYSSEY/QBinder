@@ -1,5 +1,6 @@
 # coding:utf-8
-from __future__ import print_function
+from __future__ import unicode_literals,division,print_function
+
 __author__ =  'timmyliang'
 __email__ =  '820472580@qq.com'
 __date__ = '2020-03-24 14:44:34'
@@ -10,12 +11,16 @@ __date__ = '2020-03-24 14:44:34'
 
 import re
 import sys
+import ast
+import six
+import json
 import inspect
 
-from functools import wraps,partial
+from functools import partial
 from collections import OrderedDict
+from textwrap import dedent
 # from collections.abc import Iterable
-from Qt import QtCore
+from Qt import QtCore,QtWidgets
 from .hook import HOOKS
 from .exception import SchemeParseError
 from .type import NotifyList,NotifyDict
@@ -24,11 +29,14 @@ class StateModel(QtCore.QAbstractListModel):
 
     def __init__(self, data = None, parent = None):
         super(StateModel,self).__init__( parent)
-        self._data = data if data else []
+        self._data = data if hasattr(data,"__iter__") else []
 
     def rowCount(self, index):
         return len(self._data)
 
+    def columnCount(self, index):
+        return 1
+    
     def data(self, index, role):
         # NOTE https://stackoverflow.com/questions/5125619/why-doesnt-list-have-safe-get-method-like-dictionary
         val = self._data[index.row()] if len(self._data) > index.row() else next(iter(self._data), '')
@@ -36,7 +44,7 @@ class StateModel(QtCore.QAbstractListModel):
         # TODO handle column
         
         if role == QtCore.Qt.DisplayRole:
-            return val
+            return ast.literal_eval(str(val)) if val else None
 
     def setData(self,data):
         self._data = data
@@ -45,6 +53,7 @@ class StateModel(QtCore.QAbstractListModel):
         return self._data
 
 class State(object):
+    # __repr__ = lambda self: "State(%s)" % self.val.__repr__()
     __repr__ = lambda self: self.val.__repr__()
     # __str__ = lambda self:self.val.__str__(),
     
@@ -104,7 +113,7 @@ class State(object):
         self.overrideMethod(val)
 
     def __get__(self, instance, owner):
-        return self.val() if callable(self.val) else self.val
+        return self.val() if six.callable(self.val) else self.val
 
     def __set__(self,instance, value):
         self.val = self.retrieve2Notify(value)
@@ -113,7 +122,10 @@ class State(object):
     
     def overrideMethod(self,val):
         """ sync the val operator and method """
-        [delattr(self,attr) for attr in self.__override_attr_list if hasattr(self,attr)]
+        for attr in self.__override_attr_list:
+            if hasattr(self,attr):
+                delattr(self,attr)
+        # [delattr(self,attr) for attr in self.__override_attr_list if hasattr(self,attr)]
         self.__override_attr_list = [attr for attr in dir(val) if not attr.startswith("_")]
         for attr in self.__override_attr_list:
             setattr(self,attr,getattr(self.val,attr))
@@ -137,7 +149,7 @@ class State(object):
         """
         遍历所有字典和数组对象，转换为 Notify 对象
         """
-        itr = val.items() if type(val) is dict else enumerate(val) if type(val) is list else []
+        itr = six.iteritems(val) if type(val) is dict else enumerate(val) if type(val) is list else []
         for k,v in itr:        
             if isinstance(v, dict):
                 self.retrieve2Notify(v,initialize=False)
@@ -171,7 +183,7 @@ class StateManager(object):
             __signal_dict = {}
             _var_dict = {}
             
-            for var,val in options.get("state",{}).items():
+            for var,val in six.iteritems(options.get("state",{})):
                 __signal_dict["_%s_signal" % var] = QtCore.Signal()
                 _var_dict[var] = State(var,manager.parent,val)
 
@@ -179,7 +191,7 @@ class StateManager(object):
             locals().update(_var_dict)
             
             __computed_signal_map = {}
-            for var,element_list in options.get("computed",{}).items():
+            for var,element_list in six.iteritems(options.get("computed",{})):
                 __signal_dict["_%s_signal" % var] = QtCore.Signal()
                 signal_list = []
                 if isinstance(element_list,list):
@@ -190,7 +202,7 @@ class StateManager(object):
                         res.append(element)
                 elif isinstance(element_list,dict):
                     res = {} if type(element_list) is dict else OrderedDict() 
-                    for key,val in element_list.items():
+                    for key,val in six.iteritems(element_list):
                         key,signal = self.parseStateVarString(key,locals())
                         val,signal = self.parseStateVarString(val,locals())
                         signal_list.append(signal)
@@ -208,7 +220,7 @@ class StateManager(object):
 
             def __init__(self):
                 super(StateDescriptor, self).__init__()
-                for computed,signal_list in self.__computed_signal_map.items():
+                for computed,signal_list in six.iteritems(self.__computed_signal_map):
                     computed = getattr(self,computed)
                     for signal in signal_list:
                         signal = getattr(self,signal)
@@ -216,13 +228,24 @@ class StateManager(object):
 
         self.parent.state = StateDescriptor()
     
-    def bind(self,var,method,option=None,typ=None):
-        setter = lambda:self.setSignal(var,method,option,typ)
+    def bind(self,var,widget,method,option=None,typ=None):
+        _setter = getattr(widget,method)
+        setter = lambda:self.setSignal(var,_setter,option,typ)
         setter()
         getattr(self.parent.state,"_%s_signal" % var).connect(setter)
 
+        # # TODO overwrite setter to modify value issue#2
+        # def setVal(func):
+        #     def wrapper(val,*args, **kwargs):
+        #         res = func(val,*args,**kwargs)
+        #         self.parent.state._var_dict[var].setVal(val)
+        #         return res
+        #     return wrapper
+        # setattr(widget,method,setVal(_setter))
+
+
     def parseStateVarString(self,element,var_dict):
-        if type(element) is str and element.startswith("${") and element.endswith("}"):
+        if isinstance(element, six.string_types) and element.startswith("${") and element.endswith("}"):
             target = element[2:-1].strip()
             _element = var_dict.get(target)
             if _element is None:
@@ -232,9 +255,9 @@ class StateManager(object):
             return element,signal
         return element,None
 
-    def parseFromatString(self,callback):
+    def parseFormatString(self,callback):
         # NOTE 如果 callback 是字符串则获取 parent 的方法
-        if type(callback) is str:
+        if isinstance(callback, six.string_types):
             if callback.startswith("`") and callback.endswith("`"):
                 def callbackHandler(m):
                     # NOTE remove ${ } pattern
@@ -249,12 +272,11 @@ class StateManager(object):
                 res = getattr(self.parent.state,target)
             else:
                 return callback
-            callback = lambda *args:res.format(*args) if type(res) is str else res(*args) if callable(res) else res
+            callback = lambda *args:res.format(*args) if isinstance(res, six.string_types) else res(*args) if six.callable(res) else res
         return callback
         
     def parseAction(self,option):
         callback_args = option.get("args",[])
-        # NOTE 从 state 获取变量 | 获取不到则从 self 里面获取
         arg_list = []
         for arg in callback_args:
             if arg.startswith("$"):
@@ -266,9 +288,9 @@ class StateManager(object):
             arg_list.append(arg)
 
         callback = option.get("action")
-        callback = self.parseFromatString(callback)
+        callback = self.parseFormatString(callback)
         callback = callback if type(callback) is not str else getattr(self.parent,callback[1:]) if callback.startswith("$") else getattr(self.parent.state,callback)
-        val = callback(*arg_list) if callable(callback) else callback
+        val = callback(*arg_list) if six.callable(callback) else callback
         return val
         
     def setSignal(self,var,method,option,typ):
@@ -280,7 +302,7 @@ class StateManager(object):
             val = int(val)
         elif option == "float":
             val = float(val)
-        elif callable(option):
+        elif six.callable(option):
             val = option(val)
         elif type(option) is dict:
             val = self.parseAction(option)
@@ -302,7 +324,7 @@ def store(options):
         
         def parseMethod(self,method,parse=True):
             if method.startswith("@"):
-                data = method[1:].split(".")
+                data = method.split(".")
                 widget = self._locals[data[0]]
             else:
                 data = method.split(".")
@@ -315,7 +337,7 @@ def store(options):
             else:
                 return (widget,data[-1])
 
-        @wraps(func)
+        @six.wraps(func)
         def wrapper(self,*args, **kwargs):
             self.__state_manager = StateManager(self)
 
@@ -324,22 +346,22 @@ def store(options):
             
             # NOTE 获取函数中的 locals 变量 https://stackoverflow.com/questions/9186395
             self._locals = {}
-            sys.setprofile(lambda f,e,a: self._locals.update(f.f_locals) if e=='return' else None)
+            sys.setprofile(lambda f,e,a: self._locals.update({ "@%s" % k : v for k,v in six.iteritems(f.f_locals)}) if e=='return' else None)
             res = func(self,*args, **kwargs)
             sys.setprofile(None)
 
             state = options.get("state",{})
 
             methods = options.get("methods",{})
-            for method,option in methods.items():
-                option = {"action":option} if type(option) is str else option
+            for method,option in six.iteritems(methods):
+                option = {"action":option} if isinstance(option, six.string_types) else option
                 if type(option) is not dict:
                     raise SchemeParseError("Invalid Scheme Args").parseErrorLine(method)
                 
                 widget,setter = parseMethod(self,method,False)
                 ref = HOOKS.get(type(widget))
                 if ref is None:
-                    for widget_type,ref in HOOKS.items():
+                    for widget_type,ref in six.iteritems(HOOKS):
                         if isinstance(widget_type,widget):
                             break
                     else:
@@ -349,48 +371,63 @@ def store(options):
                 action = option.get("action")
 
                 signals = option.get("signals")
-                signals = [signals] if type(signals) is str else signals
+                signals = [signals] if isinstance(signals, six.string_types) else signals
                 # NOTE get hook.py config as default signals
                 if signals is None:
                     signals = hook.get("signals",[])
-                    signals = [signals] if type(signals) is str else signals
+                    signals = [signals] if isinstance(signals, six.string_types) else signals
 
                 # NOTE 获取 updater
                 updaters = option.get("updaters",{})
                 default_updater = None if type(action) is not str else None if action.startswith("$") or action.startswith("`") else self.state._var_dict[action].setVal
-                updaters.setdefault("default",updaters if type(updaters) is str else default_updater)
+                updaters.setdefault("default",updaters if isinstance(updaters, six.string_types) else default_updater)
 
                 for i,signal in enumerate(signals):
                     updater = updaters.get(signal,updaters.get("default"))
                     if not updater: continue
-                    updater = updater if callable(updater) else getattr(self,updater[1:]) if updater.startswith("$") else getattr(self,updater)
+                    updater = updater if six.callable(updater) else getattr(self,updater[1:]) if updater.startswith("$") else getattr(self,updater)
                     signal = getattr(widget,signal)
                     signal.connect(updater)
                     
                 setter = hook.get("setter",setter)
-                setter = getattr(widget,setter)
+                # setter = getattr(widget,setter)
                 typ = hook.get("type")
                 state_list = option.get("bindings",state)
                 try:
-                    if type(state_list) is str:
-                        self.__state_manager.bind(state_list,setter,option=option,typ=typ)
+                    if isinstance(state_list, six.string_types):
+                        self.__state_manager.bind(state_list,widget,setter,option=option,typ=typ)
                     else:
                         # NOTE 默认自动将方法绑定到所有的 state 里面
                         for var in state_list:
-                            self.__state_manager.bind(var,setter,option=option,typ=typ)
+                            self.__state_manager.bind(var,widget,setter,option=option,typ=typ)
                 except AttributeError as err:
                     raise SchemeParseError().parseErrorLine(method,err)
 
             signals = options.get("signals",{})
-            try:
-                for signal,attrs in signals.items():
+            for signal,attrs in six.iteritems(signals):
+                try:
                     attrs = attrs if hasattr(attrs, '__iter__') else [attrs]
                     widget,_signal = parseMethod(self,signal,False)
                     _signal = getattr(widget,_signal)
                     for attr in attrs:
-                        _signal.connect(partial(attr,self,widget) if callable(attr) else partial(getattr(self,attr[1:]),widget) if attr.startswith("$") else self.state._var_dict[attr].setVal)
-            except AttributeError as err:
-                raise SchemeParseError().parseErrorLine(signal,err)
+                        _signal.connect(partial(attr,self,widget) if six.callable(attr) else partial(getattr(self,attr[1:]),widget) if attr.startswith("$") else self.state._var_dict[attr].setVal)
+                except AttributeError as err:
+                    raise SchemeParseError().parseErrorLine(signal,err)
+            
+            # TODO read the dynamic Property 
+            self._locals.update({attr:getattr(self,attr)  for attr in dir(self)})
+            for name,widget in six.iteritems(self._locals):
+                if not isinstance(widget,QtWidgets.QWidget): continue
+                config = widget.property("QMVVM")
+                # print (widget.dynamicPropertyNames())
+                # print (type(config),config)
+                if not config: continue
+
+                # config = ast.literal_eval(dedent(config))
+                config = json.loads(config,encoding="utf-8")
+                # print (type(config),config)
+                # print ("asd")
+
                         
             return res
         return wrapper

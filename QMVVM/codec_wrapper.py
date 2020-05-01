@@ -10,10 +10,10 @@ __date__ = '2020-04-02 21:12:08'
 """
 
 import re
+import six
 import codecs
 import string
 import encodings
-from functools import wraps
 
 from . import codec_parser
 import QMVVM
@@ -21,7 +21,7 @@ import QMVVM
 
 def sourceCodeHandler(func,*args):
 
-    @wraps(func)
+    @six.wraps(func)
     def wrapper(source,*args,**kwargs):
         source , length = func(source,*args,**kwargs)
         source = codec_parser.parse(source)

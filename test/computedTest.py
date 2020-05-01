@@ -1,5 +1,5 @@
 # coding:utf-8
-
+from __future__ import print_function,division
 __author__ = 'timmyliang'
 __email__ = '820472580@qq.com'
 __date__ = '2020-03-22 22:55:38'
@@ -38,6 +38,7 @@ class WidgetTest(QtWidgets.QWidget):
             # "item_list":OrderedDict([
             #     ('One', "${option_A}"),
             #     ('${selected}', "${option_B}"),
+            #     ('A','AAA'),
             #     ('Three', "${option_C}"),
             # ]),
         },
@@ -46,7 +47,7 @@ class WidgetTest(QtWidgets.QWidget):
                 # "bindings":["item_list"],
                 # "args":["selected"],
             	# "action": lambda a:"Selected: %s" %  a,
-            	"action":"`selected ${item_list}`",
+            	"action":"`selected ${selected}`",
             },
         },
         "signals":{
@@ -75,6 +76,7 @@ class WidgetTest(QtWidgets.QWidget):
         self.button.clicked.connect(self.testComputed)
         # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
         self.state.selected = self.combo.currentText()
+        print(self.state.item_list)
     
     # def getData(self):
     #     print 1,self.item_list
@@ -93,13 +95,11 @@ class WidgetTest(QtWidgets.QWidget):
     #     # print self.item_list
 
     def testComputed(self):
-        print self.state.item_list
-        # self.state.item_list[0].append(1)
-        self.state.selected += '2'
-        print self.state.item_list
-        # self.state.option_B = 'BBC'
+        print(self.state.item_list)
         # print self.state.item_list
-        # self.state.item_list = 1
+        # # self.state.item_list[0].append(1)
+        # self.state.selected += '2'
+        # print self.state.item_list
 
     def update(self,widget,text):
         self.state.selected = text
@@ -111,7 +111,6 @@ def main():
     widget.show()
 
     app.exec_()
-
 
 
 if __name__ == "__main__":

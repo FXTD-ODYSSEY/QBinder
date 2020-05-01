@@ -11,6 +11,8 @@ except:
         sys.path.append(MODULE)
     import Qt
 
+
+from .QMVVM import store
+from .QMVVM import StateModel
 from . import codec_wrapper as _codec
 from .hook import HOOKS
-from .QMVVM import store

@@ -90,7 +90,7 @@ class PaletteListModel(QtCore.QAbstractListModel):
     #=====================================================#
     #INSERTING & REMOVING
     #=====================================================#
-    def insertRows(self, position, rows, parent = QtCore.QModelIndex()):
+    def insertRows(self, position, rows,parent = QtCore.QModelIndex()):
         self.beginInsertRows(parent, position, position + rows - 1)
         
         for i in range(rows):
@@ -170,11 +170,11 @@ class WidgetTest(QtWidgets.QWidget):
         rowCount = 4
         columnCount = 6
 
-        # self.model = PaletteListModel([red, green, blue])
-        red = State(123)
-        item_list = [red, "green", "blue"]
-        print(item_list)
-        self.model = TestModel(item_list)
+        self.model = PaletteListModel([red, green, blue])
+        # red = State(123)
+        # item_list = [red, "green", "blue"]
+        # print(item_list)
+        # self.model = TestModel(item_list)
         
         listView.setModel(self.model)
         comboBox.setModel(self.model)
@@ -200,7 +200,8 @@ class WidgetTest(QtWidgets.QWidget):
         # print (model.stringList())
         
     def addComboBox(self,comboBox):
-        comboBox.addItem("asdasd")
+        print ("add")
+        comboBox.addItem("asd")
         
     def changeOrder(self):
         # index = self.model.index(2,0)

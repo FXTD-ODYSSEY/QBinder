@@ -1,5 +1,5 @@
 # coding:utf-8
-from __future__ import print_function
+from __future__ import unicode_literals,division,print_function
 
 __author__ =  'timmyliang'
 __email__ =  '820472580@qq.com'
@@ -8,8 +8,6 @@ __date__ = '2020-04-29 17:07:57'
 """
 
 """
-
-
 
 import os
 import sys
@@ -22,6 +20,7 @@ if MODULE not in sys.path:
     sys.path.append(MODULE)
 
 import QMVVM
+from QMVVM import StateModel
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
@@ -36,7 +35,7 @@ class WidgetTest(QtWidgets.QWidget):
             "option_C": "C",
         },
         "computed":{
-            "*item_list": ["${selected}","${option_B}","${option_C}"],
+            "item_list": ["${option_A}","${option_B}","${option_C}"],
         },
         # "methods": {
         #     "label.setText":{
@@ -64,6 +63,13 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(treeView)
 
         comboBox = QtWidgets.QComboBox()
+        comboBox.setProperty(b"QMVVM",'''
+        {
+            "bindings":{},
+            "b":2
+        }
+        ''')
+        print ("dynamicPropertyNames",comboBox.dynamicPropertyNames())
         layout.addWidget(comboBox)
 
         tableView = QtWidgets.QTableView()
@@ -77,7 +83,9 @@ class WidgetTest(QtWidgets.QWidget):
         columnCount = 6
 
         item_list = [red, "green", "blue"]
-        self.model = item_list
+        # TODO configurate the model
+        print (self.state.item_list)
+        # self.model = StateModel(self.state.item_list)
         
         # listView.setModel(self.model)
         # comboBox.setModel(self.model)
@@ -88,7 +96,7 @@ class WidgetTest(QtWidgets.QWidget):
         button.clicked.connect(self.changeOrder)
         layout.addWidget(button)
         button = QtWidgets.QPushButton("change2")
-        button.clicked.connect(partial(self.addComboBox,comboBox))
+        button.clicked.connect(self.addComboBox)
         layout.addWidget(button)
 
         # self.model.dataChanged.connect(self.modifyData)
@@ -102,9 +110,13 @@ class WidgetTest(QtWidgets.QWidget):
         # model = topLeft.model()
         # print (model.stringList())
         
-    def addComboBox(self,comboBox):
-        comboBox.addItem("asdasd")
-        
+    def addComboBox(self):
+        print (self.state.item_list)
+        import pdb
+        pdb.set_trace()
+        self.state.option_B = "BBB"
+        print (self.state.item_list)
+
     def changeOrder(self):
         self.model.setData([])
         self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
@@ -114,7 +126,6 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
 
     widget = WidgetTest()
-
 
     widget.show()
     
