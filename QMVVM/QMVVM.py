@@ -122,10 +122,7 @@ class State(object):
     
     def overrideMethod(self,val):
         """ sync the val operator and method """
-        for attr in self.__override_attr_list:
-            if hasattr(self,attr):
-                delattr(self,attr)
-        # [delattr(self,attr) for attr in self.__override_attr_list if hasattr(self,attr)]
+        [delattr(self,attr) for attr in self.__override_attr_list if hasattr(self,attr)]
         self.__override_attr_list = [attr for attr in dir(val) if not attr.startswith("_")]
         for attr in self.__override_attr_list:
             setattr(self,attr,getattr(self.val,attr))
@@ -139,7 +136,7 @@ class State(object):
                 setattr(cls,attr,func)
 
     def sync(self):
-        getattr(self.widget.state,"_%s_signal" % self.var).emit()
+        getattr(self.widget.state,b"_%s_signal" % self.var).emit()
 
     def setVal(self,value):
         self.val = self.retrieve2Notify(value)
@@ -192,7 +189,7 @@ class StateManager(object):
             
             __computed_signal_map = {}
             for var,element_list in six.iteritems(options.get("computed",{})):
-                __signal_dict["_%s_signal" % var] = QtCore.Signal()
+                __signal_dict[b"_%s_signal" % var] = QtCore.Signal()
                 signal_list = []
                 if isinstance(element_list,list):
                     res = []
@@ -224,7 +221,7 @@ class StateManager(object):
                     computed = getattr(self,computed)
                     for signal in signal_list:
                         signal = getattr(self,signal)
-                        signal.connect(lambda *args, **kwargs: computed.emit())
+                        signal.connect(computed.emit)
 
         self.parent.state = StateDescriptor()
     
@@ -346,9 +343,9 @@ def store(options):
             
             # NOTE 获取函数中的 locals 变量 https://stackoverflow.com/questions/9186395
             self._locals = {}
-            sys.setprofile(lambda f,e,a: self._locals.update({ "@%s" % k : v for k,v in six.iteritems(f.f_locals)}) if e=='return' else None)
+            # sys.setprofile(lambda f,e,a: self._locals.update({ "@%s" % k : v for k,v in six.iteritems(f.f_locals)}) if e=='return' else None)
             res = func(self,*args, **kwargs)
-            sys.setprofile(None)
+            # sys.setprofile(None)
 
             state = options.get("state",{})
 

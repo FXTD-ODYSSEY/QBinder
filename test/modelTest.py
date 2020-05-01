@@ -1,5 +1,5 @@
 # coding:utf-8
-from __future__ import unicode_literals,division,print_function
+from __future__ import division,print_function
 
 __author__ =  'timmyliang'
 __email__ =  '820472580@qq.com'
@@ -112,8 +112,8 @@ class WidgetTest(QtWidgets.QWidget):
         
     def addComboBox(self):
         print (self.state.item_list)
-        import pdb
-        pdb.set_trace()
+        # import pdb
+        # pdb.set_trace()
         self.state.option_B = "BBB"
         print (self.state.item_list)
 

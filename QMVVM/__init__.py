@@ -6,7 +6,7 @@ try:
     import Qt
 except:
     DIR = os.path.dirname(__file__)
-    MODULE = os.path.join(DIR,"_vender")
+    MODULE = os.path.join(DIR,"_vendor")
     if MODULE not in sys.path:
         sys.path.append(MODULE)
     import Qt
