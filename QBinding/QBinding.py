@@ -1,5 +1,5 @@
 # coding:utf-8
-from __future__ import unicode_literals,division,print_function
+from __future__ import division,print_function
 
 __author__ =  'timmyliang'
 __email__ =  '820472580@qq.com'
@@ -29,14 +29,11 @@ class StateModel(QtCore.QAbstractListModel):
 
     def __init__(self, data = None, parent = None):
         super(StateModel,self).__init__( parent)
-        self._data = data if hasattr(data,"__iter__") else []
+        self._data = data if hasattr(data,"__iter__") else [data]
 
     def rowCount(self, index):
         return len(self._data)
 
-    def columnCount(self, index):
-        return 1
-    
     def data(self, index, role):
         # NOTE https://stackoverflow.com/questions/5125619/why-doesnt-list-have-safe-get-method-like-dictionary
         val = self._data[index.row()] if len(self._data) > index.row() else next(iter(self._data), '')
@@ -44,7 +41,7 @@ class StateModel(QtCore.QAbstractListModel):
         # TODO handle column
         
         if role == QtCore.Qt.DisplayRole:
-            return ast.literal_eval(str(val)) if val else None
+            return val.val if isinstance(val,State) else val
 
     def setData(self,data):
         self._data = data
