@@ -19,15 +19,15 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-import QMVVM
-from QMVVM import StateModel
+import QBinding
+from QBinding import StateModel
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
 
 class WidgetTest(QtWidgets.QWidget):
 
-    @QMVVM.store({
+    @QBinding.store({
         "state": {
             "selected": "",
             "option_A": "A",
@@ -35,26 +35,29 @@ class WidgetTest(QtWidgets.QWidget):
             "option_C": "C",
         },
         "computed":{
-            "item_list": ["${option_A}","${option_B}","${option_C}"],
+            "item_list": ["${selected}","${option_A}","${option_B}","${option_C}"],
         },
         # "methods": {
-        #     "label.setText":{
+        #     "line.setText":{
         #         # "bindings":["item_list"],
         #         # "args":["selected"],
         #     	# "action": lambda a:"Selected: %s" %  a,
-        #     	"action":"`selected ${item_list}`",
+        #     	"action":"selected",
         #     },
         # },
-        # "signals":{
-        #     "combo.currentTextChanged":"$update",
-        #     # "combo.currentTextChanged":"selected",
-        # }
+        "signals":{
+            "line.textChanged":"$update",
+            # "combo.currentTextChanged":"selected",
+        }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
 
+        self.line = QtWidgets.QLineEdit()
+        layout.addWidget(self.line)
+        
         #ALL OF OUR VIEWS
         listView = QtWidgets.QListView()
         layout.addWidget(listView)
@@ -69,7 +72,7 @@ class WidgetTest(QtWidgets.QWidget):
             "b":2
         }
         ''')
-        print ("dynamicPropertyNames",comboBox.dynamicPropertyNames())
+        # print ("dynamicPropertyNames",comboBox.dynamicPropertyNames())
         layout.addWidget(comboBox)
 
         tableView = QtWidgets.QTableView()
@@ -84,13 +87,12 @@ class WidgetTest(QtWidgets.QWidget):
 
         item_list = [red, "green", "blue"]
         # TODO configurate the model
-        print (self.state.item_list)
-        # self.model = StateModel(self.state.item_list)
+        self.model = StateModel(self.state.item_list)
         
-        # listView.setModel(self.model)
-        # comboBox.setModel(self.model)
-        # tableView.setModel(self.model)
-        # treeView.setModel(self.model)
+        listView.setModel(self.model)
+        comboBox.setModel(self.model)
+        tableView.setModel(self.model)
+        treeView.setModel(self.model)
 
         button = QtWidgets.QPushButton("change")
         button.clicked.connect(self.changeOrder)
@@ -101,8 +103,9 @@ class WidgetTest(QtWidgets.QWidget):
 
         # self.model.dataChanged.connect(self.modifyData)
 
-    def modifyData(self,topLeft,bottomRight,roles):
-        pass
+    def update(self,widget,text):
+        self.state.selected = text
+        self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         # print ("modifyData",topLeft,bottomRight,roles)
         # print ("topLeft",topLeft.row())
@@ -115,6 +118,7 @@ class WidgetTest(QtWidgets.QWidget):
         # import pdb
         # pdb.set_trace()
         self.state.option_B = "BBB"
+        self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         print (self.state.item_list)
 
     def changeOrder(self):
