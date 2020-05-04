@@ -343,9 +343,9 @@ def store(options):
             
             # NOTE 获取函数中的 locals 变量 https://stackoverflow.com/questions/9186395
             self._locals = {}
-            # sys.setprofile(lambda f,e,a: self._locals.update({ "@%s" % k : v for k,v in six.iteritems(f.f_locals)}) if e=='return' else None)
+            sys.setprofile(lambda f,e,a: self._locals.update({ "@%s" % k : v for k,v in six.iteritems(f.f_locals)}) if e=='return' else None)
             res = func(self,*args, **kwargs)
-            # sys.setprofile(None)
+            sys.setprofile(None)
 
             state = options.get("state",{})
 
