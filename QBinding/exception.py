@@ -14,7 +14,7 @@ import sys
 import linecache
 import re
 
-from .codec_parser import getQMVVMDecorator,getClassContent
+from .codec_parser import getQBindingDecorator,getClassContent
 
 def returnSelfWrapper(func):
     def wrapper(self,*args, **kwargs):
@@ -69,17 +69,17 @@ class SchemeParseError(Exception,object):
         # NOTE 说明当前文件存在 class
         for start_lineno,_class_name,class_type,class_content,end_lineno in getClassContent(lineno_source):
             if class_name != _class_name: continue
-            match = getQMVVMDecorator(class_content)
+            match = getQBindingDecorator(class_content)
             if not match:continue
-            QMVVM_option,_,_ = match[0]
+            QBinding_option,_,_ = match[0]
             break
         else:
-            print ("*> trace fail | cannot find the QMVVM option\nfile_path: %s\nclass_name: %s" % (file_path,class_name) )
+            print ("*> trace fail | cannot find the QBinding option\nfile_path: %s\nclass_name: %s" % (file_path,class_name) )
             return
         
         # NOTE 获取报错出行号
         method = option.get("method")
-        lineno = int(getErrorLine(method,QMVVM_option)) + 1
+        lineno = int(getErrorLine(method,QBinding_option)) + 1
         if not lineno:
             print ("*> trace fail | cannot find the error line\nfile_path: %s\nclass_name: %s" % (file_path,class_name) )
             return

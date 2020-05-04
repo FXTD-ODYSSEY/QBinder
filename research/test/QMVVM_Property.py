@@ -15,7 +15,7 @@ from functools import wraps
 from functools import partial
 from PySide2 import QtCore
 
-# @QMVVM.store({
+# @QBinding.store({
 #     "state":{
 #         "count":0,
 #     },

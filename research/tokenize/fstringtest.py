@@ -6,7 +6,7 @@ code = dedent(u"""
     from PySide2 import QtGui
     import os
     import sys
-    import QMVVM
+    import QBinding
     hello = "yes"
     test = f"happy {hello}"
 
@@ -16,7 +16,7 @@ code = dedent(u"""
 
     class Counter(QtWidgets.QWidget):
 
-        @QMVVM.store({
+        @QBinding.store({
             r"state":{
                 "text":"",
             },

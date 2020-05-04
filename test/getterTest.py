@@ -23,11 +23,11 @@ MODULE = os.path.join(DIR,"..")
 if MODULE not in sys.path:
 	sys.path.append(MODULE)
 
-import QMVVM
+import QBinding
 
 class Counter(QtWidgets.QWidget):
 
-	@QMVVM.store({
+	@QBinding.store({
 		"state":{
 			# "text":"",
 			# "text":lambda:["line.textChanged","line2.textChanged"],

@@ -18,12 +18,12 @@ MODULE = os.path.join(DIR, "..","..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-import QMVVM
+import QBinding
 from Qt import QtGui,QtWidgets, QtCore
 
 class WidgetTest(QtWidgets.QWidget):
 
-    @QMVVM.store({
+    @QBinding.store({
         "state": {
             "checkedNames": [],
         },

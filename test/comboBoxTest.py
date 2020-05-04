@@ -22,11 +22,11 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-import QMVVM
+import QBinding
 
 class ComboTest(QtWidgets.QWidget):
 
-    @QMVVM.store({
+    @QBinding.store({
         "ui":"#/../",
         "state": {
             "text": "123",
@@ -70,7 +70,7 @@ class ComboTest(QtWidgets.QWidget):
 
         self.combo = QtWidgets.QComboBox()
         self.combo.addItem(self.state.text)
-        self.combo._QMVVM_Bindings = {}
+        self.combo._QBinding_Bindings = {}
 
         self.line = QtWidgets.QLineEdit()
         self.btn = QtWidgets.QPushButton('change enable')

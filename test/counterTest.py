@@ -28,20 +28,20 @@ MODULE = os.path.join(DIR,"..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-import QMVVM
+import QBinding
 from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
 import os
 import sys
-import QMVVM
+import QBinding
 
 class Counter(QtWidgets.QWidget):
     '''
         # 1234
         self.test
     '''
-    @QMVVM.store({
+    @QBinding.store({
         "state":{
             "count":0,
             "count2":6,

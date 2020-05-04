@@ -22,8 +22,9 @@ def notify(func):
 class NotifyList(list):
     """
     https://stackoverflow.com/questions/13259179/list-callbacks
-    监听数组的内置函数更新组件数据
     """
+    __repr__ = list.__repr__
+
     def __init__(self,val,STATE):
         super(NotifyList, self).__init__(val)
         self.STATE = STATE
@@ -62,6 +63,7 @@ class NotifyDict(OrderedDict):
     """
     https://stackoverflow.com/questions/5186520/python-property-change-listener-pattern
     """
+    __repr__ = dict.__repr__
     def __init__(self,val,STATE):
         super(NotifyDict, self).__init__(val)
         self.STATE = STATE

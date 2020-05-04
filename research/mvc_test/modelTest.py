@@ -11,7 +11,7 @@ __date__ = '2020-04-29 13:34:11'
 import os
 import sys
 DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR,"..","..","QMVVM","_vender")
+MODULE = os.path.join(DIR,"..","..","QBinding","_vender")
 if MODULE not in sys.path:
     sys.path.insert(0,MODULE)
 

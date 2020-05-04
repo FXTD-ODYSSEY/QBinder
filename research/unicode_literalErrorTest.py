@@ -13,11 +13,11 @@ import os
 import sys
 
 DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR,"..","QMVVM","_vendor")
+MODULE = os.path.join(DIR,"..","QBinding","_vendor")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-# import QMVVM
+# import QBinding
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui

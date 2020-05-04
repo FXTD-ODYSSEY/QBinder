@@ -340,9 +340,9 @@ def store(options):
             
             # NOTE 获取函数中的 locals 变量 https://stackoverflow.com/questions/9186395
             self._locals = {}
-            # sys.setprofile(lambda f,e,a: self._locals.update({ "@%s" % k : v for k,v in six.iteritems(f.f_locals)}) if e=='return' else None)
+            sys.setprofile(lambda f,e,a: self._locals.update({ "@%s" % k : v for k,v in six.iteritems(f.f_locals)}) if e=='return' else None)
             res = func(self,*args, **kwargs)
-            # sys.setprofile(None)
+            sys.setprofile(None)
 
             state = options.get("state",{})
 
@@ -384,7 +384,7 @@ def store(options):
                     signal.connect(updater)
                     
                 setter = hook.get("setter",setter)
-                # setter = getattr(widget,setter)
+                setter = getattr(widget,setter)
                 typ = hook.get("type")
                 state_list = option.get("bindings",state)
                 try:
@@ -412,7 +412,7 @@ def store(options):
             self._locals.update({attr:getattr(self,attr)  for attr in dir(self)})
             for name,widget in six.iteritems(self._locals):
                 if not isinstance(widget,QtWidgets.QWidget): continue
-                config = widget.property("QMVVM")
+                config = widget.property("QBinding")
                 # print (widget.dynamicPropertyNames())
                 # print (type(config),config)
                 if not config: continue

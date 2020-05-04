@@ -30,9 +30,9 @@ def getClassContent(source):
     match = re.findall(re.compile(reg,re.X|re.M),source)
     return match
 
-def getQMVVMDecorator(content):
+def getQBindingDecorator(content):
     reg = r'''
-        @(?:QMVVM\.store|store)\s*?\(((?:.|\n)*)\)     (?# 匹配 QMVVM sotre 装饰器 | 获取传入的参数)
+        @(?:QBinding\.store|store)\s*?\(((?:.|\n)*)\)     (?# 匹配 QBinding sotre 装饰器 | 获取传入的参数)
         (?:.|\n)*?
         \d{5}?\|(\s*)def\ +__init__.*?:                      (?# 匹配 __init__)
         ((?:.|\n)*?)\d{5}?\|\2(?:\Z|\S)                     (?# 匹配 __init__函数内部的代码 基于缩进)
@@ -92,7 +92,7 @@ def parse(source):
     # NOTE 清空注释
     lineno_source = re.sub(r'[ \t\r\f]*?(#.*)','',lineno_source)
     for start_lineno,class_name,class_type,class_content,end_lineno in getClassContent(lineno_source):
-        match = getQMVVMDecorator(class_content)
+        match = getQBindingDecorator(class_content)
         if not match:continue
         option,_,init = match[0]
         # NOTE 获取 init 下相关的所有函数内容

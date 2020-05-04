@@ -9,7 +9,7 @@ https://zhuanlan.zhihu.com/p/21945624
 """
 
 import sys
-MODULE = r"D:\Users\82047\Desktop\repo\QtConfig\QMVVM\_vender"
+MODULE = r"D:\Users\82047\Desktop\repo\QtConfig\QBinding\_vender"
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
@@ -22,8 +22,8 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 import os
 import sys
-# import QMVVM
-from QMVVM import store
+# import QBinding
+from QBinding import store
 
 class Counter(QtWidgets.QWidget):
 
@@ -51,7 +51,7 @@ class Counter(QtWidgets.QWidget):
 """
 p=ast.parse(expr)
 
-class QMVVMImportParser(ast.NodeVisitor):
+class QBindingImportParser(ast.NodeVisitor):
     import_dict = {}
 
     def visit_ImportFrom(self,node):
@@ -65,7 +65,7 @@ class QMVVMImportParser(ast.NodeVisitor):
         var = alias.asname if alias.asname else alias.name
         self.import_dict[var] = var
 
-class QMVVMDecoratorParser(ast.NodeVisitor):
+class QBindingDecoratorParser(ast.NodeVisitor):
 
     store_option = []
     def __init__(self,import_dict):
@@ -77,14 +77,14 @@ class QMVVMDecoratorParser(ast.NodeVisitor):
         for n in ast.iter_child_nodes(node):
             if isinstance(n, ast.FunctionDef) :
                 if n.name == "__init__":
-                    # NOTE 遍历查询 QMVVM 装饰器
+                    # NOTE 遍历查询 QBinding 装饰器
                     for decorator in n.decorator_list:
                         if isinstance(decorator.func, ast.Name):
                             name = decorator.func.id
                         elif isinstance(decorator.func, ast.Name):
                             name = decorator.func.value.id
 
-                        if "QMVVM" in self.import_dict[name]:
+                        if "QBinding" in self.import_dict[name]:
                             self.store_option.append(decorator.args)
                             break
                 for n in ast.iter_child_nodes(n):
@@ -98,7 +98,7 @@ class QMVVMDecoratorParser(ast.NodeVisitor):
                             func = n.value.func
                             print attr,func.lineno
                             break
-class QMVVMCallParser(ast.NodeVisitor):
+class QBindingCallParser(ast.NodeVisitor):
 
     store_option = None
     def __init__(self,import_dict):
@@ -110,9 +110,9 @@ class QMVVMCallParser(ast.NodeVisitor):
             print dir(node)
 
 
-import_parser = QMVVMImportParser()
+import_parser = QBindingImportParser()
 import_parser.visit(p)
-deco_parser = QMVVMDecoratorParser(import_parser.import_dict)
+deco_parser = QBindingDecoratorParser(import_parser.import_dict)
 deco_parser.visit(p)
 
 

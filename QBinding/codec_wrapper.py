@@ -16,7 +16,7 @@ import string
 import encodings
 
 from . import codec_parser
-import QMVVM
+import QBinding
 
 
 def sourceCodeHandler(func,*args):
@@ -33,15 +33,15 @@ def sourceCodeHandler(func,*args):
 
     return wrapper
 
-def QMVVM_search_function(encoding_name):
-    QMVVM = ''
+def QBinding_search_function(encoding_name):
+    QBinding = ''
     try:
-        QMVVM,encoding_name = encoding_name.split(";;")
+        QBinding,encoding_name = encoding_name.split(";;")
     except ValueError:
         encoding_name = "utf-8"
 
     CODING = encodings.search_function(encoding_name)
-    CODING.decode = sourceCodeHandler(CODING.decode) if "QMVVM" in QMVVM else CODING.decode
+    CODING.decode = sourceCodeHandler(CODING.decode) if "QBinding" in QBinding else CODING.decode
 
     CODING = codecs.CodecInfo(
         encode=CODING.encode,
@@ -53,4 +53,4 @@ def QMVVM_search_function(encoding_name):
 
     return CODING
 
-codecs.register(QMVVM_search_function)
+codecs.register(QBinding_search_function)

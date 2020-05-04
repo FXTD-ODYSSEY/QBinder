@@ -1,5 +1,5 @@
 import sys
-MODULE = r"D:\Users\82047\Desktop\repo\QtConfig\QMVVM\_vender"
+MODULE = r"D:\Users\82047\Desktop\repo\QtConfig\QBinding\_vender"
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 import astroid

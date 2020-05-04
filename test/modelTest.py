@@ -66,7 +66,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(treeView)
 
         comboBox = QtWidgets.QComboBox()
-        comboBox.setProperty(b"QMVVM",'''
+        comboBox.setProperty(b"QBinding",'''
         {
             "bindings":{},
             "b":2

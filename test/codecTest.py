@@ -28,7 +28,7 @@ MODULE = os.path.join(DIR,"..")
 if MODULE not in sys.path:
 	sys.path.append(MODULE)
 
-import QMVVM
+import QBinding
 
 if __name__ == "__main__":
     from textwrap import dedent
@@ -38,14 +38,14 @@ if __name__ == "__main__":
         from PySide2 import QtGui
         import os
         import sys
-        import QMVVM
+        import QBinding
 
         class Counter(QtWidgets.QWidget):
             '''
                 # 1234
                 self.test
             '''
-            @QMVVM.store({
+            @QBinding.store({
                 "state":{
                     "count":0,
                     "count2":6,
@@ -140,4 +140,4 @@ if __name__ == "__main__":
                 
     """)
     
-    text = code.decode('QMVVM;;utf-8')
+    text = code.decode('QBinding;;utf-8')
