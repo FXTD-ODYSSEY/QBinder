@@ -15,6 +15,5 @@ except:
 
 
 from .QBinding import store
-from .QBinding import StateModel
 from . import codec_wrapper as _codec
 from .hook import HOOKS

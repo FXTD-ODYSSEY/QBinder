@@ -11,16 +11,12 @@ __date__ = '2020-03-22 22:55:38'
 
 import os
 import sys
-
-from functools import wraps,partial
-from collections import OrderedDict
-DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR, "..","..")
-if MODULE not in sys.path:
-    sys.path.append(MODULE)
+repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
+sys.path.insert(0,repo) if repo not in sys.path else None
 
 import QBinding
-from Qt import QtGui,QtWidgets, QtCore
+from Qt import QtGui, QtWidgets, QtCore
+from collections import OrderedDict
 
 class WidgetTest(QtWidgets.QWidget):
 
@@ -32,12 +28,6 @@ class WidgetTest(QtWidgets.QWidget):
                 ('Two', 'B'),
                 ('Three', 'C'),
             ]),
-        },
-        "methods": {
-            "label.setText":{
-                "args":["selected"],
-            	"action": lambda a:"Selected: %s" %  a,
-            },
         },
         "signals":{
             "combo.currentTextChanged": lambda self,widget,text: self.state._var_dict["selected"].setVal(self.state.options.get(text))
@@ -57,9 +47,11 @@ class WidgetTest(QtWidgets.QWidget):
         self.label = QtWidgets.QLabel()
         layout.addWidget(self.combo)
         layout.addWidget(self.label)
+        self.label.setText(lambda:"Selected: %s" % self.state.selected)
 
-        # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
         self.state.selected =  self.state.options.get(self.combo.currentText())
+
+        # self.combo.currentTextChanged.connect(lambda text: self.state._var_dict["selected"].setVal(self.state.options.get(text)))
         
     # def update(self,widget,text):
     #     self.state._var_dict["selected"].setVal(self.state.options.get(text))

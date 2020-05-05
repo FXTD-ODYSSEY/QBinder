@@ -10,29 +10,17 @@ __date__ = '2020-03-22 22:55:38'
 
 import os
 import sys
-
-from functools import wraps,partial
-
-DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR, "..","..")
-if MODULE not in sys.path:
-    sys.path.append(MODULE)
+repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
+sys.path.insert(0,repo) if repo not in sys.path else None
 
 import QBinding
-from Qt import QtGui,QtWidgets, QtCore
+from Qt import QtGui, QtWidgets, QtCore
 
 class WidgetTest(QtWidgets.QWidget):
 
     @QBinding.store({
         "state": {
             "checkedNames": [],
-        },
-        "methods": {
-            "label.setText":{
-                "args":["checkedNames"],
-            	# "action": lambda a:"CheckedNames %s" %  a,
-            	"action": "`CheckedNames: ${$0}`",
-            },
         },
         "signals": {
             "cb1.stateChanged":"$updateCB",
@@ -64,6 +52,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(groupBox)
         layout.addWidget(self.label)
 
+        self.label.setText(lambda:"CheckedNames: %s" % self.state.checkedNames)
         # self.cb1.stateChanged.connect(partial(self.updateCB,self.cb1))
         # self.cb2.stateChanged.connect(partial(self.updateCB,self.cb2))
         # self.cb3.stateChanged.connect(partial(self.updateCB,self.cb3))

@@ -15,7 +15,7 @@ def notify(func):
     def wrapper(self,*args,**kwargs):
         res = func(self,*args,**kwargs)
         if hasattr(self,"STATE"):
-            getattr(self.STATE.widget.state,"_%s_signal" % self.STATE.var).emit()
+            self.STATE.emitDataChanged()
         return res
     return wrapper
 

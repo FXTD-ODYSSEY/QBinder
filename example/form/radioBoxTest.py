@@ -7,34 +7,21 @@ __date__ = '2020-03-22 22:55:38'
 """
 
 """
-
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
-
 import os
 import sys
-
-from functools import wraps,partial
-
-DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR, "..","..")
-if MODULE not in sys.path:
-    sys.path.append(MODULE)
+repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
+sys.path.insert(0,repo) if repo not in sys.path else None
 
 import QBinding
+from Qt import QtGui, QtWidgets, QtCore
+
+from functools import partial
 
 class WidgetTest(QtWidgets.QWidget):
 
     @QBinding.store({
         "state": {
             "picked": "",
-        },
-        "methods": {
-            "label.setText":{
-                "args":["picked"],
-            	"action": lambda a:"Picked %s" %  a,
-            },
         },
         "signals":{
             "rb1.toggled":"$updateRB",
@@ -62,7 +49,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(groupBox)
         layout.addWidget(self.label)
 
-        # self.label.setText("CheckedNames %s" %  self.state.checkedNames)
+        self.label.setText(lambda:"CheckedNames %s" %  self.state.picked)
 
         # for rb in groupBox.findChildren(QtWidgets.QRadioButton):
         #     rb.toggled.connect(partial(self.updateRB,rb))

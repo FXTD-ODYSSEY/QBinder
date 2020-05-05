@@ -8,21 +8,13 @@ __date__ = '2020-03-22 22:55:38'
 
 """
 
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
-
 import os
 import sys
-
-from functools import wraps
-
-DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR, "..")
-if MODULE not in sys.path:
-    sys.path.append(MODULE)
+repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
+sys.path.insert(0,repo) if repo not in sys.path else None
 
 import QBinding
+from Qt import QtGui, QtWidgets, QtCore
 
 class ComboTest(QtWidgets.QWidget):
 
@@ -39,25 +31,6 @@ class ComboTest(QtWidgets.QWidget):
                 3:"c",
             },
             # "data_list": ["${enable}",""],
-        },
-        "methods": {
-            # "combo.addItem":{
-            # 	"action": "text"
-            # },
-            "line.setText": "text2",
-            "label.setText": {
-                "args": ["text2", "enable"],
-                "action": "`${text2} ${enable}`",
-                # "updaters": "modify",
-            },
-            "label2.setText": {
-                # "action": "$modifyTest",
-                "action": "data_list",
-            },
-            "cb.setChecked": {
-                # "bindings": "text2",
-                "action": "enable",
-            }
         },
     })
     def __init__(self):
@@ -85,30 +58,26 @@ class ComboTest(QtWidgets.QWidget):
         layout.addWidget(self.combo)
         layout.addWidget(self.label2)
 
-        # self.line.setText(self.state.text)
-        # self.label.setText(self.state.enable)
-        # self.cb.setChecked(self.state.enable)
+        self.line.setText(lambda:self.state.text2)
+        self.label.setText(lambda:"{text2} {enable}".format(text2=self.state.text2,enable=self.state.enable))
+        self.label2.setText(lambda:self.state.data_list)
+        self.cb.setChecked(lambda:self.state.enable)
 
         # self.line.textChanged.connect(self.modify)
         self.btn.clicked.connect(self.clickEvent)
 
     def clickEvent(self):
-        # self.state.enable = not self.state.enable
+        self.state.enable = not self.state.enable
         # self.state.num += 1
         # self.state.data_list = [1234,1]
         # self.state.data_list.append(1)
         # self.state.data_list.append(2)
         # print self.state.data_list
-        self.state.data_list[1][4] = {123:"4444" }
         # print self.state.text2
         # self.state.text2 = "abxcs"
 
-    def modifyTest(self):
-        return "%s %s %s" % (self.state.text2, self.state.text, self.state.num+1)
-
-    def modify(self, text):
-        self.state.text = text
-
+        # print("data_list",self.state.data_list)
+        # self.state.data_list[1][4] = {123:"4444" }
 
 def main():
     app = QtWidgets.QApplication([])

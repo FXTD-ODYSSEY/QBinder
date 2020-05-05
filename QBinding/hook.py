@@ -16,29 +16,14 @@ HOOKS = {
     QtWidgets.QComboBox: {
         "setCurrentIndex": {
             "type":int,   
-            "signals": "currentIndexChanged",
         },
         "setItemText": {
             "type":str,
-            "signals": "currentIndexChanged",
         },
-        # "addItem": {
-        #     "type":str,                         
-        #     "setter": "setItemText",            
-        #     "getter": "currentText",
-        #     "signals": "currentIndexChanged",
-        # },
-        # "addItems": {
-        #     "type":str,                         
-        #     "setter": "setItemText",            
-        #     "getter": "currentText",
-        #     "signals": "currentIndexChanged",
-        # },
     },
     QtWidgets.QLineEdit: {
         "setText":{
             "type":str,
-            "signals": "textChanged",
         }
     },
     
@@ -51,53 +36,50 @@ HOOKS = {
     QtWidgets.QCheckBox: {
         "setChecked":{
             "type":bool,
-            "signals": "stateChanged",
         },
     },
 
 
-
-
-    QtWidgets.QAction: {
-        bool:{
-            "getter": "isChecked",
-            "setter": "setChecked",
-            "signals": "toggled",
-        }
-    },
-    # QtWidgets.QActionGroup: (_get_QActionGroup, _set_QActionGroup, _event_QActionGroup),
-    QtWidgets.QPushButton: {
-        bool:{
-            "getter": "isChecked",
-            "setter": "setChecked",
-            "signals": "toggled",
-        }
-    },
-    QtWidgets.QSpinBox: {
-        int:{
-            "getter": "value",
-            "setter": "setValue",
-            "signals": "valueChanged",
-        }
-    },
-    QtWidgets.QDoubleSpinBox: {
-        float:{
-            "getter": "value",
-            "setter": "setValue",
-            "signals": "valueChanged",
-        }
-    },
-    # QtWidgets.QPlainTextEdit: {
-    #     str:{
+    # QtWidgets.QAction: {
+    #     bool:{
+    #         "getter": "isChecked",
+    #         "setter": "setChecked",
+    #         "signals": "toggled",
+    #     }
+    # },
+    # # QtWidgets.QActionGroup: (_get_QActionGroup, _set_QActionGroup, _event_QActionGroup),
+    # QtWidgets.QPushButton: {
+    #     bool:{
+    #         "getter": "isChecked",
+    #         "setter": "setChecked",
+    #         "signals": "toggled",
+    #     }
+    # },
+    # QtWidgets.QSpinBox: {
+    #     int:{
     #         "getter": "value",
-    #         "setter": "setPlainText",
+    #         "setter": "setValue",
     #         "signals": "valueChanged",
     #     }
     # },
-    # QtWidgets.QListWidget: (_get_QListWidget, _set_QListWidget, _event_QListWidget),
-    # QtWidgets.QSlider: (_get_QSlider, _set_QSlider, _event_QSlider),
-    # QtWidgets.QButtonGroup: (_get_QButtonGroup, _set_QButtonGroup, _event_QButtonGroup),
-    # QtWidgets.QTabWidget: (_get_QTabWidget, _set_QTabWidget, _event_QTabWidget)
+    # QtWidgets.QDoubleSpinBox: {
+    #     float:{
+    #         "getter": "value",
+    #         "setter": "setValue",
+    #         "signals": "valueChanged",
+    #     }
+    # },
+    # # QtWidgets.QPlainTextEdit: {
+    # #     str:{
+    # #         "getter": "value",
+    # #         "setter": "setPlainText",
+    # #         "signals": "valueChanged",
+    # #     }
+    # # },
+    # # QtWidgets.QListWidget: (_get_QListWidget, _set_QListWidget, _event_QListWidget),
+    # # QtWidgets.QSlider: (_get_QSlider, _set_QSlider, _event_QSlider),
+    # # QtWidgets.QButtonGroup: (_get_QButtonGroup, _set_QButtonGroup, _event_QButtonGroup),
+    # # QtWidgets.QTabWidget: (_get_QTabWidget, _set_QTabWidget, _event_QTabWidget)
 }
 
 
