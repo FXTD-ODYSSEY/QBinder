@@ -49,7 +49,7 @@ class WidgetTest(QtWidgets.QWidget):
             ],
         },
         "signals":{
-            "line.textChanged":"$update",
+            "line.textChanged":"option_B",
             # "combo.currentTextChanged":"selected",
         }
     })
@@ -107,31 +107,14 @@ class WidgetTest(QtWidgets.QWidget):
         self.label.setText(lambda: "%s %s" % (self.state.option_B,self.text))
         layout.addWidget(self.label)
 
-        # self.model.dataChanged.connect(self.modifyData)
-
-    def update(self,widget,text):
-        self.state.option_A = text
-        # self.state.item_model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
-        # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
-        # print ("modifyData",topLeft,bottomRight,roles)
-        # print ("topLeft",topLeft.row())
-        # print ("bottomRight",bottomRight.row())
-        # model = topLeft.model()
-        # print (model.stringList())
-        
     def addComboBox(self):
         print (self.state.item_list)
-        # import pdb
-        # pdb.set_trace()
         self.state.option_B = "BBB"
-        # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         print (self.state.item_list)
 
     def changeOrder(self):
         self.text = "asd"
-        # self.model.setData([])
-        # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
-        
+
 if __name__ == '__main__':
     
     app = QtWidgets.QApplication(sys.argv)
