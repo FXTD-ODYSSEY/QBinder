@@ -7,22 +7,14 @@ __date__ = '2020-03-22 22:55:38'
 """
 
 """
-
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
-
 import os
 import sys
-
-from functools import wraps,partial
-from collections import OrderedDict
-DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR, "..")
-if MODULE not in sys.path:
-    sys.path.append(MODULE)
+repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
+sys.path.insert(0,repo) if repo not in sys.path else None
 
 import QBinding
+from Qt import QtGui, QtWidgets, QtCore
+from collections import OrderedDict
 
 class WidgetTest(QtWidgets.QWidget):
 
@@ -34,21 +26,13 @@ class WidgetTest(QtWidgets.QWidget):
             "option_C": "C",
         },
         "computed":{
-            "item_list": ["${selected}","${option_B}","${option_C}",True],
-            # "item_list":OrderedDict([
-            #     ('One', "${option_A}"),
-            #     ('${selected}', "${option_B}"),
-            #     ('A','AAA'),
-            #     ('Three', "${option_C}"),
-            # ]),
-        },
-        "methods": {
-            "label.setText":{
-                # "bindings":["item_list"],
-                # "args":["selected"],
-            	# "action": lambda a:"Selected: %s" %  a,
-            	"action":"`selected ${selected}`",
-            },
+            # "item_list": ["${selected}","${option_B}","${option_C}",True],
+            "item_list":OrderedDict([
+                ('One', "${option_A}"),
+                ('${selected}', "${option_B}"),
+                ('A','AAA'),
+                ('Three', "${option_C}"),
+            ]),
         },
         "signals":{
             "combo.currentTextChanged":"$update",
@@ -77,6 +61,8 @@ class WidgetTest(QtWidgets.QWidget):
         # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
         self.state.selected = self.combo.currentText()
         print(self.state.item_list)
+
+        self.label.setText(lambda:"selected {selected}".format(selected=self.state.selected))
     
     # def getData(self):
     #     print 1,self.item_list
@@ -95,6 +81,7 @@ class WidgetTest(QtWidgets.QWidget):
     #     # print self.item_list
 
     def testComputed(self):
+        self.state.option_A = 'AAA'
         print(self.state.item_list)
         # print self.state.item_list
         # # self.state.item_list[0].append(1)

@@ -20,7 +20,6 @@ if MODULE not in sys.path:
     sys.path.append(MODULE)
 
 import QBinding
-from QBinding import StateModel
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
@@ -35,16 +34,20 @@ class WidgetTest(QtWidgets.QWidget):
             "option_C": "C",
         },
         "computed":{
-            "item_list": ["${selected}","${option_A}","${option_B}","${option_C}"],
+            "item_list": [
+                "${selected}",
+                "${option_A}",
+                "${option_B}",
+                "${option_C}"
+            ],
+            "*item_model": [
+                ["${option_A}","${option_B}"],
+                "${option_B}",
+                "${option_C}",
+                ["12"],
+                ["asd","1234"]
+            ],
         },
-        # "methods": {
-        #     "line.setText":{
-        #         # "bindings":["item_list"],
-        #         # "args":["selected"],
-        #     	# "action": lambda a:"Selected: %s" %  a,
-        #     	"action":"selected",
-        #     },
-        # },
         "signals":{
             "line.textChanged":"$update",
             # "combo.currentTextChanged":"selected",
@@ -66,12 +69,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(treeView)
 
         comboBox = QtWidgets.QComboBox()
-        comboBox.setProperty(b"QBinding",'''
-        {
-            "bindings":{},
-            "b":2
-        }
-        ''')
+
         # print ("dynamicPropertyNames",comboBox.dynamicPropertyNames())
         layout.addWidget(comboBox)
 
@@ -82,17 +80,20 @@ class WidgetTest(QtWidgets.QWidget):
         green = QtGui.QColor(0,255,0)
         blue  = QtGui.QColor(0,0,255)
 
-        rowCount = 4
-        columnCount = 6
-
         item_list = [red, "green", "blue"]
         # TODO configurate the model
-        self.model = StateModel(self.state.item_list)
-        
-        listView.setModel(self.model)
-        comboBox.setModel(self.model)
-        tableView.setModel(self.model)
-        treeView.setModel(self.model)
+        # self.model = StateModel(self.state.item_list)
+
+        # print (self.state.item_list)
+        self.state.selected = "selected"
+        # print (self.state.item_list)
+
+        # print ("item_model",self.state.item_model)
+
+        listView.setModel(self.state.item_model)
+        comboBox.setModel(self.state.item_model)
+        tableView.setModel(self.state.item_model)
+        treeView.setModel(self.state.item_model)
 
         button = QtWidgets.QPushButton("change")
         button.clicked.connect(self.changeOrder)
@@ -100,12 +101,17 @@ class WidgetTest(QtWidgets.QWidget):
         button = QtWidgets.QPushButton("change2")
         button.clicked.connect(self.addComboBox)
         layout.addWidget(button)
+        
+        self.text = '123'
+        self.label = QtWidgets.QLabel("label")
+        self.label.setText(lambda: "%s %s" % (self.state.option_B,self.text))
+        layout.addWidget(self.label)
 
         # self.model.dataChanged.connect(self.modifyData)
 
     def update(self,widget,text):
-        self.state.selected = text
-        self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.state.option_A = text
+        # self.state.item_model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         # print ("modifyData",topLeft,bottomRight,roles)
         # print ("topLeft",topLeft.row())
@@ -118,12 +124,13 @@ class WidgetTest(QtWidgets.QWidget):
         # import pdb
         # pdb.set_trace()
         self.state.option_B = "BBB"
-        self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         print (self.state.item_list)
 
     def changeOrder(self):
-        self.model.setData([])
-        self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.text = "asd"
+        # self.model.setData([])
+        # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         
 if __name__ == '__main__':
     

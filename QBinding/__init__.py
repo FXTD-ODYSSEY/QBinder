@@ -14,6 +14,8 @@ except:
     import six
 
 
-from .QBinding import store
+from .QBinding import store,setterHook
 from . import codec_wrapper as _codec
 from .hook import HOOKS
+
+setterHook()

@@ -41,6 +41,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.edit)
         layout.addWidget(self.label)
         
+        
         self.edit.setText(lambda:self.state.message)
         self.label.setText(lambda:"message is %s" % self.state.message)
 
