@@ -24,3 +24,5 @@
 
 @表示非 self 的 QWidget   
 $表示非 self 的 变量
+
+[PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)
