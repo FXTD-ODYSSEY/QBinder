@@ -13,7 +13,7 @@ __date__ = '2020-05-06 23:02:37'
 import sys
 import six
 from collections import OrderedDict
-from Qt import QtCore,QtGui
+from Qt import QtCore,QtGui,QtWidgets
 
 def notify(func):
     def wrapper(self,*args,**kwargs):
@@ -108,10 +108,12 @@ class StateProxyModel(QtCore.QAbstractItemModel):
         # NOTE add data update callback
         [item.connect(self.dataChangedEmit) for row in self._source for item in row if isinstance(item,State)]
 
-        # NOTE create a temp standardItem model for row and column Count Utilize
-        self.__model4count = QtGui.QStandardItemModel()
-        self.__model4count.appendRow([QtGui.QStandardItem(i) for i in range(max([len(row) for row in self._source])-1)])
-        self.__model4count.appendColumn([QtGui.QStandardItem(i) for i in range(len(self._source))])
+        # NOTE fill None to the empty cell 
+        columnCount = max([len(row) for row in self._source])
+        for row in self._source :
+            rowCount = len(row)
+            if rowCount < columnCount:
+                row.extend([None for i in range(columnCount - rowCount)])
 
     def index(self, row, column, parent=QtCore.QModelIndex()):
         return self.createIndex(row, column)
@@ -120,12 +122,10 @@ class StateProxyModel(QtCore.QAbstractItemModel):
         return QtCore.QModelIndex()
 
     def rowCount(self, parent):
-        return self.__model4count.rowCount(parent)
-        # return len(self._source)
+        return len(self._source) if parent.row() == -1 else 0
 
     def columnCount(self, parent):
-        return self.__model4count.columnCount(parent)
-        # return max([len(row) for row in self._source])
+        return max([len(row) for row in self._source])
 
     def item(self,row,column):
         row_list = next(iter(self._source[row:]),None)
@@ -136,14 +136,20 @@ class StateProxyModel(QtCore.QAbstractItemModel):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole :
             if index.isValid():
                 item = self.item(index.row(),index.column())
-                return item.val if isinstance(item,State) else item.text() if isinstance(item,QtGui.QStandardItem) else item
+                return item.val if isinstance(item,State) else item.text() if isinstance(item,QtGui.QStandardItem) else str(item)
 
     def setData(self, index, value, role = QtCore.Qt.EditRole):
         if role == QtCore.Qt.EditRole:
             if index.isValid():
-                item = self.item(index.row(),index.column())
-                if not item: return False
-                item.setVal(value)
+                row = index.row()
+                column = index.column()
+                item = self.item(row,column)
+                if isinstance(item,State):
+                    item.set(value)
+                elif isinstance(item,QtGui.QStandardItem):
+                    item.setText(value)
+                else:
+                    self._source[row][column] = value
                 self.dataChanged.emit(index, index)
                 return True
         return False
@@ -151,11 +157,13 @@ class StateProxyModel(QtCore.QAbstractItemModel):
     def flags(self, index):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
+    def get(self):
+        return self._source
 
 class State(QtGui.QStandardItem):
     # __repr__ = lambda self: "State(%s)" % self.val.__repr__()
-    __repr__ = lambda self: self.val.__repr__()
-    # __str__ = lambda self:self.val.__str__(),
+    __repr__ = lambda self: repr(self.val)
+    __str__ = lambda self: str(self.val)
     
     operator_list = {
         "__add__"       : lambda self,x:self.val.__add__(x),
@@ -211,12 +219,12 @@ class State(QtGui.QStandardItem):
         self.overrideMethod(val)
 
     def __get__(self, instance, owner):
-        return self.val() if callable(self.val) else self.val
+        return self.get()
 
     def __set__(self, instance, value):
-        self.setVal(value)
+        self.set(value)
 
-    def setVal(self,value):
+    def set(self,value):
         if not isinstance(value,self.val_type):
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.activeWindow(),"warning","dynamic change state type not support")
             return
@@ -224,6 +232,9 @@ class State(QtGui.QStandardItem):
         self.overrideMethod(value)
         self.emitDataChanged()
         self.emit()
+    
+    def get(self):
+        return self.val() if callable(self.val) else self.val
 
     def overrideMethod(self,val):
         """ sync the val operator and method """
@@ -265,7 +276,7 @@ class State(QtGui.QStandardItem):
 
     def setData(self,value, role=QtCore.Qt.EditRole):
         if role == QtCore.Qt.EditRole:
-            self.setVal(value)
+            self.set(value)
             return True
         return False
     

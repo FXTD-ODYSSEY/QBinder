@@ -24,8 +24,8 @@ class WidgetTest(QtWidgets.QWidget):
             "picked": "",
         },
         "signals":{
-            "rb1.toggled":"$updateRB",
-            "rb2.toggled":"$updateRB",
+            "rb1.toggled":"updateRB",
+            "rb2.toggled":"updateRB",
         }
     })
     def __init__(self):

@@ -23,7 +23,7 @@ class WidgetTest(QtWidgets.QWidget):
             "selected": [],
         },
         "signals":{
-            "listWidget.itemSelectionChanged":"$update"
+            "listWidget.itemSelectionChanged":"update"
         }
     })
     def __init__(self):

@@ -44,7 +44,7 @@ class WidgetTest(QtWidgets.QWidget):
         self.setProperty("test","hello,world")
         print(self.dynamicPropertyNames())
 
-        # ! remove unicode_literals will fix all the problems
+        # ! remove unicode_literals will fix all the problems or Add b to the _var_dict key
         
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

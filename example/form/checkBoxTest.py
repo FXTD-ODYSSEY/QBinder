@@ -22,16 +22,21 @@ class WidgetTest(QtWidgets.QWidget):
         "state": {
             "checkedNames": [],
         },
-        "signals": {
-            "cb1.stateChanged":"$updateCB",
-            "cb2.stateChanged":"$updateCB",
-            "cb3.stateChanged":"$updateCB",
-        }
+        # "signals": {
+        #     "cb1.stateChanged":"updateCB",
+        #     "cb2.stateChanged":"updateCB",
+        #     "cb3.stateChanged":"updateCB",
+        # }
     })
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-
+        self.state.OPTIONS["signals"] = {
+            "cb1.stateChanged":"updateCB",
+            "cb2.stateChanged":"updateCB",
+            "cb3.stateChanged":"updateCB",
+        }
+        
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)

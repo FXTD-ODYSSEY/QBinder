@@ -39,6 +39,7 @@ def StateHandler(func,options=None):
             self.STATE_DICT = {} if not hasattr(self,"STATE_DICT") else self.STATE_DICT
             self.STATE_DICT.setdefault(self.STATE,{})
             callback = self.STATE_DICT.get(self.STATE).get(func)
+            # NOTE clear old callback
             self.STATE._model.itemChanged.disconnect(callback) if callback else None
             
             callback = partial(lambda value,state:(func(self,typ(value()) if typ else value(),*args, **kwargs)),value)
@@ -46,18 +47,25 @@ def StateHandler(func,options=None):
             self.STATE._model.itemChanged.connect(callback)
 
             value = value()
+            value = typ(value) if typ else value
 
-        value = typ(value) if typ else value
         res = func(self,value,*args,**kwargs)
         return res
     return wrapper
 
-def setterHook():
+global default_hook_dict
+default_hook_dict = {}
+def hookInitialize():
     """
     # NOTE Dynamic wrap the Qt Widget setter base on the HOOKS Definition
     """
+    global default_hook_dict
+    for widget,(setter,func) in default_hook_dict.items():
+        setattr(widget,setter,func)
+
     for widget,setters in HOOKS.items():
         for setter,options in setters.items():
+            default_hook_dict[widget] = (setter,getattr(widget,setter))
             setattr(widget,setter,StateHandler(getattr(widget,setter),options))
             # NOTE example code -> setattr(QtWidgets.QCheckBox,"setText",StateHandler(QtWidgets.QCheckBox.setText))
 
@@ -151,26 +159,7 @@ def store(options):
                 _model.appendColumn(_var_dict.values())
 
                 for var,element_list in six.iteritems(options.get("computed",{})):
-                #     # TODO recursive handle list
-                #     if isinstance(element_list,list):
-                #         res = []
-                #         for element in element_list:
-                #             if not isinstance(element,six.string_types):
-                #                 continue
-                #             element = parseStateVarString(element,locals())
-                #             res.append(element)
-                #     # TODO recursive handle dict
-                #     elif isinstance(element_list,dict):
-                #         res = {} if type(element_list) is dict else OrderedDict() 
-                #         for key,val in six.iteritems(element_list):
-                #             if isinstance(val,six.string_types):
-                #                 val = parseStateVarString(val,locals())
-                #             res[key] = val
-                #     else:
-                #         res = parseStateVarString(element_list,locals())
-
                     res = retrieveHandleStateVar(element_list,locals())
-
                     # NOTE model handle
                     if var.startswith("*"):
                         var = var[1:]
@@ -186,8 +175,20 @@ def store(options):
                 
                 def __init__(self):
                     super(StateDescriptor, self).__init__()
+                    # NOTE register to all the hook Qt Widget
                     for widget in HOOKS:
                         setattr(widget,"STATE",self)
+                
+                def __getitem__(self,key):
+                    return self._var_dict[key]
+
+                def __setitem__(self,key,val):
+                    self._var_dict[key].set(val)
+                
+                def toJson(self):
+                    # data = json.dumps({k:v.val if isinstance(v,State) else v.getter(self) if type(v) is property else v for k,v in self._var_dict.items()})
+                    data = {k:v.get() if isinstance(v,State) or isinstance(v,StateProxyModel) else getattr(self,k) if type(v) is property else v for k,v in self._var_dict.items() if not k.startswith("__computed_")}
+                    return json.dumps(ast.literal_eval(str(data)))
 
             self.state = StateDescriptor()
             
@@ -204,26 +205,11 @@ def store(options):
                     widget,_signal = parseMethod(self,signal,False)
                     _signal = getattr(widget,_signal)
                     for attr in attrs:
-                        _signal.connect(partial(attr,self,widget) if six.callable(attr) else partial(getattr(self,attr[1:]),widget) 
-                                        if attr.startswith("$") else cursorPositionFix(self.state._var_dict[attr].setVal,widget))
+                        _signal.connect(partial(attr,self,widget) if six.callable(attr) else cursorPositionFix(self.state._var_dict[attr[1:]].set,widget) if attr.startswith("$") else partial(getattr(self,attr),widget))
                 except AttributeError as err:
                     raise SchemeParseError().parseErrorLine(signal,err)
             
             
-            # # TODO read the dynamic Property 
-            # self._locals.update({attr:getattr(self,attr)  for attr in dir(self)})
-            # for name,widget in six.iteritems(self._locals):
-            #     if not isinstance(widget,QtWidgets.QWidget): continue
-            #     config = widget.property("QBinding")
-            #     # print (widget.dynamicPropertyNames())
-            #     # print (type(config),config)
-            #     if not config: continue
-            #     # config = ast.literal_eval(dedent(config))
-            #     config = json.loads(config,encoding="utf-8")
-            #     # print (type(config),config)
-            #     # print ("asd")
-
-                        
             return res
         return wrapper
     return handler

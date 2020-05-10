@@ -29,7 +29,7 @@ class WidgetTest(QtWidgets.QWidget):
     @QBinding.store({
         "state": {
             "selected": "",
-            "option_A": "A",
+            "option_A": 123.0,
             "option_B": "B",
             "option_C": "C",
         },
@@ -41,16 +41,16 @@ class WidgetTest(QtWidgets.QWidget):
                 "${option_C}"
             ],
             "*item_model": [
+                [["${option_A}","${option_B}"],"1"],
                 ["${option_A}","${option_B}"],
                 "${option_B}",
                 "${option_C}",
-                ["12"],
+                [None,'asd',None,123],
                 ["asd","1234"]
             ],
         },
         "signals":{
-            "line.textChanged":"option_B",
-            # "combo.currentTextChanged":"selected",
+            "line.textChanged":"$option_B",
         }
     })
     def __init__(self):
@@ -58,8 +58,15 @@ class WidgetTest(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
 
+        print (self.state.toJson())
+
         self.line = QtWidgets.QLineEdit()
         layout.addWidget(self.line)
+        self.label = QtWidgets.QLabel()
+        layout.addWidget(self.label)
+        
+        self.line.setText(lambda:self.state.option_B)
+        self.label.setText(lambda:self.state.option_B)
         
         #ALL OF OUR VIEWS
         listView = QtWidgets.QListView()
@@ -81,8 +88,6 @@ class WidgetTest(QtWidgets.QWidget):
         blue  = QtGui.QColor(0,0,255)
 
         item_list = [red, "green", "blue"]
-        # TODO configurate the model
-        # self.model = StateModel(self.state.item_list)
 
         # print (self.state.item_list)
         self.state.selected = "selected"

@@ -25,7 +25,7 @@ class WidgetTest(QtWidgets.QWidget):
             "message": "asd",
         },
         "signals":{
-            "edit.textChanged":"message"
+            "edit.textChanged":"$message"
         }
     })
     def __init__(self):

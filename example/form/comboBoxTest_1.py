@@ -23,7 +23,7 @@ class WidgetTest(QtWidgets.QWidget):
             "selected": "",
         },
         "signals":{
-            "combo.currentTextChanged":"$update",
+            "combo.currentTextChanged":"update",
         }
     })
     def __init__(self):

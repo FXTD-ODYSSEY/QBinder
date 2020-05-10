@@ -30,7 +30,7 @@ class WidgetTest(QtWidgets.QWidget):
             ]),
         },
         "signals":{
-            "combo.currentTextChanged": lambda self,widget,text: self.state._var_dict["selected"].setVal(self.state.options.get(text))
+            "combo.currentTextChanged": lambda self,widget,text: self.state["selected"].setVal(self.state.options.get(text))
         }
     })
     def __init__(self):
@@ -41,6 +41,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
 
+        print(type(self.state.selected),type(self.state["selected"]))
         self.combo = QtWidgets.QComboBox()
         self.combo.addItems([text for text in self.state.options])
 

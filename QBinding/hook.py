@@ -24,18 +24,21 @@ HOOKS = {
     QtWidgets.QLineEdit: {
         "setText":{
             "type":str,
-        }
+        },
     },
     
     QtWidgets.QLabel: {
         "setText":{
             "type":str,
-        }
+        },
     },
 
     QtWidgets.QCheckBox: {
         "setChecked":{
             "type":bool,
+        },
+        "setText":{
+            "type":str,
         },
     },
 
