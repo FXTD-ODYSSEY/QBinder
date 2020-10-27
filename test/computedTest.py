@@ -18,7 +18,7 @@ from collections import OrderedDict
 
 class WidgetTest(QtWidgets.QWidget):
 
-    @QBinding.store({
+    @QBinding.init({
         "state": {
             "selected": "",
             "option_A": "A",

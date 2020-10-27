@@ -24,9 +24,32 @@ from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
 
+class InputTest(QtWidgets.QWidget):
+    @QBinding.init({
+        "state": {
+            "text": "abc",
+        },
+        "signals":{
+            "line.textChanged":"$text",
+        }
+    })
+    def __init__(self):
+        super(InputTest, self).__init__()
+        layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
+        self.setLayout(layout)
+
+        self.line = QtWidgets.QLineEdit()
+        self.label = QtWidgets.QLabel()
+        layout.addWidget(self.line)
+        layout.addWidget(self.label)
+
+        self.line.setText(lambda: self.state.text)
+        self.label.setText(lambda: self.state.text)
+        
 class WidgetTest(QtWidgets.QWidget):
 
-    @QBinding.store({
+    @QBinding.init({
         "state": {
             "selected": "",
             "option_A": 123.0,
@@ -58,9 +81,14 @@ class WidgetTest(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
 
-        print (self.state.toJson())
+        self.input = InputTest()
+        layout.addWidget(self.input)
+        self.input.label.setText(lambda:"%s test" % self.state.option_B)
+
+        # print (self.state.toJson())
 
         self.line = QtWidgets.QLineEdit()
+        # print(self.line.STATE)
         layout.addWidget(self.line)
         self.label = QtWidgets.QLabel()
         layout.addWidget(self.label)

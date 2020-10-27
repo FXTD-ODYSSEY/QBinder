@@ -18,7 +18,7 @@ from Qt import QtGui, QtWidgets, QtCore
 
 class ComboTest(QtWidgets.QWidget):
 
-    @QBinding.store({
+    @QBinding.init({
         "ui":"#/../",
         "state": {
             "text": "123",

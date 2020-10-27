@@ -18,7 +18,7 @@ from Qt import QtGui, QtWidgets, QtCore
 
 class WidgetTest(QtWidgets.QWidget):
 
-    @QBinding.store({
+    @QBinding.init({
         "state": {
             "selected": "",
         },

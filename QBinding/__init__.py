@@ -14,8 +14,7 @@ except:
     import six
 
 
-from .QBinding import store,hookInitialize
-from . import codec_wrapper as _codec
-from .hook import HOOKS
+from .hook import HOOKS,hookInitialize,hook_dict
+from .init import init
 
 hookInitialize()

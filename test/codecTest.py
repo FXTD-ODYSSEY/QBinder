@@ -45,7 +45,7 @@ if __name__ == "__main__":
                 # 1234
                 self.test
             '''
-            @QBinding.store({
+            @QBinding.init({
                 "state":{
                     "count":0,
                     "count2":6,

@@ -4,8 +4,10 @@
 - [x] 利用 Qt model 进行数据绑定
 - [x] 数组字典变量获取 state 变量索引
 - [x] 添加 signal 配置
+- [ ] lambda 返回字典 - 配置状态
 - [ ] json 状态输出
 - [ ] 全局状态管理类似 Vuex 实现
+    - [ ] 使用单例模式注册单例管理
 
 - [x] ~~updater 解析~~
 - [x] ~~lambda 转义为字符串~~
@@ -20,9 +22,9 @@
 
 - [x] six 兼容 python 2 & 3 的 string 判断 https://stackoverflow.com/questions/4843173
 
-@表示 local 变量
-$表示 state 的 变量
-*表示 Qt 的 model
+@表示 local 变量   
+$表示 state 的 变量   
+*表示 Qt 的 model   
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)

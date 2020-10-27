@@ -19,7 +19,7 @@ from functools import partial
 
 class WidgetTest(QtWidgets.QWidget):
 
-    @QBinding.store({
+    @QBinding.init({
         "state": {
             "picked": "",
         },

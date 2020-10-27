@@ -16,7 +16,7 @@ code = dedent(u"""
 
     class Counter(QtWidgets.QWidget):
 
-        @QBinding.store({
+        @QBinding.init({
             r"state":{
                 "text":"",
             },

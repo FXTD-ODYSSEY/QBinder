@@ -16,58 +16,12 @@ import six
 import json
 import inspect
 
-from functools import partial
+from functools import partial,wraps
 from collections import OrderedDict
 from textwrap import dedent
 from Qt import QtCore,QtWidgets,QtGui
-from .hook import HOOKS
 from .exception import SchemeParseError
 from .type import StateProxyModel,State
-
-
-
-def StateHandler(func,options=None):
-    """
-    # NOTE initialize the Qt Widget setter 
-    """
-    options = options if options is not None else {}
-    typ = options.get("type")
-    signals = options.get("signals",[])
-    signals = [signals] if isinstance(signals,six.string_types) else signals
-    def wrapper(self,value,*args, **kwargs):
-        if callable(value):
-            self.STATE_DICT = {} if not hasattr(self,"STATE_DICT") else self.STATE_DICT
-            self.STATE_DICT.setdefault(self.STATE,{})
-            callback = self.STATE_DICT.get(self.STATE).get(func)
-            # NOTE clear old callback
-            self.STATE._model.itemChanged.disconnect(callback) if callback else None
-            
-            callback = partial(lambda value,state:(func(self,typ(value()) if typ else value(),*args, **kwargs)),value)
-            self.STATE_DICT[self.STATE][func] = callback
-            self.STATE._model.itemChanged.connect(callback)
-
-            value = value()
-            value = typ(value) if typ else value
-
-        res = func(self,value,*args,**kwargs)
-        return res
-    return wrapper
-
-global default_hook_dict
-default_hook_dict = {}
-def hookInitialize():
-    """
-    # NOTE Dynamic wrap the Qt Widget setter base on the HOOKS Definition
-    """
-    global default_hook_dict
-    for widget,(setter,func) in default_hook_dict.items():
-        setattr(widget,setter,func)
-
-    for widget,setters in HOOKS.items():
-        for setter,options in setters.items():
-            default_hook_dict[widget] = (setter,getattr(widget,setter))
-            setattr(widget,setter,StateHandler(getattr(widget,setter),options))
-            # NOTE example code -> setattr(QtWidgets.QCheckBox,"setText",StateHandler(QtWidgets.QCheckBox.setText))
 
 def elapsedTime(func):
     def wrapper(*args, **kwargs):
@@ -79,7 +33,7 @@ def elapsedTime(func):
     return wrapper
 
 @elapsedTime
-def store(options):
+def init(options):
     def handler(func):
         
         def parseMethod(self,method,parse=True):
@@ -173,12 +127,6 @@ def store(options):
 
                 OPTIONS = options
                 
-                def __init__(self):
-                    super(StateDescriptor, self).__init__()
-                    # NOTE register to all the hook Qt Widget
-                    for widget in HOOKS:
-                        setattr(widget,"STATE",self)
-                
                 def __getitem__(self,key):
                     return self._var_dict[key]
 
@@ -186,8 +134,20 @@ def store(options):
                     self._var_dict[key].set(val)
                 
                 def toJson(self):
-                    # data = json.dumps({k:v.val if isinstance(v,State) else v.getter(self) if type(v) is property else v for k,v in self._var_dict.items()})
-                    data = {k:v.get() if isinstance(v,State) or isinstance(v,StateProxyModel) else getattr(self,k) if type(v) is property else v for k,v in self._var_dict.items() if not k.startswith("__computed_")}
+                    # data = {k:v.get() if isinstance(v,State) or isinstance(v,StateProxyModel) else getattr(self,k) if type(v) is property else v for k,v in self._var_dict.items() if not k.startswith("__computed_")}
+                    data = {}
+                    for k,v in self._var_dict.items():
+                        if k.startswith("__computed_"):
+                            continue
+                            
+                        if isinstance(v,property):
+                            if isinstance(v,State) or isinstance(v,StateProxyModel):
+                                data[k] = v.get()
+                            else:
+                                data[k] = getattr(self,k) 
+                        else:
+                            data[k] = v
+
                     return json.dumps(ast.literal_eval(str(data)))
 
             self.state = StateDescriptor()

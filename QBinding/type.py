@@ -90,8 +90,6 @@ class NotifyDict(OrderedDict):
         
 
 
-# TODO Inherit QAbstractItemModel makes tree view wierd
-# class StateProxyModel(QtGui.QStandardItemModel):
 class StateProxyModel(QtCore.QAbstractItemModel):
     
     def __init__(self, source=None):

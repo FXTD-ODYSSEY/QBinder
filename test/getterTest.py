@@ -27,7 +27,7 @@ import QBinding
 
 class Counter(QtWidgets.QWidget):
 
-	@QBinding.store({
+	@QBinding.init({
 		"state":{
 			# "text":"",
 			# "text":lambda:["line.textChanged","line2.textChanged"],

@@ -41,7 +41,7 @@ class Counter(QtWidgets.QWidget):
         # 1234
         self.test
     '''
-    @QBinding.store({
+    @QBinding.init({
         "state":{
             "count":0,
             "count2":6,

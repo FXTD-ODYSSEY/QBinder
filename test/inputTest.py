@@ -26,7 +26,7 @@ import QBinding
 
 class WidgetTest(QtWidgets.QWidget):
 
-    @QBinding.store({
+    @QBinding.init({
         "state": {
             "message": "",
         },
