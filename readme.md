@@ -1,5 +1,18 @@
-## todolist
+## 新 TDOO
 
+- [ ] 单例模式 - 数据全局共享
+- [ ] MVC 拆分可能性
+- [ ] 数据 dump 输入输出
+- [ ] Qt model 进行数据绑定
+- [ ] HOOK 添加自定义的 setter getter updater
+- [ ] 
+
+
+
+
+
+
+## todolist
 
 - [x] 利用 Qt model 进行数据绑定
 - [x] 数组字典变量获取 state 变量索引

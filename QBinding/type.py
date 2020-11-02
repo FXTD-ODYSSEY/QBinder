@@ -12,7 +12,10 @@ __date__ = '2020-05-06 23:02:37'
 
 import sys
 import six
+import inspect
+from functools import partial
 from collections import OrderedDict
+from contextlib import contextmanager
 from Qt import QtCore,QtGui,QtWidgets
 
 def notify(func):
@@ -89,77 +92,123 @@ class NotifyDict(OrderedDict):
         return OrderedDict.__setitem__(self,key,value)
         
 
-
-class StateProxyModel(QtCore.QAbstractItemModel):
+# class BindingProxyModel(QtCore.QAbstractItemModel):
     
-    def __init__(self, source=None):
-        super(StateProxyModel, self).__init__()
-        self.setSource(source)
+#     def __init__(self, source=None):
+#         super(BindingProxyModel, self).__init__()
+#         self.setSource(source)
 
-    def dataChangedEmit(self):
-        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+#     def dataChangedEmit(self):
+#         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
 
-    def setSource(self, source):
-        # NOTE update source data remove old callback
-        [item.disconnect(self.dataChangedEmit) for row in self._source for item in row if isinstance(item,State)] if hasattr(self,"_source") else None
-        self._source = [item if isinstance(item,list) else [item if isinstance(item,State) else item] for item in source] if source else []
-        # NOTE add data update callback
-        [item.connect(self.dataChangedEmit) for row in self._source for item in row if isinstance(item,State)]
+#     def setSource(self, source):
+#         # NOTE update source data remove old callback
+#         [item.disconnect(self.dataChangedEmit) for row in self._source for item in row if isinstance(item,Binding)] if hasattr(self,"_source") else None
+#         self._source = [item if isinstance(item,list) else [item if isinstance(item,Binding) else item] for item in source] if source else []
+#         # NOTE add data update callback
+#         [item.connect(self.dataChangedEmit) for row in self._source for item in row if isinstance(item,Binding)]
 
-        # NOTE fill None to the empty cell 
-        columnCount = max([len(row) for row in self._source])
-        for row in self._source :
-            rowCount = len(row)
-            if rowCount < columnCount:
-                row.extend([None for i in range(columnCount - rowCount)])
+#         # NOTE fill None to the empty cell 
+#         columnCount = max([len(row) for row in self._source])
+#         for row in self._source :
+#             rowCount = len(row)
+#             if rowCount < columnCount:
+#                 row.extend([None for i in range(columnCount - rowCount)])
 
-    def index(self, row, column, parent=QtCore.QModelIndex()):
-        return self.createIndex(row, column)
+#     def index(self, row, column, parent=QtCore.QModelIndex()):
+#         return self.createIndex(row, column)
 
-    def parent(self, index):
-        return QtCore.QModelIndex()
+#     def parent(self, index):
+#         return QtCore.QModelIndex()
 
-    def rowCount(self, parent):
-        return len(self._source) if parent.row() == -1 else 0
+#     def rowCount(self, parent):
+#         return len(self._source) if parent.row() == -1 else 0
 
-    def columnCount(self, parent):
-        return max([len(row) for row in self._source])
+#     def columnCount(self, parent):
+#         return max([len(row) for row in self._source])
 
-    def item(self,row,column):
-        row_list = next(iter(self._source[row:]),None)
-        if row_list is None:return
-        return next(iter(row_list[column:]),None)
+#     def item(self,row,column):
+#         row_list = next(iter(self._source[row:]),None)
+#         if row_list is None:return
+#         return next(iter(row_list[column:]),None)
         
-    def data(self, index, role = QtCore.Qt.DisplayRole):
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole :
-            if index.isValid():
-                item = self.item(index.row(),index.column())
-                return item.val if isinstance(item,State) else item.text() if isinstance(item,QtGui.QStandardItem) else str(item)
+#     def data(self, index, role = QtCore.Qt.DisplayRole):
+#         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole :
+#             if index.isValid():
+#                 item = self.item(index.row(),index.column())
+#                 return item.val if isinstance(item,Binding) else item.text() if isinstance(item,QtGui.QStandardItem) else str(item)
 
-    def setData(self, index, value, role = QtCore.Qt.EditRole):
-        if role == QtCore.Qt.EditRole:
-            if index.isValid():
-                row = index.row()
-                column = index.column()
-                item = self.item(row,column)
-                if isinstance(item,State):
-                    item.set(value)
-                elif isinstance(item,QtGui.QStandardItem):
-                    item.setText(value)
-                else:
-                    self._source[row][column] = value
-                self.dataChanged.emit(index, index)
-                return True
-        return False
+#     def setData(self, index, value, role = QtCore.Qt.EditRole):
+#         if role == QtCore.Qt.EditRole:
+#             if index.isValid():
+#                 row = index.row()
+#                 column = index.column()
+#                 item = self.item(row,column)
+#                 if isinstance(item,Binding):
+#                     item.set(value)
+#                 elif isinstance(item,QtGui.QStandardItem):
+#                     item.setText(value)
+#                 else:
+#                     self._source[row][column] = value
+#                 self.dataChanged.emit(index, index)
+#                 return True
+#         return False
         
-    def flags(self, index):
-        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+#     def flags(self, index):
+#         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-    def get(self):
-        return self._source
+#     def get(self):
+#         return self._source
 
-class State(QtGui.QStandardItem):
-    # __repr__ = lambda self: "State(%s)" % self.val.__repr__()
+def connect_binder(cls):
+    for name,binder in inspect.getmembers(cls):
+        if isinstance(binder,Binder):
+            break
+    else:
+        raise RuntimeError("No Binder Found")
+    
+    
+    class BinderInstance(Binder):
+        _var_dict = {n:s for n,s in inspect.getmembers(binder) if isinstance(s,Binding)}
+        locals().update(_var_dict)
+        
+        # _model = QtGui.QStandardItemModel()
+        # _model.appendColumn(_var_dict.values())
+    
+    setattr(cls,name,BinderInstance())
+    return cls
+
+class Binder(QtCore.QObject):
+    
+    _var_dict = {}
+    def __getitem__(self,key):
+        return self._var_dict.get(key)
+
+    def __setitem__(self,key,value):
+        var = self._var_dict.get(key)
+        var.set(value) if var else None
+            
+    def __setattr__(self, key, value):
+        value = value if isinstance(value,Binding) else Binding(value)
+        self.__dict__[key] = value
+    
+    def dump(self):
+        # TODO dump data
+        pass
+
+class GBinder(Binder):
+    # NOTE Global Singleton
+    _instance = None
+    def __new__(cls, *args, **kw):
+        if cls._instance is None:
+            cls._instance = object.__new__(cls, *args, **kw)
+        return cls._instance
+
+class Binding(QtCore.QObject,QtGui.QStandardItem):
+    
+    TRACE = False
+    TRACE_LIST = []
+    
     __repr__ = lambda self: repr(self.val)
     __str__ = lambda self: str(self.val)
     
@@ -208,46 +257,73 @@ class State(QtGui.QStandardItem):
         "__ge__"        : lambda self,x:self.val.__ge__(x),
         "__gt__"        : lambda self,x:self.val.__gt__(x),
     }
+    
+    signal = QtCore.Signal()
+    
     def __init__(self,val = None):
-        super(State,self).__init__()
+        super(Binding,self).__init__()
         self.val = self.retrieve2Notify(val)
         self.val_type = six.string_types if isinstance(self.val,six.string_types) else type(self.val).__base__
+        # self.__callback_list = []
         self.__override_attr_list = []
-        self.__callback_list = []
-        self.overrideMethod(val)
+        self.overrideOperator(self.val)
+        
+        self.signal.connect(lambda:print('test singal'))
+        
+    @classmethod
+    @contextmanager
+    def set_trace(cls):
+        cls.TRACE_LIST.clear()
+        cls.TRACE = True
+        yield
+        cls.TRACE = False
 
     def __get__(self, instance, owner):
+        self.TRACE_LIST.append(self) if self.TRACE and self not in self.TRACE_LIST else None
+        # print("__get__")
         return self.get()
 
     def __set__(self, instance, value):
+        print("__set__",value)
         self.set(value)
 
     def set(self,value):
-        if not isinstance(value,self.val_type):
-            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.activeWindow(),"warning","dynamic change state type not support")
-            return
         self.val = self.retrieve2Notify(value)
-        self.overrideMethod(value)
+        self.overrideOperator(value)
         self.emitDataChanged()
-        self.emit()
+        self.signal.emit()
     
     def get(self):
         return self.val() if callable(self.val) else self.val
 
-    def overrideMethod(self,val):
-        """ sync the val operator and method """
-        [delattr(self,attr) for attr in self.__override_attr_list if hasattr(self,attr)]
-        self.__override_attr_list = [attr for attr in dir(val) if not attr.startswith("_")]
-        for attr in self.__override_attr_list:
-            setattr(self,attr,getattr(self.val,attr))
-        self.overrideOperator(val)
-
+    # def overrideMethod(self,val):
+    #     """ sync the val operator and method """
+    #     [delattr(self,attr) for attr in self.__override_attr_list if hasattr(self,attr)]
+    #     self.__override_attr_list = [attr for attr in dir(val) if not attr.startswith("_")]
+    #     for attr in self.__override_attr_list:
+    #         setattr(self,attr,getattr(self.val,attr))
+    #     self.overrideOperator(val)
+        
+    # def overrideOperator(self,val):
+    #     for name,func in inspect.getmembers(val):
+    #         if callable(func) and name != "__class__":
+    #             setattr(self,name,lambda self,x:getattr(self.val,name)(x))
+                
     @classmethod
     def overrideOperator(cls,val):
-        for attr in dir(val):
-            func = cls.operator_list.get(attr)
-            if func is not None:
-                setattr(cls,attr,func)
+        for attr,func in cls.operator_list.items():
+            if not attr in dir(val):
+                continue
+            
+            # callback = lambda self,a:getattr(self.val,attr)(x) 
+            def op(func):
+                def wrapper(self,x):
+                    val = func(self,x)
+                    self.signal.emit()
+                    return val
+                return wrapper
+            # func = lambda self,x: print(x,attr) #getattr(self.val,attr)(x) 
+            setattr(cls,attr,op(func))
 
     def retrieve2Notify(self,val,initialize=True):
         """ convert to Notify type """
@@ -278,12 +354,14 @@ class State(QtGui.QStandardItem):
             return True
         return False
     
-    def connect(self,callback):
-        self.__callback_list.append(callback)
+    # def connect(self,callback):
+    #     self.__callback_list.append(callback)
+    #     print(self,self.__callback_list)
 
-    def disconnect(self,callback):
-        self.__callback_list.remove(callback)
+    # def disconnect(self,callback):
+    #     self.__callback_list.remove(callback)
     
-    def emit(self,*args,**kwargs):
-        [callback(*args,**kwargs) if callable(callback) else None for callback in self.__callback_list]
+    # def emit(self,*args,**kwargs):
+    #     print(self,self.__callback_list)
+    #     [callback(*args,**kwargs) for callback in self.__callback_list if callable(callback)]
         

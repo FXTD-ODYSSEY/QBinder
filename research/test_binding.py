@@ -46,7 +46,7 @@ class StateDescriptor(QtCore.QObject):
         print("__getattr__")
         return self.__dict__[key].__val
     
-    def __(self, instance, val):
+    def _set_(self, instance, val):
         print("__set__",val)
         # self.__val = val
 
@@ -57,18 +57,15 @@ class StateDescriptor(QtCore.QObject):
 
 
 def connect_binding(cls):
-    """ https://stackoverflow.com/questions/11091609/setting-a-class-metaclass-using-a-decorator """
-
     for name,descriptor in inspect.getmembers(cls):
         if isinstance(descriptor,StateDescriptor):
             break
     else:
-        raise RuntimeError()
-
-    state_dict = {n:s for n,s in inspect.getmembers(descriptor) if isinstance(s,State)}
+        raise RuntimeError("No StateDescriptor Found")
     
     class StateDescriptorInstance(StateDescriptor):
-        locals().update(state_dict)
+        _var_dict = {n:s for n,s in inspect.getmembers(descriptor) if isinstance(s,State)}
+        locals().update(_var_dict)
     
     setattr(cls,name,StateDescriptorInstance())
     return cls
