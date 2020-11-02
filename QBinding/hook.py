@@ -1,12 +1,17 @@
-# coding:utf-8
-
-__author__ = "timmyliang"
-__email__ = "820472580@qq.com"
-__date__ = "2020-04-17 15:35:39"
+# -*- coding: utf-8 -*-
+"""
 
 """
-自动绑定配置表
-"""
+
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+
+__author__ = 'timmyliang'
+__email__ = '820472580@qq.com'
+__date__ = '2020-11-02 23:47:53'
+
+import sys
 import six
 import inspect
 from functools import partial
@@ -81,9 +86,16 @@ def state_handler(func, options=None):
     """
     options = options if options is not None else {}
     typ = options.get("type")
-    updater = options.get("updater")
-    getter = options.get("getter")
-
+    
+    def fix_cursor_position(func,widget):
+        '''fix the lineedit cusorPosition after setting the value'''
+        def wrapper(*args,**kwargs):
+            pos = widget.property("cursorPosition")
+            res = func(*args,**kwargs)
+            widget.setProperty("cursorPosition",pos) if pos else None
+            return res
+        return wrapper
+    
     def wrapper(self, value, *args, **kwargs):
         if callable(value):
             # # NOTE get the outter frame state attribute from the widget class
@@ -92,21 +104,23 @@ def state_handler(func, options=None):
 
             with Binding.set_trace():
                 val = value()
-
+        
             # NOTE register auto update
-            callback = lambda: func(
-                self, typ(value()) if typ else value(), *args, **kwargs
-            )
+            callback = partial(lambda c: func(
+                self, typ(c()) if typ else c(), *args, **kwargs
+            ),value) 
             for binding in Binding.TRACE_LIST:
                 binding.signal.connect(callback)
 
-            # # NOTE Single binding connect to the updater
-            # # TODO only support one binding without other evaluation
-            # if updater and getter and len(Binding.TRACE_SET) == 1:
-            #     # binding = Binding.TRACE_SET.pop()
-            #     updater = getattr(self, updater)
-            #     getter = getattr(self, getter)
-            #     updater.connect(lambda: binding.set(getter()))
+            updater = options.get("updater")
+            getter = options.get("getter")
+
+            code = value.__code__
+            # NOTE Single binding connect to the updater
+            if updater and getter and len(Binding.TRACE_LIST) == 1 and len(code.co_consts) == 1:
+                updater = getattr(self, updater)
+                getter = getattr(self, getter)
+                updater.connect(fix_cursor_position(lambda *args: binding.set(getter()),self))
 
             value = typ(val) if typ else val
 

@@ -174,6 +174,12 @@ def connect_binder(cls):
         
         # _model = QtGui.QStandardItemModel()
         # _model.appendColumn(_var_dict.values())
+        def __setattr__(self, key, value):
+            # super(BinderInstance,self).__setattr__(key, value)
+            # value = value if isinstance(value,Binding) else Binding(value)
+            binding = self._var_dict.get(key)
+            binding.set(value)
+
     
     setattr(cls,name,BinderInstance())
     return cls
@@ -207,6 +213,7 @@ class GBinder(Binder):
 class Binding(QtCore.QObject,QtGui.QStandardItem):
     
     TRACE = False
+    SET_FLAG = False
     TRACE_LIST = []
     
     __repr__ = lambda self: repr(self.val)
@@ -263,67 +270,39 @@ class Binding(QtCore.QObject,QtGui.QStandardItem):
     def __init__(self,val = None):
         super(Binding,self).__init__()
         self.val = self.retrieve2Notify(val)
-        self.val_type = six.string_types if isinstance(self.val,six.string_types) else type(self.val).__base__
-        # self.__callback_list = []
-        self.__override_attr_list = []
         self.overrideOperator(self.val)
-        
-        self.signal.connect(lambda:print('test singal'))
         
     @classmethod
     @contextmanager
     def set_trace(cls):
-        cls.TRACE_LIST.clear()
+        del cls.TRACE_LIST[:]
         cls.TRACE = True
         yield
         cls.TRACE = False
 
     def __get__(self, instance, owner):
         self.TRACE_LIST.append(self) if self.TRACE and self not in self.TRACE_LIST else None
-        # print("__get__")
         return self.get()
 
-    def __set__(self, instance, value):
-        print("__set__",value)
-        self.set(value)
-
+    # def __set__(self, instance, value):
+    #     print("__set__",value)
+    #     self.set(value)
+        
     def set(self,value):
         self.val = self.retrieve2Notify(value)
         self.overrideOperator(value)
-        self.emitDataChanged()
+        # self.emitDataChanged()
         self.signal.emit()
     
     def get(self):
         return self.val() if callable(self.val) else self.val
 
-    # def overrideMethod(self,val):
-    #     """ sync the val operator and method """
-    #     [delattr(self,attr) for attr in self.__override_attr_list if hasattr(self,attr)]
-    #     self.__override_attr_list = [attr for attr in dir(val) if not attr.startswith("_")]
-    #     for attr in self.__override_attr_list:
-    #         setattr(self,attr,getattr(self.val,attr))
-    #     self.overrideOperator(val)
-        
-    # def overrideOperator(self,val):
-    #     for name,func in inspect.getmembers(val):
-    #         if callable(func) and name != "__class__":
-    #             setattr(self,name,lambda self,x:getattr(self.val,name)(x))
-                
     @classmethod
     def overrideOperator(cls,val):
         for attr,func in cls.operator_list.items():
             if not attr in dir(val):
                 continue
-            
-            # callback = lambda self,a:getattr(self.val,attr)(x) 
-            def op(func):
-                def wrapper(self,x):
-                    val = func(self,x)
-                    self.signal.emit()
-                    return val
-                return wrapper
-            # func = lambda self,x: print(x,attr) #getattr(self.val,attr)(x) 
-            setattr(cls,attr,op(func))
+            setattr(cls,attr,func)
 
     def retrieve2Notify(self,val,initialize=True):
         """ convert to Notify type """
@@ -354,14 +333,3 @@ class Binding(QtCore.QObject,QtGui.QStandardItem):
             return True
         return False
     
-    # def connect(self,callback):
-    #     self.__callback_list.append(callback)
-    #     print(self,self.__callback_list)
-
-    # def disconnect(self,callback):
-    #     self.__callback_list.remove(callback)
-    
-    # def emit(self,*args,**kwargs):
-    #     print(self,self.__callback_list)
-    #     [callback(*args,**kwargs) for callback in self.__callback_list if callable(callback)]
-        

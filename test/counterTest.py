@@ -33,11 +33,12 @@ import os
 import sys
 from QBinding import Binder, connect_binder
 
+
 @connect_binder
 class Counter(QtWidgets.QWidget):
 
     state = Binder()
-    state.count = 0
+    state.count = 123
     state.count2 = 6
 
     def __init__(self):
@@ -66,10 +67,10 @@ class Counter(QtWidgets.QWidget):
         label5 = QtWidgets.QLabel()
 
         self.label.setText(lambda:str(self.state.count))
-        label2.setText("<center>%s %s</center>" % (self.count, self.state.count))
-        label3.setText("<center>%s</center>" % self.count)
-        label4.setText(self.calculate(self.count, self.count3))
-        label5.setText(str(self.state.count2))
+        label2.setText(lambda:"<center>%s %s</center>" % (self.count, self.state.count))
+        label3.setText(lambda:"<center>%s</center>" % self.count)
+        label4.setText(lambda:self.calculate(self.count, self.count3))
+        label5.setText(lambda:str(self.state.count2))
 
         layout.addWidget(self.label)
         layout.addWidget(plus_button)
@@ -88,10 +89,8 @@ class Counter(QtWidgets.QWidget):
 
     def add(self):
         self.state.count += 1
-        print(self.state.count)
 
     def subtract(self):
-        print(self.state.count)
         self.state.count -= 1
 
     def add2(self):
