@@ -42,6 +42,8 @@ class ComboTest(QtWidgets.QWidget):
         super(ComboTest, self).__init__()
         self.initialize()
 
+        print(~self.state)
+
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
@@ -78,8 +80,8 @@ class ComboTest(QtWidgets.QWidget):
     def clickEvent(self):
         self.state.enable = not self.state.enable
         print(self.state.enable)
+        self.state.data_list.append(1)
         # self.state.num += 1
-        # self.state.data_list.append(1)
         # self.state.data_list.append(2)
         # print self.state.data_list
         # print self.state.text2

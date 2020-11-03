@@ -113,7 +113,8 @@ def connect_binder(cls):
         }
         locals().update(_var_dict)
 
-        _model = QtGui.QStandardItemModel()
+        # _model = QtGui.QStandardItemModel()
+        # _data_list = _var_dict.values()
         # _model.appendColumn(_var_dict.values())
         def __setattr__(self, key, value):
             binding = self._var_dict.get(key)
@@ -137,10 +138,18 @@ class Binder(QtCore.QObject):
     def __setattr__(self, key, value):
         value = value if isinstance(value, Binding) else Binding(value)
         self.__dict__[key] = value
-
-    def dump(self):
+    
+    def __call__(self,*args):
+        print(args)
         # TODO dump data
-        pass
+        print("run call")
+    
+    # def __invert__(self):
+    #     return 1
+    
+    # def dump(self):
+    #     
+    #     pass
 
 
 class GBinder(Binder):
@@ -149,9 +158,18 @@ class GBinder(Binder):
 
     def __new__(cls, *args, **kw):
         if cls._instance is None:
-            cls._instance = object.__new__(cls, *args, **kw)
+            cls._var_dict = {
+                n: s for n, s in inspect.getmembers(cls) if isinstance(s, Binding)
+            }
+            print(cls._var_dict)
+            cls._instance = Binder.__new__(cls, *args, **kw)
+            # cls.__setattr__ = lambda self,key,value: self._var_dict.get(key).binding.set(value)
         return cls._instance
-
+    
+    def __set__(self,*args, **kw):
+        print("__set__")
+        print(args)
+        print(kw)
 
 class Binding(QtGui.QStandardItem):
 

@@ -13,8 +13,7 @@ except:
     import six
 
 
-from .hook import HOOKS,hook_initialize
-# from .init import init
-from .type import Binder, connect_binder , Model
+from .hook import HOOKS, hook_initialize
+from .type import GBinder, Binder, connect_binder, Model , Binding
 
 hook_initialize()
