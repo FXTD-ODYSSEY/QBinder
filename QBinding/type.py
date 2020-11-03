@@ -123,6 +123,32 @@ def connect_binder(cls):
     setattr(cls, name, BinderInstance())
     return cls
 
+@contextmanager
+def init_binder():
+    binder = Binder()
+    yield binder
+    
+    stacks = inspect.stack()
+    # NOTE get the outer class frame
+    frame = stacks[2][0]
+    
+    class BinderInstance(Binder):
+        _var_dict = {
+            n: s for n, s in inspect.getmembers(binder) if isinstance(s, Binding)
+        }
+        locals().update(_var_dict)
+
+        def __setattr__(self, key, value):
+            binding = self._var_dict.get(key)
+            binding.set(value)
+
+    for k,v in frame.f_locals.items():
+        if binder is v:
+            frame.f_locals.update({
+                k:BinderInstance()
+            })
+            break
+    
 
 class Binder(QtCore.QObject):
 
@@ -166,10 +192,10 @@ class GBinder(Binder):
             # cls.__setattr__ = lambda self,key,value: self._var_dict.get(key).binding.set(value)
         return cls._instance
     
-    def __set__(self,*args, **kw):
-        print("__set__")
-        print(args)
-        print(kw)
+    # def __set__(self,*args, **kw):
+    #     print("__set__")
+    #     print(args)
+    #     print(kw)
 
 class Binding(QtGui.QStandardItem):
 

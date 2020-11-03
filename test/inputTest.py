@@ -22,14 +22,13 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinding import Binder, connect_binder
+from QBinding import Binder, connect_binder,init_binder
 
 
-@connect_binder
 class WidgetTest(QtWidgets.QWidget):
 
-    state = Binder()
-    state.message = "asd"
+    with init_binder() as state:
+        state.message = "asd"
 
     def __init__(self):
         super(WidgetTest, self).__init__()
