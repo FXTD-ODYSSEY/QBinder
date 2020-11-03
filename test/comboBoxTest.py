@@ -24,7 +24,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinding import Binder,connect_binder
+from QBinding import Binder, connect_binder, Model
 from Qt import QtGui, QtWidgets, QtCore
 
 
@@ -36,26 +36,8 @@ class ComboTest(QtWidgets.QWidget):
     state.text2 = "asd"
     state.num = 123
     state.enable = True
-    state.data_list = {
-        1: {2: "a"},
-        2: ["b"],
-        3: "c",
-    }
-    # @QBinding.init({
-    #     "ui":"#/../",
-    #     "state": {
-    #         "text": "123",
-    #         "text2": "1234",
-    #         "num": 123,
-    #         "enable": True,
-    #         "data_list": {
-    #             1:{2:'a'},
-    #             2:["b"],
-    #             3:"c",
-    #         },
-    #         # "data_list": ["${enable}",""],
-    #     },
-    # })
+    state.data_list = Model([state.text2, state.enable])
+
     def __init__(self):
         super(ComboTest, self).__init__()
         self.initialize()
@@ -71,7 +53,8 @@ class ComboTest(QtWidgets.QWidget):
         self.label2 = QtWidgets.QLabel()
 
         self.combo = QtWidgets.QComboBox()
-        self.combo.addItem(self.state.text)
+        self.combo.setModel(self.state.data_list)
+        # self.combo.addItem(self.state.text)
 
         layout.addWidget(self.btn)
         layout.addWidget(self.line)
@@ -96,7 +79,6 @@ class ComboTest(QtWidgets.QWidget):
         self.state.enable = not self.state.enable
         print(self.state.enable)
         # self.state.num += 1
-        self.state.data_list = [1234,1]
         # self.state.data_list.append(1)
         # self.state.data_list.append(2)
         # print self.state.data_list

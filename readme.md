@@ -2,7 +2,7 @@
 
 - [ ] 单例模式 - 数据全局共享
 - [ ] 数据 dump 输入输出
-- [ ] Qt model 进行数据绑定
+- [x] Qt model 进行数据绑定
     - [ ] 实现 QCombobox addItem 修改
 - [ ] HOOK 添加自定义的 setter getter updater
 - [ ] 

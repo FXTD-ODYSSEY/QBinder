@@ -15,6 +15,6 @@ except:
 
 from .hook import HOOKS,hook_initialize
 # from .init import init
-from .type import Binder, connect_binder
+from .type import Binder, connect_binder , Model
 
 hook_initialize()
