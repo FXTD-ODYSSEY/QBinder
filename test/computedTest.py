@@ -12,33 +12,20 @@ import sys
 repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
 sys.path.insert(0,repo) if repo not in sys.path else None
 
-import QBinding
-from Qt import QtGui, QtWidgets, QtCore
+from QBinding import Binder, connect_binder 
+from PySide2 import QtGui, QtWidgets, QtCore
 from collections import OrderedDict
 
+@connect_binder
 class WidgetTest(QtWidgets.QWidget):
-
-    @QBinding.init({
-        "state": {
-            "selected": "",
-            "option_A": "A",
-            "option_B": "B",
-            "option_C": "C",
-        },
-        "computed":{
-            # "item_list": ["${selected}","${option_B}","${option_C}",True],
-            "item_list":OrderedDict([
-                ('One', "${option_A}"),
-                ('${selected}', "${option_B}"),
-                ('A','AAA'),
-                ('Three', "${option_C}"),
-            ]),
-        },
-        "signals":{
-            "combo.currentTextChanged":"$update",
-            # "combo.currentTextChanged":"selected",
-        }
-    })
+    
+    state = Binder()
+    state.selected = ""
+    state.option_A = "A"
+    state.option_B = "B"
+    state.option_C = "C"
+    state.item_list = [state.selected,state.option_A,state.option_B,state.option_C]
+        
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
@@ -46,6 +33,7 @@ class WidgetTest(QtWidgets.QWidget):
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
+        print(self.state.selected)
 
         self.combo = QtWidgets.QComboBox()
         # self.combo.addItems(self.state.item_list)
@@ -58,37 +46,16 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.button)
 
         self.button.clicked.connect(self.testComputed)
-        # self.combo.currentTextChanged.connect(lambda *args:self.update(self.combo,*args))
+        self.combo.currentTextChanged.connect(self.update)
         self.state.selected = self.combo.currentText()
         print(self.state.item_list)
 
         self.label.setText(lambda:"selected {selected}".format(selected=self.state.selected))
     
-    # def getData(self):
-    #     print 1,self.item_list
-    #     self.item_list.append('asd')
-    #     self.item_list.insert(1,'d')
-    #     print 2,self.item_list
-    #     self.state.option_B = "BBC"
-    #     print 3,self.item_list
-    #     self.item_list[0] += 'aA'
-    #     # print self.item_list[0].replace('A','sds')
-    #     # print self.item_list[0].append('A')
-    #     print self.item_list
-    #     print self.item_list[0]
-    #     print str(self.item_list[0])
-    #     # print self.item_list[0].replace
-    #     # print self.item_list
-
     def testComputed(self):
-        self.state.option_A = 'AAA'
-        print(self.state.item_list)
-        # print self.state.item_list
-        # # self.state.item_list[0].append(1)
-        # self.state.selected += '2'
-        # print self.state.item_list
+        self.state.selected = 'AAA'
 
-    def update(self,widget,text):
+    def update(self,text):
         self.state.selected = text
 
 def main():

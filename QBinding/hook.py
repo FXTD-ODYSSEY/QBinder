@@ -7,9 +7,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-__author__ = 'timmyliang'
-__email__ = '820472580@qq.com'
-__date__ = '2020-11-02 23:47:53'
+__author__ = "timmyliang"
+__email__ = "820472580@qq.com"
+__date__ = "2020-11-02 23:47:53"
 
 import sys
 import six
@@ -34,7 +34,7 @@ HOOKS = {
             "getter": "currentText",
             "updater": "currentTextChanged",
         },
-        # "setItemText": {
+        # "addItem": {
         #     "type":str,
         # },
     },
@@ -80,22 +80,25 @@ HOOKS = {
     },
 }
 
+
 def state_handler(func, options=None):
     """
     # NOTE initialize the Qt Widget setter
     """
     options = options if options is not None else {}
     typ = options.get("type")
-    
-    def fix_cursor_position(func,widget):
-        '''fix the lineedit cusorPosition after setting the value'''
-        def wrapper(*args,**kwargs):
+
+    def fix_cursor_position(func, widget):
+        """fix the lineedit cusorPosition after setting the value"""
+
+        def wrapper(*args, **kwargs):
             pos = widget.property("cursorPosition")
-            res = func(*args,**kwargs)
-            widget.setProperty("cursorPosition",pos) if pos else None
+            res = func(*args, **kwargs)
+            widget.setProperty("cursorPosition", pos) if pos else None
             return res
+
         return wrapper
-    
+
     def wrapper(self, value, *args, **kwargs):
         if callable(value):
             # # NOTE get the outter frame state attribute from the widget class
@@ -104,23 +107,30 @@ def state_handler(func, options=None):
 
             with Binding.set_trace():
                 val = value()
-        
+
             # NOTE register auto update
-            callback = partial(lambda c: func(
-                self, typ(c()) if typ else c(), *args, **kwargs
-            ),value) 
+            callback = partial(
+                lambda c: func(self, typ(c()) if typ else c(), *args, **kwargs), value
+            )
             for binding in Binding.TRACE_LIST:
-                binding.signal.connect(callback)
+                binding.connect(callback)
 
             updater = options.get("updater")
             getter = options.get("getter")
 
             code = value.__code__
             # NOTE Single binding connect to the updater
-            if updater and getter and len(Binding.TRACE_LIST) == 1 and len(code.co_consts) == 1:
+            if (
+                updater
+                and getter
+                and len(Binding.TRACE_LIST) == 1
+                and len(code.co_consts) == 1
+            ):
                 updater = getattr(self, updater)
                 getter = getattr(self, getter)
-                updater.connect(fix_cursor_position(lambda *args: binding.set(getter()),self))
+                updater.connect(
+                    fix_cursor_position(lambda *args: binding.set(getter()), self)
+                )
 
             value = typ(val) if typ else val
 

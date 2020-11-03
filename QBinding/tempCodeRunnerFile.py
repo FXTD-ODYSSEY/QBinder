@@ -1,1 +1,0 @@
-self.val.__ge

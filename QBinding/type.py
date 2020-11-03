@@ -172,17 +172,15 @@ def connect_binder(cls):
         _var_dict = {n:s for n,s in inspect.getmembers(binder) if isinstance(s,Binding)}
         locals().update(_var_dict)
         
-        # _model = QtGui.QStandardItemModel()
+        _model = QtGui.QStandardItemModel()
         # _model.appendColumn(_var_dict.values())
         def __setattr__(self, key, value):
-            # super(BinderInstance,self).__setattr__(key, value)
-            # value = value if isinstance(value,Binding) else Binding(value)
             binding = self._var_dict.get(key)
             binding.set(value)
 
-    
     setattr(cls,name,BinderInstance())
     return cls
+
 
 class Binder(QtCore.QObject):
     
@@ -210,7 +208,7 @@ class GBinder(Binder):
             cls._instance = object.__new__(cls, *args, **kw)
         return cls._instance
 
-class Binding(QtCore.QObject,QtGui.QStandardItem):
+class Binding(QtGui.QStandardItem):
     
     TRACE = False
     SET_FLAG = False
@@ -265,12 +263,11 @@ class Binding(QtCore.QObject,QtGui.QStandardItem):
         "__gt__"        : lambda self,x:self.val.__gt__(x),
     }
     
-    signal = QtCore.Signal()
-    
     def __init__(self,val = None):
         super(Binding,self).__init__()
         self.val = self.retrieve2Notify(val)
         self.overrideOperator(self.val)
+        self.__callback_list = []
         
     @classmethod
     @contextmanager
@@ -291,8 +288,8 @@ class Binding(QtCore.QObject,QtGui.QStandardItem):
     def set(self,value):
         self.val = self.retrieve2Notify(value)
         self.overrideOperator(value)
-        # self.emitDataChanged()
-        self.signal.emit()
+        self.emitDataChanged()
+        self.emit()
     
     def get(self):
         return self.val() if callable(self.val) else self.val
@@ -333,3 +330,12 @@ class Binding(QtCore.QObject,QtGui.QStandardItem):
             return True
         return False
     
+    def connect(self,callback):
+        self.__callback_list.append(callback)
+
+    def disconnect(self,callback):
+        self.__callback_list.remove(callback)
+    
+    def emit(self,*args,**kwargs):
+        [callback(*args,**kwargs) for callback in self.__callback_list if callable(callback)]
+        

@@ -38,7 +38,7 @@ from QBinding import Binder, connect_binder
 class Counter(QtWidgets.QWidget):
 
     state = Binder()
-    state.count = 123
+    state.count = 0
     state.count2 = 6
 
     def __init__(self):
@@ -46,7 +46,7 @@ class Counter(QtWidgets.QWidget):
         self.count = 4
         self.count3 = 15
         self.initialize()
-        
+
         print(self.state.count)
 
     def initialize(self):
@@ -66,12 +66,15 @@ class Counter(QtWidgets.QWidget):
         minus_button2 = QtWidgets.QPushButton("count2 --")
         label5 = QtWidgets.QLabel()
 
-        self.label.setText(lambda:str(self.state.count))
-        label2.setText(lambda:"<center>%s %s</center>" % (self.count, self.state.count))
-        label3.setText(lambda:"<center>%s</center>" % self.count)
-        label4.setText(lambda:self.calculate(self.count, self.count3))
-        label5.setText(lambda:str(self.state.count2))
+        self.label.setText(lambda: str(self.state.count))
+        label2.setText(
+            lambda: "<center>%s %s</center>" % (self.count, self.state.count)
+        )
+        label3.setText(lambda: "<center>%s</center>" % self.count)
+        label4.setText(lambda: self.calculate(self.state.count, self.state.count2))
+        label5.setText(lambda: str(self.state.count2))
 
+        
         layout.addWidget(self.label)
         layout.addWidget(plus_button)
         layout.addWidget(minus_button)
@@ -86,7 +89,14 @@ class Counter(QtWidgets.QWidget):
         minus_button.clicked.connect(self.subtract)
         plus_button2.clicked.connect(self.add2)
         minus_button2.clicked.connect(self.subtract2)
+        
+    #     test_button = QtWidgets.QPushButton("Test")
+    #     test_button.clicked.connect(self.test)
+    #     layout.addWidget(test_button)
 
+    # def test(self):
+    #     self.state.count = "a"
+    
     def add(self):
         self.state.count += 1
 
