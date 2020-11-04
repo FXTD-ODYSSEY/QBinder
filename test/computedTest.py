@@ -12,20 +12,20 @@ import sys
 repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
 sys.path.insert(0,repo) if repo not in sys.path else None
 
-from QBinding import BinderBase, init_binder, Model
+from QBinding import Binder
 from PySide2 import QtGui, QtWidgets, QtCore
 from collections import OrderedDict
 
 
 class WidgetTest(QtWidgets.QWidget):
     
-    with init_binder() as state:
-        state.selected = ""
-        state.option_A = "A"
-        state.option_B = "B"
-        state.option_C = "C"
-        state.item_list = [state.selected,state.option_A,state.option_B,state.option_C]
-            
+    state = Binder()
+    state.selected = ""
+    state.option_A = "A"
+    state.option_B = "B"
+    state.option_C = "C"
+    state.item_list = [state.selected,state.option_A,state.option_B,state.option_C]
+        
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
@@ -33,7 +33,6 @@ class WidgetTest(QtWidgets.QWidget):
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
-        print(self.state.selected)
 
         self.combo = QtWidgets.QComboBox()
         # self.combo.addItems(self.state.item_list)
@@ -48,7 +47,6 @@ class WidgetTest(QtWidgets.QWidget):
         self.button.clicked.connect(self.testComputed)
         self.combo.currentTextChanged.connect(self.update)
         self.state.selected = self.combo.currentText()
-        print(self.state.item_list)
 
         self.label.setText(lambda:"selected {selected}".format(selected=self.state.selected))
     

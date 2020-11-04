@@ -20,7 +20,7 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinding import BinderBase, init_binder, Model
+from QBinding import Binder, Model
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
@@ -28,8 +28,8 @@ from Qt import QtGui
 
 
 class InputTest(QtWidgets.QWidget):
-    with init_binder() as state:
-        state.text = "abc"
+    state = Binder()
+    state.text = "abc"
     
     def __init__(self):
         super(InputTest, self).__init__()
@@ -47,20 +47,20 @@ class InputTest(QtWidgets.QWidget):
 
 
 class WidgetTest(QtWidgets.QWidget):
-    with init_binder() as state:
-        state.selected = ""
-        state.option_A = 123.0
-        state.option_B = "B"
-        state.option_C = "C"
-        state.item_list = [state.selected, state.option_A, state.option_B, state.option_C]
-        state.item_model = Model([
-            [[state.option_A, state.option_B], "1"],
-            [state.option_A, state.option_B],
-            state.option_B,
-            state.option_C,
-            [None, "asd", None, 123],
-            ["asd", "1234"],
-        ])
+    state = Binder()
+    state.selected = ""
+    state.option_A = 123.0
+    state.option_B = "B"
+    state.option_C = "C"
+    state.item_list = [state.selected, state.option_A, state.option_B, state.option_C]
+    state.item_model = Model([
+        [[state.option_A, state.option_B], "1"],
+        [state.option_A, state.option_B],
+        state.option_B,
+        state.option_C,
+        [None, "asd", None, 123],
+        ["asd", "1234"],
+    ])
 
     def __init__(self):
         super(WidgetTest, self).__init__()

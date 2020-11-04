@@ -31,14 +31,14 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 import os
 import sys
-from QBinding import init_binder
+from QBinding import Binder
 
 
 class Counter(QtWidgets.QWidget):
 
-    with init_binder() as state:
-        state.count = 0
-        state.count2 = 6
+    state = Binder()
+    state.count = 0
+    state.count2 = 6
 
     def __init__(self):
         super(Counter, self).__init__()

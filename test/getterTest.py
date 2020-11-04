@@ -24,14 +24,14 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinding import BinderBase, init_binder
+from QBinding import Binder
 
 
 
 class Counter(QtWidgets.QWidget):
 
-    with init_binder() as state:
-        state.data = [1,2,3]
+    state = Binder()
+    state.data = [1,2,3]
 
     def __init__(self):
         super(Counter, self).__init__()
