@@ -18,9 +18,11 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 
+
 class FnBinding(object):
-    def __init__(self,func_name):
+    def __init__(self, func_name):
         pass
+
 
 def notify(func):
     def wrapper(self, *args, **kwargs):
@@ -102,6 +104,7 @@ class NotifyDict(OrderedDict):
             elif isinstance(value, list):
                 value = NotifyList(value, self.STATE)
         return OrderedDict.__setitem__(self, key, value)
+
 
 class Binding(QtGui.QStandardItem):
 
@@ -185,9 +188,8 @@ class Binding(QtGui.QStandardItem):
     @classmethod
     def overrideOperator(cls, val):
         for attr, func in cls.operator_list.items():
-            if not attr in dir(val):
-                continue
-            setattr(cls, attr, func)
+            if attr in dir(val):
+                setattr(cls, attr, func)
 
     def retrieve2Notify(self, val, initialize=True):
         """ convert to Notify type """
@@ -231,13 +233,9 @@ class Binding(QtGui.QStandardItem):
         self.__callback_list.remove(callback)
 
     def emit(self, *args, **kwargs):
-        [
-            callback(*args, **kwargs)
-            for callback in self.__callback_list
-            if callable(callback)
-        ]
-
-
+        for callback in self.__callback_list:
+            if callable(callback):
+                callback(*args, **kwargs)
 
 
 class Model(QtCore.QAbstractItemModel):
@@ -269,12 +267,10 @@ class Model(QtCore.QAbstractItemModel):
         )
 
         # NOTE add data update callback
-        [
-            item.connect(self.dataChangedEmit)
-            for row in self._source
-            for item in row
-            if isinstance(item, Binding)
-        ]
+        for row in self._source:
+            for item in row:
+                if isinstance(item, Binding):
+                    item.connect(self.dataChangedEmit)
 
         # NOTE fill None to the empty cell
         columnCount = max([len(row) for row in self._source])
@@ -338,4 +334,3 @@ class Model(QtCore.QAbstractItemModel):
 
     def get(self):
         return self._source
-    

@@ -27,8 +27,8 @@ from QBinding import Binder
 
         
 class WidgetTest(QtWidgets.QWidget):
-    state = Binder()
-    state.text = "aasdsd"
+    with Binder() as state:
+        state.text = "aasdsd"
 
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -50,7 +50,7 @@ class WidgetTest(QtWidgets.QWidget):
         self.label.setText(lambda: "message is %s" % self.state.text)
 
     def changeText(self):
-        self.state.text = "asd"
+        self.state["text"] = "asd"
 
 def main():
     app = QtWidgets.QApplication([])

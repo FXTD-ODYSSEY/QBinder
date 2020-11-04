@@ -26,11 +26,10 @@ from Qt import QtCore
 from Qt import QtGui
 
 
-
 class InputTest(QtWidgets.QWidget):
     state = Binder()
     state.text = "abc"
-    
+
     def __init__(self):
         super(InputTest, self).__init__()
         layout = QtWidgets.QVBoxLayout()
@@ -52,15 +51,17 @@ class WidgetTest(QtWidgets.QWidget):
     state.option_A = 123.0
     state.option_B = "B"
     state.option_C = "C"
-    state.item_list = [state.selected, state.option_A, state.option_B, state.option_C]
-    state.item_model = Model([
-        [[state.option_A, state.option_B], "1"],
-        [state.option_A, state.option_B],
-        state.option_B,
-        state.option_C,
-        [None, "asd", None, 123],
-        ["asd", "1234"],
-    ])
+    state.item_list = [state["selected"], state["option_A"], state["option_B"], state["option_C"]]
+    state.item_model = Model(
+        [
+            [[state["option_A"], state["option_B"]], "1"],
+            [state["option_A"], state["option_B"]],
+            state["option_B"],
+            state["option_C"],
+            [None, "asd", None, 123],
+            ["asd", "1234"],
+        ]
+    )
 
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -97,11 +98,10 @@ class WidgetTest(QtWidgets.QWidget):
         tableView = QtWidgets.QTableView()
         layout.addWidget(tableView)
 
-        red = QtGui.QColor(255, 0, 0)
-        green = QtGui.QColor(0, 255, 0)
-        blue = QtGui.QColor(0, 0, 255)
-
-        item_list = [red, "green", "blue"]
+        # red = QtGui.QColor(255, 0, 0)
+        # green = QtGui.QColor(0, 255, 0)
+        # blue = QtGui.QColor(0, 0, 255)
+        # item_list = [red, "green", "blue"]
 
         # print (self.state.item_list)
         self.state.selected = "selected"
@@ -128,8 +128,9 @@ class WidgetTest(QtWidgets.QWidget):
 
     def addComboBox(self):
         print(self.state.item_list)
-        self.state.option_B = "BBB"
-        print(self.state.item_list)
+        self.state.option_B = 123
+        val = self.state.item_list[2]
+        print(val + '1')
 
     def changeOrder(self):
         self.text = "asd"

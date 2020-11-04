@@ -15,7 +15,7 @@ except:
 
 from .hook import HOOKS, hook_initialize
 from .binding import  Model , Binding
-from .binder import GBinder, Binder,init_binder
+from .binder import GBinder, Binder
 
 # NOTE hook Qt caller to accept lambda argument
 hook_initialize()
