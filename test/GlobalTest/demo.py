@@ -27,13 +27,14 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinding import BinderBase,  init_binder
+from QBinding import Binder,  GBinder
 from Qt import QtGui, QtWidgets, QtCore
 
 import data
 
-with init_binder(True) as gstate:
-    gstate.text = '12'
+state = GBinder()
+state.msg = 'msg'
+# state.text = 'text'
 
 class InputTest(QtWidgets.QWidget):
 
@@ -48,8 +49,8 @@ class InputTest(QtWidgets.QWidget):
         layout.addWidget(self.line)
         layout.addWidget(self.label)
 
-        self.line.setText(lambda: gstate.msg)
-        self.label.setText(lambda: gstate.text)
+        self.line.setText(lambda: state.text)
+        self.label.setText(lambda: state.msg)
         
         
 class InputTest2(QtWidgets.QWidget):
@@ -65,15 +66,17 @@ class InputTest2(QtWidgets.QWidget):
         layout.addWidget(self.line)
         layout.addWidget(self.label)
 
-        self.line.setText(lambda: gstate.text)
-        self.label.setText(lambda: gstate.msg)
+        self.line.setText(lambda: state.msg)
+        self.label.setText(lambda: state.text)
+
 
 
 if __name__ == '__main__':
     
     app = QtWidgets.QApplication(sys.argv)
+    state.input_ui = InputTest2()
+    state.input_ui.show()
+        
     widget = InputTest()
     widget.show()
-    widget2 = InputTest2()
-    widget2.show()
     sys.exit(app.exec_())

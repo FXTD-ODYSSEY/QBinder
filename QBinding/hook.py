@@ -81,7 +81,7 @@ HOOKS = {
 }
 
 
-def state_handler(func, options=None):
+def binding_handler(func, options=None):
     """
     # NOTE initialize the Qt Widget setter
     """
@@ -146,5 +146,5 @@ def hook_initialize():
     """
     for widget, setters in HOOKS.items():
         for setter, options in setters.items():
-            wrapper = state_handler(getattr(widget, setter), options)
+            wrapper = binding_handler(getattr(widget, setter), options)
             setattr(widget, setter, wrapper)

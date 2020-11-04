@@ -24,16 +24,21 @@ if MODULE not in sys.path:
 
 from QBinding import BinderBase,init_binder
 
-
+# with init_binder(True) as state:
+#     state.message = "asd"
+state = BinderBase()
+state.text = "aasdsd"
+        
 class WidgetTest(QtWidgets.QWidget):
 
-    with init_binder() as state:
-        state.message = "asd"
 
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-
+        print(state.text)
+        print(type(state.text))
+        print(type(state["text"]))
+        
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
@@ -46,11 +51,11 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.button)
 
         self.button.clicked.connect(self.changeText)
-        self.edit.setText(lambda: self.state.message)
-        self.label.setText(lambda: "message is %s" % self.state.message)
+        self.edit.setText(lambda: state.text)
+        self.label.setText(lambda: "message is %s" % state.text)
 
     def changeText(self):
-        self.state.message = "asd"
+        state.message = "asd"
 
 def main():
     app = QtWidgets.QApplication([])

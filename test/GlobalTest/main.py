@@ -27,14 +27,14 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinding import BinderBase,  init_binder
+from QBinding import Binder,  GBinder
 from Qt import QtGui, QtWidgets, QtCore
 
 import data
 from demo import InputTest,InputTest2
 
-with init_binder(True) as gstate:
-    gstate.text = 'new'
+state = GBinder()
+state.text = 'new'
 
 if __name__ == '__main__':
     

@@ -28,15 +28,19 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 sys.path.insert(0, repo) if repo not in sys.path else None
 
 import inspect
-from QBinding import GBinder,  init_binder , Binding
+from QBinding import GBinder,   Binding
 
 # class GlobalData(GBinder):
 #     text = "text"
 #     msg = "hello world"
 #     num = 123
-    
-with init_binder(singleton=True) as gstate:
-    gstate.text = "text"
-    gstate.msg = "hello world"
-    gstate.num = 123
+
+gstate = GBinder()
+gstate.text = "text"
+gstate.msg = "hello world"
+gstate.num = 123
+# with init_binder(singleton=True) as gstate:
+#     gstate.text = "text"
+#     gstate.msg = "hello world"
+#     gstate.num = 123
 

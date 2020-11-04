@@ -14,7 +14,7 @@ __date__ = "2020-11-04 15:30:25"
 import inspect
 from contextlib import contextmanager
 from collections import OrderedDict
-from .binding import Binding
+from .binding import Binding,FnBinding
 
 
 class BinderDispatcher(object):
@@ -44,93 +44,55 @@ class BinderDispatcher(object):
     
 class BinderBase(object):
 
-    _var_dict_ = {}
-
     def __getitem__(self, key):
-        print(self._var_dict_)
         return self._var_dict_.get(key)
 
     def __setitem__(self, key, value):
         var = self._var_dict_.get(key)
         var.set(value) if var else None
 
-    def __setattr__(self, key, value):
-        value = value if isinstance(value, Binding) else Binding(value)
-        self.__dict__[key] = value
 
+    def __setattr__(self, key, value):
+        binding = self._var_dict_.get(key)
+        if binding:
+            binding.set(value)
+        else:
+            # NOTE assign binding to class static member
+            binding = Binding(value)
+            self._var_dict_[key] = binding
+            setattr(self.__class__, key, binding)
+    
     def __call__(self, *args):
         # NOTE __call__ dispatch function avoid polluting local scope
         return BinderDispatcher(self).dispatch(*args)
 
+class Binder(BinderBase):
+    
+    def __new__(cls, *args, **kw):
+        # NOTE spawn differenct class instance to contain static member
+        class BinderInstance(BinderBase):
+            _var_dict_ = {}
+        return cls.__new__(BinderInstance, *args, **kw)
 
 class GBinder(BinderBase):
     # NOTE Global Singleton
     __instance = None
-
+    _var_dict_ = {}
+    
     def __new__(cls, *args, **kw):
         if cls.__instance is None:
-            attr_list = [
-                k
-                for k in cls.__dict__.keys()
-                if not k.startswith("__") and not k.endswith("__")
-            ]
-
-            var_dict = {}
-            for n, s in inspect.getmembers(cls):
-                if n in attr_list:
-                    s = Binding(s)
-                    setattr(cls, n, s)
-                    var_dict[n] = s
-
-            # NOTE __setitem__ and __getitem__ need _var_dict_ private variable
-            setattr(cls, "_var_dict_", var_dict)
             cls.__instance = BinderBase.__new__(cls, *args, **kw)
         return cls.__instance
 
     def __setattr__(self, key, value):
         binding = self._var_dict_.get(key)
-        binding.set(value)
-
-
-@contextmanager
-def init_binder(singleton=False):
-    binder = BinderBase()
-    yield binder
-
-    # NOTE get the outer frame
-    stacks = inspect.stack()
-    frame = stacks[2][0]
-
-    _var_dict_ = {n: s for n, s in inspect.getmembers(binder) if isinstance(s, Binding)}
-    # TODO bind function
-    # _func_dict_ = {n: s for n, s in inspect.getmembers(binder) if isinstance(s, Binding)}
-
-    # TODO record all the exist binder
-    if singleton:
-        for n, s in _var_dict_.items():
-            setattr(GBinder, n, s)
-        GBinder._var_dict_.update(_var_dict_)
-        cls = GBinder
-    else:
-        _var_dict_.update({"_var_dict_": _var_dict_})
-
-        class Binder(BinderBase):
-
-            locals().update(_var_dict_)
-
-            def __setattr__(self, key, value):
-                binding = self._var_dict_.get(key)
-                binding.set(value)
-
-        cls = Binder
-
-    # NOTE add to the local scope
-    for k, v in frame.f_locals.items():
-        if binder is v:
-            binder = cls()
-            frame.f_locals.update({k: binder})
-            break
-
+        if binding:
+            binding.set(value)
+        else:
+            # NOTE assign binding to class static member
+            binding = Binding(value)
+            self._var_dict_[key] = binding
+            setattr(self.__class__,key,binding)
 
 def fn(func_name):
-    pass
+    return FnBinding(func_name)

@@ -8,7 +8,7 @@
     - [ ] 实现 QCombobox addItem 扩展支持
 - [ ] HOOK 添加自定义的 setter getter updater
 - [ ] Binder 绑定函数
-- [ ] 制作类似 vue-devtools 调试面板
+- [ ] 制作类似 vue-devtools 的调试面板
 
 - [ ] combobox update delay
 - [ ] init_binder 实例化的时候记录所有的 binder 方便后续进行 dump 统一存储
@@ -16,3 +16,4 @@
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)
+

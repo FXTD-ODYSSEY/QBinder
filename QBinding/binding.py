@@ -18,6 +18,10 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 
+class FnBinding(object):
+    def __init__(self,func_name):
+        pass
+
 def notify(func):
     def wrapper(self, *args, **kwargs):
         res = func(self, *args, **kwargs)
@@ -98,10 +102,6 @@ class NotifyDict(OrderedDict):
             elif isinstance(value, list):
                 value = NotifyList(value, self.STATE)
         return OrderedDict.__setitem__(self, key, value)
-
-class FnBinding(object):
-    def __init__(self,func_name):
-        pass
 
 class Binding(QtGui.QStandardItem):
 
