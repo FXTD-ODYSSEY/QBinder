@@ -24,25 +24,24 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinding import Binder, connect_binder, Model
+from QBinding import BinderBase, init_binder, Model
 from Qt import QtGui, QtWidgets, QtCore
 
 
-@connect_binder
 class ComboTest(QtWidgets.QWidget):
 
-    state = Binder()
-    state.text = "asd"
-    state.text2 = "asd"
-    state.num = 123
-    state.enable = True
-    state.data_list = Model([state.text2, state.enable])
+    with init_binder() as state:
+        state.text = "asd"
+        state.text2 = "asd"
+        state.num = 123
+        state.enable = True
+        state.data_list = Model([state.text2, state.enable])
 
     def __init__(self):
         super(ComboTest, self).__init__()
         self.initialize()
 
-        print(~self.state)
+        # print(~self.state)
 
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
@@ -80,7 +79,8 @@ class ComboTest(QtWidgets.QWidget):
     def clickEvent(self):
         self.state.enable = not self.state.enable
         print(self.state.enable)
-        self.state.data_list.append(1)
+        # self.state.data_list.append(1)
+        
         # self.state.num += 1
         # self.state.data_list.append(2)
         # print self.state.data_list

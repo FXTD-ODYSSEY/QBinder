@@ -12,20 +12,20 @@ import sys
 repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
 sys.path.insert(0,repo) if repo not in sys.path else None
 
-from QBinding import Binder, connect_binder 
+from QBinding import BinderBase, init_binder, Model
 from PySide2 import QtGui, QtWidgets, QtCore
 from collections import OrderedDict
 
-@connect_binder
+
 class WidgetTest(QtWidgets.QWidget):
     
-    state = Binder()
-    state.selected = ""
-    state.option_A = "A"
-    state.option_B = "B"
-    state.option_C = "C"
-    state.item_list = [state.selected,state.option_A,state.option_B,state.option_C]
-        
+    with init_binder() as state:
+        state.selected = ""
+        state.option_A = "A"
+        state.option_B = "B"
+        state.option_C = "C"
+        state.item_list = [state.selected,state.option_A,state.option_B,state.option_C]
+            
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()

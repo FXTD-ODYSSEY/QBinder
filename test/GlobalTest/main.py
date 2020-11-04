@@ -9,7 +9,7 @@ from __future__ import absolute_import
 
 __author__ = 'timmyliang'
 __email__ = '820472580@qq.com'
-__date__ = '2020-11-03 15:55:15'
+__date__ = '2020-11-04 14:53:13'
 
 import os
 import sys
@@ -27,16 +27,20 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-import inspect
-from QBinding import GBinder,  init_binder , Binding
+from QBinding import BinderBase,  init_binder
+from Qt import QtGui, QtWidgets, QtCore
 
-# class GlobalData(GBinder):
-#     text = "text"
-#     msg = "hello world"
-#     num = 123
+import data
+from demo import InputTest,InputTest2
+
+with init_binder(True) as gstate:
+    gstate.text = 'new'
+
+if __name__ == '__main__':
     
-with init_binder(singleton=True) as gstate:
-    gstate.text = "text"
-    gstate.msg = "hello world"
-    gstate.num = 123
-
+    app = QtWidgets.QApplication(sys.argv)
+    widget = InputTest()
+    widget.show()
+    widget2 = InputTest2()
+    widget2.show()
+    sys.exit(app.exec_())

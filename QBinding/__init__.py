@@ -14,6 +14,7 @@ except:
 
 
 from .hook import HOOKS, hook_initialize
-from .type import GBinder, Binder, connect_binder,init_binder, Model , Binding
+from .type import GBinder, BinderBase, Model , Binding
+from .binder import init_binder
 
 hook_initialize()

@@ -18,12 +18,14 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 
+from .attrdict import AttrDict
 
 def notify(func):
     def wrapper(self, *args, **kwargs):
         res = func(self, *args, **kwargs)
         if hasattr(self, "STATE"):
             self.STATE.emitDataChanged()
+            self.STATE.emit()
         return res
 
     return wrapper
@@ -99,103 +101,55 @@ class NotifyDict(OrderedDict):
                 value = NotifyList(value, self.STATE)
         return OrderedDict.__setitem__(self, key, value)
 
+class BinderBase(object):
 
-def connect_binder(cls):
-    for name, binder in inspect.getmembers(cls):
-        if isinstance(binder, Binder):
-            break
-    else:
-        raise RuntimeError("No Binder Found")
-
-    class BinderInstance(Binder):
-        _var_dict = {
-            n: s for n, s in inspect.getmembers(binder) if isinstance(s, Binding)
-        }
-        locals().update(_var_dict)
-
-        # _model = QtGui.QStandardItemModel()
-        # _data_list = _var_dict.values()
-        # _model.appendColumn(_var_dict.values())
-        def __setattr__(self, key, value):
-            binding = self._var_dict.get(key)
-            binding.set(value)
-
-    setattr(cls, name, BinderInstance())
-    return cls
-
-@contextmanager
-def init_binder():
-    binder = Binder()
-    yield binder
-    
-    stacks = inspect.stack()
-    # NOTE get the outer class frame
-    frame = stacks[2][0]
-    
-    class BinderInstance(Binder):
-        _var_dict = {
-            n: s for n, s in inspect.getmembers(binder) if isinstance(s, Binding)
-        }
-        locals().update(_var_dict)
-
-        def __setattr__(self, key, value):
-            binding = self._var_dict.get(key)
-            binding.set(value)
-
-    for k,v in frame.f_locals.items():
-        if binder is v:
-            frame.f_locals.update({
-                k:BinderInstance()
-            })
-            break
-    
-
-class Binder(QtCore.QObject):
-
-    _var_dict = {}
+    _var_dict_ = {}
 
     def __getitem__(self, key):
-        return self._var_dict.get(key)
+        print(self._var_dict_)
+        return self._var_dict_.get(key)
 
     def __setitem__(self, key, value):
-        var = self._var_dict.get(key)
+        var = self._var_dict_.get(key)
         var.set(value) if var else None
 
     def __setattr__(self, key, value):
         value = value if isinstance(value, Binding) else Binding(value)
         self.__dict__[key] = value
-    
-    def __call__(self,*args):
+
+    def __call__(self, *args):
         print(args)
         # TODO dump data
         print("run call")
-    
-    # def __invert__(self):
-    #     return 1
-    
-    # def dump(self):
-    #     
-    #     pass
 
 
-class GBinder(Binder):
+class GBinder(BinderBase):
     # NOTE Global Singleton
-    _instance = None
+    __instance = None
 
     def __new__(cls, *args, **kw):
-        if cls._instance is None:
-            cls._var_dict = {
-                n: s for n, s in inspect.getmembers(cls) if isinstance(s, Binding)
-            }
-            print(cls._var_dict)
-            cls._instance = Binder.__new__(cls, *args, **kw)
-            # cls.__setattr__ = lambda self,key,value: self._var_dict.get(key).binding.set(value)
-        return cls._instance
-    
-    # def __set__(self,*args, **kw):
-    #     print("__set__")
-    #     print(args)
-    #     print(kw)
+        if cls.__instance is None:
+            attr_list = [
+                k
+                for k in cls.__dict__.keys()
+                if not k.startswith("__") and not k.endswith("__")
+            ]
+
+            var_dict = {}
+            for n, s in inspect.getmembers(cls):
+                if n in attr_list:
+                    s = Binding(s)
+                    setattr(cls, n, s)
+                    var_dict[n] = s
+
+            # NOTE __setitem__ and __getitem__ need _var_dict_ private variable
+            setattr(cls, "_var_dict_", var_dict)
+            cls.__instance = BinderBase.__new__(cls, *args, **kw)
+        return cls.__instance
+
+    def __setattr__(self, key, value):
+        binding = self._var_dict_.get(key)
+        binding.set(value)
 
 class Binding(QtGui.QStandardItem):
 
@@ -264,9 +218,7 @@ class Binding(QtGui.QStandardItem):
         cls.TRACE = False
 
     def __get__(self, instance, owner):
-        self.TRACE_LIST.append(
-            self
-        ) if self.TRACE and self not in self.TRACE_LIST else None
+        self.TRACE_LIST.append(self) if self.TRACE else None
         return self.get()
 
     def set(self, value):
@@ -361,7 +313,7 @@ class Model(QtCore.QAbstractItemModel):
             if source
             else []
         )
-        
+
         # NOTE add data update callback
         [
             item.connect(self.dataChangedEmit)

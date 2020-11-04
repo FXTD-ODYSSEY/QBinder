@@ -22,7 +22,7 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinding import Binder, connect_binder,init_binder
+from QBinding import BinderBase,init_binder
 
 
 class WidgetTest(QtWidgets.QWidget):

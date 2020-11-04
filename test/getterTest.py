@@ -24,14 +24,14 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinding import Binder, connect_binder
+from QBinding import BinderBase, init_binder
 
 
-@connect_binder
+
 class Counter(QtWidgets.QWidget):
 
-    state = Binder()
-    state.text = "asd"
+    with init_binder() as state:
+        state.data = [1,2,3]
 
     def __init__(self):
         super(Counter, self).__init__()
@@ -41,26 +41,18 @@ class Counter(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
 
-        self.line = QtWidgets.QLineEdit()
-        self.line2 = QtWidgets.QLineEdit()
-
         label = QtWidgets.QLabel()
         plus_button = QtWidgets.QPushButton("+")
 
-        layout.addWidget(self.line)
         layout.addWidget(label)
-        layout.addWidget(self.line2)
         layout.addWidget(plus_button)
 
-        self.line.setText(lambda: self.state.text)
-        self.line2.setText(lambda: self.state.text)
-        label.setText(lambda: "Label %s" % self.state.text)
-        # self.line.textChanged.connect(self.modify)
-        # self.line2.textChanged.connect(self.modify)
-        plus_button.clicked.connect(self.changeText)
+        label.setText(lambda: "Label %s" % self.state.data)
+        plus_button.clicked.connect(self.changeData)
 
-    def changeText(self):
-        self.line.setText("bbcc")
+    def changeData(self):
+        self.state.data.append(3)
+        print(self.state.data)
 
 
 def main():

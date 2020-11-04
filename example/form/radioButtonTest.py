@@ -12,22 +12,16 @@ import sys
 repo = (lambda f:lambda p=__file__:f(f,p))(lambda f,p: p if [d for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p)) if d == '.git'] else None if os.path.dirname(p) == p else f(f,os.path.dirname(p)))()
 sys.path.insert(0,repo) if repo not in sys.path else None
 
-import QBinding
+from QBinding import init_binder
 from Qt import QtGui, QtWidgets, QtCore
 
 from functools import partial
 
 class WidgetTest(QtWidgets.QWidget):
 
-    @QBinding.init({
-        "state": {
-            "picked": "",
-        },
-        "signals":{
-            "rb1.toggled":"updateRB",
-            "rb2.toggled":"updateRB",
-        }
-    })
+    with init_binder() as state:
+        state.picked = ""
+
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
@@ -51,8 +45,8 @@ class WidgetTest(QtWidgets.QWidget):
 
         self.label.setText(lambda:"CheckedNames %s" %  self.state.picked)
 
-        # for rb in groupBox.findChildren(QtWidgets.QRadioButton):
-        #     rb.toggled.connect(partial(self.updateRB,rb))
+        for rb in groupBox.findChildren(QtWidgets.QRadioButton):
+            rb.toggled.connect(partial(self.updateRB,rb))
 
     def updateRB(self,rb,state):
         if state:
