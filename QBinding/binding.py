@@ -18,8 +18,6 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 
-from .attrdict import AttrDict
-
 def notify(func):
     def wrapper(self, *args, **kwargs):
         res = func(self, *args, **kwargs)
@@ -101,55 +99,9 @@ class NotifyDict(OrderedDict):
                 value = NotifyList(value, self.STATE)
         return OrderedDict.__setitem__(self, key, value)
 
-class BinderBase(object):
-
-    _var_dict_ = {}
-
-    def __getitem__(self, key):
-        print(self._var_dict_)
-        return self._var_dict_.get(key)
-
-    def __setitem__(self, key, value):
-        var = self._var_dict_.get(key)
-        var.set(value) if var else None
-
-    def __setattr__(self, key, value):
-        value = value if isinstance(value, Binding) else Binding(value)
-        self.__dict__[key] = value
-
-    def __call__(self, *args):
-        print(args)
-        # TODO dump data
-        print("run call")
-
-
-class GBinder(BinderBase):
-    # NOTE Global Singleton
-    __instance = None
-
-    def __new__(cls, *args, **kw):
-        if cls.__instance is None:
-            attr_list = [
-                k
-                for k in cls.__dict__.keys()
-                if not k.startswith("__") and not k.endswith("__")
-            ]
-
-            var_dict = {}
-            for n, s in inspect.getmembers(cls):
-                if n in attr_list:
-                    s = Binding(s)
-                    setattr(cls, n, s)
-                    var_dict[n] = s
-
-            # NOTE __setitem__ and __getitem__ need _var_dict_ private variable
-            setattr(cls, "_var_dict_", var_dict)
-            cls.__instance = BinderBase.__new__(cls, *args, **kw)
-        return cls.__instance
-
-    def __setattr__(self, key, value):
-        binding = self._var_dict_.get(key)
-        binding.set(value)
+class FnBinding(object):
+    def __init__(self,func_name):
+        pass
 
 class Binding(QtGui.QStandardItem):
 
@@ -286,6 +238,8 @@ class Binding(QtGui.QStandardItem):
         ]
 
 
+
+
 class Model(QtCore.QAbstractItemModel):
     def __init__(self, source=None):
         super(Model, self).__init__()
@@ -384,3 +338,4 @@ class Model(QtCore.QAbstractItemModel):
 
     def get(self):
         return self._source
+    

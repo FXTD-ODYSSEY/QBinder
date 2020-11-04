@@ -37,7 +37,10 @@ class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-
+        print(self.state('dump'))
+        dispatcher = self.state('dispatcher')
+        print(dispatcher)
+        
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)

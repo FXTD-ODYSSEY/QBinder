@@ -20,7 +20,7 @@ from Qt import QtCore
 from Qt import QtWidgets
 from Qt import QtGui
 
-from .type import Binding
+from .binding import Binding
 
 HOOKS = {
     QtWidgets.QComboBox: {
