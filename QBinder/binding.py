@@ -162,7 +162,8 @@ class Binding(QtGui.QStandardItem):
         super(Binding, self).__init__()
         self.val = self.retrieve2Notify(val)
         self.overrideOperator(self.val)
-        self.__callback_list = []
+        self.event_loop = []
+        self.bind_widgets = []
 
     @classmethod
     @contextmanager
@@ -228,15 +229,15 @@ class Binding(QtGui.QStandardItem):
         return False
 
     def connect(self, callback):
-        self.__callback_list.append(callback)
+        self.event_loop.append(callback)
 
     def disconnect(self, callback):
-        self.__callback_list.remove(callback)
+        self.event_loop.remove(callback)
 
     def emit(self, *args, **kwargs):
         [
             callback(*args, **kwargs)
-            for callback in self.__callback_list
+            for callback in self.event_loop
             if callable(callback)
         ]
 

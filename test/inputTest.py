@@ -28,6 +28,12 @@ from QBinder import Binder
 class WidgetTest(QtWidgets.QWidget):
     with Binder() as state:
         state.text = "aasdsd"
+        state.num = 1
+        state.val = 2.0
+    # state = Binder()
+    # state.text = "aasdsd"
+    # state.num = 1
+    # state.val = 2.0
     
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -44,13 +50,26 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.button)
 
-        self.button.clicked.connect(self.changeText)
+        self.button.clicked.connect(self.change_text)
         self.edit.setText(lambda: self.state.text)
         self.label.setText(lambda: "message is %s" % self.state.text)
-
-    def changeText(self):
-        self.state["text"] = "asd"
-
+        
+        self.spin = QtWidgets.QSpinBox(self)
+        self.label = QtWidgets.QLabel()
+        layout.addWidget(self.spin)
+        layout.addWidget(self.label)
+        self.spin.setValue(lambda: self.state.num)
+        self.label.setText(lambda: "num is %s" % self.state.num)
+        
+        self.spin = QtWidgets.QDoubleSpinBox(self)
+        self.label = QtWidgets.QLabel()
+        layout.addWidget(self.spin)
+        layout.addWidget(self.label)
+        self.spin.setValue(lambda: self.state.val)
+        self.label.setText(lambda: "val is %s" % self.state.val)
+        
+    def change_text(self):
+        self.state.text = "asd"
 
 def main():
     app = QtWidgets.QApplication([])

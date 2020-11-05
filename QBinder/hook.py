@@ -67,14 +67,14 @@ HOOKS = {
     QtWidgets.QSpinBox: {
         "setValue": {
             "type": int,
-            "getter": "getValue",
+            "getter": "value",
             "updater": "valueChanged",
         },
     },
     QtWidgets.QDoubleSpinBox: {
         "setValue": {
             "type": float,
-            "getter": "getValue",
+            "getter": "value",
             "updater": "valueChanged",
         },
     },
@@ -101,9 +101,6 @@ def binding_handler(func, options=None):
 
     def wrapper(self, value, *args, **kwargs):
         if callable(value):
-            # # NOTE get the outter frame state attribute from the widget class
-            # frame = inspect.currentframe().f_back
-            # parent = frame.f_locals.get('self')
 
             # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
             with Binding.set_trace():
@@ -114,6 +111,7 @@ def binding_handler(func, options=None):
                 lambda c: func(self, typ(c()) if typ else c(), *args, **kwargs), value
             )
             for binding in Binding.TRACE_LIST:
+                binding.bind_widgets.append(self) if self not in binding.bind_widgets else None
                 binding.connect(callback)
 
             updater = options.get("updater")

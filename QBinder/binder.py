@@ -89,19 +89,17 @@ class BinderBase(object):
 
     def __exit__(self, *args):
         # NOTE get the outer frame
-        frame = inspect.stack()[1][0]
-
+        frame = inspect.currentframe().f_back
+        
         # NOTE add to the local scope
         for k, v in frame.f_locals.items():
             if self.proxy is v:
-                {
-                    setattr(self.__class__, n, s)
-                    for n, s in inspect.getmembers(self.proxy)
-                    if isinstance(s, Binding)
-                }
+                for n, s in inspect.getmembers(self.proxy):
+                    if isinstance(s, Binding):
+                        self._var_dict_[n] = s
+                        setattr(self.__class__, n, s)
                 frame.f_locals.update({k: self})
                 break
-
 
 class Binder(BinderBase):
     def __new__(cls, *args, **kw):
