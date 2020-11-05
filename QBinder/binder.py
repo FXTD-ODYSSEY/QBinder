@@ -44,6 +44,20 @@ class BinderDispatcher(object):
         return self
 
 
+class BinderProxy(object):
+    _var_dict_ = {}
+    def __getitem__(self, key):
+        return self._var_dict_.get(key)
+
+    def __setitem__(self, key, value):
+        var = self._var_dict_.get(key)
+        var.set(value) if var else None
+        
+    def __setattr__(self, key, value):
+        self._var_dict_[key] = value
+        value = value if isinstance(value, Binding) else Binding(value)
+        self.__dict__[key] = value
+
 class BinderBase(object):
     _var_dict_ = {}
 
@@ -70,10 +84,23 @@ class BinderBase(object):
 
     def __enter__(self):
         # NOTE support with statement for group indent
-        return self
+        self.proxy = BinderProxy()
+        return self.proxy
 
     def __exit__(self, *args):
-        pass
+        # NOTE get the outer frame
+        frame = inspect.stack()[1][0]
+
+        # NOTE add to the local scope
+        for k, v in frame.f_locals.items():
+            if self.proxy is v:
+                {
+                    setattr(self.__class__, n, s)
+                    for n, s in inspect.getmembers(self.proxy)
+                    if isinstance(s, Binding)
+                }
+                frame.f_locals.update({k: self})
+                break
 
 
 class Binder(BinderBase):
@@ -97,7 +124,7 @@ class GBinder(BinderBase):
 
 
 # TODO bind function
-# TODO record all the exist binder
+# TODO collect all the exist binder for dumping
 
 # TODO fn binding
 def fn(func_name):

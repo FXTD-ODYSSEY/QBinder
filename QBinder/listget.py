@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-safe get list
-"""
 
 from __future__ import division
 from __future__ import print_function

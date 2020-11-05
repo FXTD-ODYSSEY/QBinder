@@ -15,8 +15,6 @@ from PySide2 import QtGui
 import os
 import sys
 
-from functools import wraps
-
 DIR = os.path.dirname(__file__)
 import sys
 

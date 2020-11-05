@@ -105,6 +105,7 @@ def binding_handler(func, options=None):
             # frame = inspect.currentframe().f_back
             # parent = frame.f_locals.get('self')
 
+            # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
             with Binding.set_trace():
                 val = value()
 
@@ -123,8 +124,8 @@ def binding_handler(func, options=None):
             if (
                 updater
                 and getter
-                and len(Binding.TRACE_LIST) == 1
-                and len(code.co_consts) == 1
+                and len(Binding.TRACE_LIST) == 1  # NOTE only bind one response variable
+                and len(code.co_consts) == 1  # NOTE only bind directly variable
             ):
                 updater = getattr(self, updater)
                 getter = getattr(self, getter)

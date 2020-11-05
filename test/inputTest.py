@@ -28,7 +28,7 @@ from QBinder import Binder
 class WidgetTest(QtWidgets.QWidget):
     with Binder() as state:
         state.text = "aasdsd"
-
+    
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
