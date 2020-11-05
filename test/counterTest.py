@@ -31,7 +31,7 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 import os
 import sys
-from QBinding import Binder
+from QBinder import Binder
 
 
 class Counter(QtWidgets.QWidget):
@@ -73,7 +73,6 @@ class Counter(QtWidgets.QWidget):
         label4.setText(lambda: self.calculate(self.state.count, self.state.count2))
         label5.setText(lambda: str(self.state.count2))
 
-        
         layout.addWidget(self.label)
         layout.addWidget(plus_button)
         layout.addWidget(minus_button)
@@ -88,14 +87,14 @@ class Counter(QtWidgets.QWidget):
         minus_button.clicked.connect(self.subtract)
         plus_button2.clicked.connect(self.add2)
         minus_button2.clicked.connect(self.subtract2)
-        
+
     #     test_button = QtWidgets.QPushButton("Test")
     #     test_button.clicked.connect(self.test)
     #     layout.addWidget(test_button)
 
     # def test(self):
     #     self.state.count = "a"
-    
+
     def add(self):
         self.state.count += 1
 

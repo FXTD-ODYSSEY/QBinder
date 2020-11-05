@@ -24,23 +24,23 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinding import init_binder
+from QBinder import Binder
 from Qt import QtGui, QtWidgets, QtCore
 from functools import partial
 
 
 class WidgetTest(QtWidgets.QWidget):
 
-    with init_binder() as state:
-        state.selected = []
+    state = Binder()
+    state.selected = []
 
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-        print(self.state('dump'))
-        dispatcher = self.state('dispatcher')
+        print(self.state("dump"))
+        dispatcher = self.state("dispatcher")
         print(dispatcher)
-        
+
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)

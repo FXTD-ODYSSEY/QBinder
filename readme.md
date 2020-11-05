@@ -7,11 +7,13 @@
     - [ ] Model 实现可扩展
     - [ ] 实现 QCombobox addItem 扩展支持
 - [ ] HOOK 添加自定义的 setter getter updater
-- [ ] Binder 绑定函数
-- [ ] 制作类似 vue-devtools 的调试面板
+- [x] Binder 绑定函数
+- [ ] 制作类似 vue-devtools 的调试面板 (mpdb 面板)
+- [ ] GBinder 括号 传入字符串参数作为分组
 
 - [ ] combobox update delay
-- [ ] init_binder 实例化的时候记录所有的 binder 方便后续进行 dump 统一存储
+- [ ] 实例化的时候记录所有的 binder 方便后续进行 dump 统一存储
+- [ ] 自动 bind QGroupBox CheckBox 和 RadioButton
 
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)

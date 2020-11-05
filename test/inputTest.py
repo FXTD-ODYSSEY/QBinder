@@ -22,10 +22,9 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinding import Binder
+from QBinder import Binder
 
 
-        
 class WidgetTest(QtWidgets.QWidget):
     with Binder() as state:
         state.text = "aasdsd"
@@ -33,7 +32,7 @@ class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-        
+
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
@@ -51,6 +50,7 @@ class WidgetTest(QtWidgets.QWidget):
 
     def changeText(self):
         self.state["text"] = "asd"
+
 
 def main():
     app = QtWidgets.QApplication([])

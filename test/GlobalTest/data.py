@@ -7,9 +7,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-__author__ = 'timmyliang'
-__email__ = '820472580@qq.com'
-__date__ = '2020-11-03 15:55:15'
+__author__ = "timmyliang"
+__email__ = "820472580@qq.com"
+__date__ = "2020-11-03 15:55:15"
 
 import os
 import sys
@@ -28,7 +28,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 sys.path.insert(0, repo) if repo not in sys.path else None
 
 import inspect
-from QBinding import GBinder,   Binding
+from QBinder import GBinder, Binding
 
 # class GlobalData(GBinder):
 #     text = "text"
@@ -43,4 +43,3 @@ gstate.num = 123
 #     gstate.text = "text"
 #     gstate.msg = "hello world"
 #     gstate.num = 123
-

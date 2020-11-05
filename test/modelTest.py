@@ -20,7 +20,7 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinding import Binder, Model
+from QBinder import Binder, Model
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
@@ -51,7 +51,12 @@ class WidgetTest(QtWidgets.QWidget):
     state.option_A = 123.0
     state.option_B = "B"
     state.option_C = "C"
-    state.item_list = [state["selected"], state["option_A"], state["option_B"], state["option_C"]]
+    state.item_list = [
+        state["selected"],
+        state["option_A"],
+        state["option_B"],
+        state["option_C"],
+    ]
     state.item_model = Model(
         [
             [[state["option_A"], state["option_B"]], "1"],
@@ -130,7 +135,7 @@ class WidgetTest(QtWidgets.QWidget):
         print(self.state.item_list)
         self.state.option_B = 123
         val = self.state.item_list[2]
-        print(val + '1')
+        print(val + "1")
 
     def changeOrder(self):
         self.text = "asd"

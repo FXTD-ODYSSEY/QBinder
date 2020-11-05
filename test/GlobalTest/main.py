@@ -7,9 +7,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-__author__ = 'timmyliang'
-__email__ = '820472580@qq.com'
-__date__ = '2020-11-04 14:53:13'
+__author__ = "timmyliang"
+__email__ = "820472580@qq.com"
+__date__ = "2020-11-04 14:53:13"
 
 import os
 import sys
@@ -27,17 +27,17 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinding import Binder,  GBinder
+from QBinder import Binder, GBinder
 from Qt import QtGui, QtWidgets, QtCore
 
 import data
-from demo import InputTest,InputTest2
+from demo import InputTest, InputTest2
 
 state = GBinder()
-state.text = 'new'
+state.text = "new"
 
-if __name__ == '__main__':
-    
+if __name__ == "__main__":
+
     app = QtWidgets.QApplication(sys.argv)
     widget = InputTest()
     widget.show()

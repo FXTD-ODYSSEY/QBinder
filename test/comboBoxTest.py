@@ -24,12 +24,12 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinding import Binder, Model
+from QBinder import Binder, Model
 from Qt import QtGui, QtWidgets, QtCore
 
 
 class ComboTest(QtWidgets.QWidget):
-    
+
     state = Binder()
     state.text = "asd"
     state.text2 = "asd"
@@ -37,7 +37,6 @@ class ComboTest(QtWidgets.QWidget):
     state.enable = True
     # state.data_list = Model([state.text2, state.enable])
     state.data_list = Model([state["text2"], state["enable"]])
-        
 
     def __init__(self):
         super(ComboTest, self).__init__()
@@ -82,7 +81,7 @@ class ComboTest(QtWidgets.QWidget):
         self.state.enable = not self.state.enable
         print(self.state.enable)
         # self.state.data_list.append(1)
-        
+
         # self.state.num += 1
         # self.state.data_list.append(2)
         # print self.state.data_list

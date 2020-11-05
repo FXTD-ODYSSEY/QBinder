@@ -1,14 +1,15 @@
 # coding:utf-8
 
-__author__ =  'timmyliang'
-__email__ =  '820472580@qq.com'
-__date__ = '2020-03-29 23:23:16'
+__author__ = "timmyliang"
+__email__ = "820472580@qq.com"
+__date__ = "2020-03-29 23:23:16"
 
 """
 https://zhuanlan.zhihu.com/p/21945624
 """
 
 import sys
+
 MODULE = r"D:\Users\82047\Desktop\repo\QtConfig\QBinding\_vender"
 if MODULE not in sys.path:
     sys.path.append(MODULE)
@@ -16,14 +17,14 @@ if MODULE not in sys.path:
 import ast
 import astor
 
-expr="""
+expr = """
 from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
 import os
 import sys
 # import QBinding
-from QBinding import store
+from QBinder import store
 
 class Counter(QtWidgets.QWidget):
 
@@ -49,33 +50,36 @@ class Counter(QtWidgets.QWidget):
         layout.addWidget(self.line)
         layout.addWidget(label)
 """
-p=ast.parse(expr)
+p = ast.parse(expr)
+
 
 class QBindingImportParser(ast.NodeVisitor):
     import_dict = {}
 
-    def visit_ImportFrom(self,node):
+    def visit_ImportFrom(self, node):
         module = node.module
         alias = node.names[0]
         var = alias.asname if alias.asname else alias.name
-        self.import_dict[var] = "%s.%s" % (module,var)
+        self.import_dict[var] = "%s.%s" % (module, var)
 
-    def visit_Import(self,node):
+    def visit_Import(self, node):
         alias = node.names[0]
         var = alias.asname if alias.asname else alias.name
         self.import_dict[var] = var
 
+
 class QBindingDecoratorParser(ast.NodeVisitor):
 
     store_option = []
-    def __init__(self,import_dict):
+
+    def __init__(self, import_dict):
         self.import_dict = import_dict
 
     def visit_ClassDef(self, node):
         class_func_dict = []
         print node
         for n in ast.iter_child_nodes(node):
-            if isinstance(n, ast.FunctionDef) :
+            if isinstance(n, ast.FunctionDef):
                 if n.name == "__init__":
                     # NOTE 遍历查询 QBinding 装饰器
                     for decorator in n.decorator_list:
@@ -88,25 +92,33 @@ class QBindingDecoratorParser(ast.NodeVisitor):
                             self.store_option.append(decorator.args)
                             break
                 for n in ast.iter_child_nodes(n):
-                    if not isinstance(n, ast.Expr) or not isinstance(n.value,ast.Call) : continue
+                    if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Call):
+                        continue
                     for arg in n.value.args:
-                        if not isinstance(arg,ast.Attribute):
+                        if not isinstance(arg, ast.Attribute):
                             continue
                         value = arg.value
-                        if isinstance(value,ast.Attribute) and value.attr == "state" and value.value.id == "self" :
+                        if (
+                            isinstance(value, ast.Attribute)
+                            and value.attr == "state"
+                            and value.value.id == "self"
+                        ):
                             attr = arg.attr
                             func = n.value.func
-                            print attr,func.lineno
+                            print attr, func.lineno
                             break
+
+
 class QBindingCallParser(ast.NodeVisitor):
 
     store_option = None
-    def __init__(self,import_dict):
+
+    def __init__(self, import_dict):
         self.import_dict = import_dict
-   
-    def visit_Call(self,node):
+
+    def visit_Call(self, node):
         print node
-        if isinstance(node.value,ast.Name) and node.value.id == "self" :
+        if isinstance(node.value, ast.Name) and node.value.id == "self":
             print dir(node)
 
 
