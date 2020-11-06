@@ -11,14 +11,27 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-04 15:30:25"
 
+import uuid
+import random
 import inspect
 from contextlib import contextmanager
 from collections import OrderedDict
 from .binding import Binding, FnBinding
+from collections import defaultdict
 
+# TODO get all the binder
+class BinderCollector(object):
+    Binders = defaultdict(list)
+    GBinders = {}
+    # @classmethod
+    # def register(cls, typ: type):
+    #     name = typ.__name__
+    #     if issubclass(typ, Directive):
+    #         cls.directives[name] = typ
+    #     elif issubclass(cls, tk.Widget):
+    #         cls.widgets[name] = typ
 
 class BinderDispatcher(object):
-    # NOTE Singleton
     __instance = None
 
     def __new__(cls, binder):
@@ -39,6 +52,11 @@ class BinderDispatcher(object):
     def dump(self, *args, **kwargs):
         # TODO dump data
         print("dump", self.binder, args)
+        
+    def bind(self):
+        # TODO bind function decorator
+        # TODO support [ ] item bind varaible name
+        pass
 
     def dispatcher(self, *args, **kwargs):
         return self
@@ -103,11 +121,33 @@ class BinderBase(object):
 
 class Binder(BinderBase):
     def __new__(cls, *args, **kw):
+        print(args)
         # NOTE spawn differenct class instance to contain static member
         class BinderInstance(BinderBase):
             _var_dict_ = {}
 
-        return cls.__new__(BinderInstance, *args, **kw)
+        instance = cls.__new__(BinderInstance)
+        # print(instance)
+        frame = inspect.currentframe().f_back
+        code = frame.f_code
+        
+        rd = random.Random()
+        rd.seed(0)
+        hex = uuid.UUID(int=rd.getrandbits(128)).hex
+        
+        # print(dir(code))
+        # print(code.co_filename)
+        # print(code.co_name)
+        # print(code.co_flags)
+        # print(code.co_stacksize)
+        # print(code.co_varnames)
+        # print(dir(frame))
+        # print(instance.__module__)
+
+        # # TODO 通过 frame 获取唯一表示符 给 collector
+        # binders = BinderCollector.Binders
+        # binders.append(instance) if instance not in binders else None
+        return instance
 
 
 class GBinder(BinderBase):
@@ -117,7 +157,7 @@ class GBinder(BinderBase):
 
     def __new__(cls, *args, **kw):
         if cls.__instance is None:
-            cls.__instance = BinderBase.__new__(cls, *args, **kw)
+            cls.__instance = BinderBase.__new__(cls)
         return cls.__instance
 
 

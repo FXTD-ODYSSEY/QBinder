@@ -26,7 +26,7 @@ from QBinder import Binder
 
 
 class WidgetTest(QtWidgets.QWidget):
-    with Binder() as state:
+    with Binder("test") as state:
         state.text = "aasdsd"
         state.num = 1
         state.val = 2.0
