@@ -13,15 +13,42 @@ __date__ = "2020-05-06 23:02:37"
 import sys
 import six
 import inspect
-from functools import partial
+from functools import partial, wraps
 from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 
 
 class FnBinding(object):
-    def __init__(self, func_name):
-        pass
+    def __init__(self, binder, func):
+        self.binder = binder
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        # TODO Try to Get A Default Instance from binder
+        return self.func(self.binder, *args, **kwargs)
+
+    def __getitem__(self, attr):
+        attr = getattr(self.binder, attr) if type(attr) is str else attr
+
+        @wraps(self.func)
+        def wrapper(*args, **kw):
+            return self.func(attr, *args, **kw)
+
+        return wrapper
+
+
+class FnBindingProxy(object):
+    def __init__(self, binder):
+        self.binder = binder
+
+    def bind(self, attr):
+        def decorator(func):
+            binding = FnBinding(self.binder, func)
+            setattr(self.binder.__class__, attr, binding)
+            return func
+
+        return decorator
 
 
 def notify(func):

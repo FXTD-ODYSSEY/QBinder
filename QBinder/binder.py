@@ -14,10 +14,8 @@ __date__ = "2020-11-04 15:30:25"
 import uuid
 import random
 import inspect
-from contextlib import contextmanager
-from collections import OrderedDict
-from .binding import Binding, FnBinding
-from collections import defaultdict
+from collections import OrderedDict,defaultdict
+from .binding import Binding, FnBindingProxy
 
 # TODO get all the binder
 class BinderCollector(object):
@@ -30,6 +28,9 @@ class BinderCollector(object):
     #         cls.directives[name] = typ
     #     elif issubclass(cls, tk.Widget):
     #         cls.widgets[name] = typ
+
+# TODO bind function
+# TODO collect all the exist binder for dumping
 
 class BinderDispatcher(object):
     __instance = None
@@ -45,7 +46,7 @@ class BinderDispatcher(object):
         method_dict = OrderedDict(method_dict)
         method_dict.pop("dispatch")
         func = method_dict.get(command)
-        if not func:
+        if func is None:
             raise RuntimeError("Binder Action %s not found" % command)
         return func(*args, **kwargs)
 
@@ -53,10 +54,8 @@ class BinderDispatcher(object):
         # TODO dump data
         print("dump", self.binder, args)
         
-    def bind(self):
-        # TODO bind function decorator
-        # TODO support [ ] item bind varaible name
-        pass
+    def fn_bind(self,attr):
+        return FnBindingProxy(self.binder).bind(attr)
 
     def dispatcher(self, *args, **kwargs):
         return self
@@ -161,9 +160,4 @@ class GBinder(BinderBase):
         return cls.__instance
 
 
-# TODO bind function
-# TODO collect all the exist binder for dumping
 
-# TODO fn binding
-def fn(func_name):
-    return FnBinding(func_name)

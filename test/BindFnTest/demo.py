@@ -32,11 +32,12 @@ from Qt import QtGui, QtWidgets, QtCore
 
 state = GBinder()
 state.msg = "msg"
+state.num = 1
 # state.text = 'text'
 
 
 class ButtonTest(QtWidgets.QWidget):
-    
+    count = 1
     def __init__(self):
         super(ButtonTest, self).__init__()
         layout = QtWidgets.QVBoxLayout()
@@ -45,11 +46,18 @@ class ButtonTest(QtWidgets.QWidget):
 
         button = QtWidgets.QPushButton("click me")
         layout.addWidget(button)
+        label = QtWidgets.QLabel()
+        layout.addWidget(label)
+        label.setText(lambda: state.num)
 
         button.clicked.connect(self.callback)
 
+    @state("fn_bind", "click_event")
     def callback(self):
-        print('[%s] click me' % self.__class__.__name__)
+        self.count += self.count
+        state.num += self.count
+        print("[%s] click me" % self.__class__.__name__)
+
 
 class ButtonTest2(QtWidgets.QWidget):
     def __init__(self):
@@ -60,9 +68,8 @@ class ButtonTest2(QtWidgets.QWidget):
 
         button = QtWidgets.QPushButton("click me ButtonTest2")
         layout.addWidget(button)
-        
-        # TODO Binder connect fn
-        # button.clicked.connect(self.callback)
+        print(state.click_event)
+        button.clicked.connect(state.click_event[state.input_ui])
 
 
 if __name__ == "__main__":

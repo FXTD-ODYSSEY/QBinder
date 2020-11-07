@@ -13,6 +13,7 @@ except:
     import six
 
 
+from .util import ListGet
 from .hook import HOOKS, hook_initialize
 from .binding import  Model , Binding
 from .binder import GBinder, Binder
