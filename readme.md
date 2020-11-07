@@ -8,6 +8,7 @@
     - [ ] 自动 bind QGroupBox CheckBox 和 RadioButton
 - [ ] HOOK 添加自定义的 setter getter updater
 - [x] Binder 绑定函数
+- [ ] 模仿 vuex 添加 Binder action commit
 - [ ] 制作类似 vue-devtools 的调试面板 (mpdb 面板)
 - [ ] GBinder 括号 传入字符串参数作为分组
 - [ ] 全局数据分组管理 - vue submodule

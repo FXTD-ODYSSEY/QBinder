@@ -51,14 +51,12 @@ class ButtonTest(QtWidgets.QWidget):
         label.setText(lambda: state.num)
 
         button.clicked.connect(self.callback)
-
-    @state("fn_bind", "click_event")
+        
+    @state("fn_bind")
     def callback(self):
-        self.count += self.count
-        state.num += self.count
-        print("[%s] click me" % self.__class__.__name__)
-
-
+        print(self)
+        state.num += 1
+    
 class ButtonTest2(QtWidgets.QWidget):
     def __init__(self):
         super(ButtonTest2, self).__init__()
@@ -68,8 +66,9 @@ class ButtonTest2(QtWidgets.QWidget):
 
         button = QtWidgets.QPushButton("click me ButtonTest2")
         layout.addWidget(button)
-        print(state.click_event)
-        button.clicked.connect(state.click_event[state.input_ui])
+        # print(state.callback)
+        button.clicked.connect(state.callback)
+        # button.clicked.connect(state.callback)
 
 
 if __name__ == "__main__":
@@ -77,7 +76,9 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     state.input_ui = ButtonTest()
     state.input_ui.show()
+    # widget = ButtonTest()
+    # widget.show()
 
-    widget = ButtonTest2()
-    widget.show()
+    widget2 = ButtonTest2()
+    widget2.show()
     sys.exit(app.exec_())

@@ -22,33 +22,33 @@ from Qt import QtCore, QtGui, QtWidgets
 class FnBinding(object):
     def __init__(self, binder, func):
         self.binder = binder
-        self.func = func
+        self.func = func if callable(func) else func.__func__
+        self.static = type(func) is staticmethod
+        self.cls = None
 
     def __call__(self, *args, **kwargs):
-        # TODO Try to Get A Default Instance from binder
-        return self.func(self.binder, *args, **kwargs)
+        arg = self.binder
+        if self.static:
+            return self.func(*args, **kwargs)
+        elif self.cls:
+            # NOTE Try to Get A Default Instance from binder
+            for _, member in inspect.getmembers(self.binder, lambda f: not callable(f)):
+                if type(member) is self.cls:
+                    arg = member
+                    break
+        return self.func(arg, *args, **kwargs)
 
     def __getitem__(self, attr):
         attr = getattr(self.binder, attr) if type(attr) is str else attr
 
         @wraps(self.func)
         def wrapper(*args, **kw):
-            return self.func(attr, *args, **kw)
+            if self.static:
+                return self.func(*args, **kw)
+            else:
+                return self.func(attr, *args, **kw)
 
         return wrapper
-
-
-class FnBindingProxy(object):
-    def __init__(self, binder):
-        self.binder = binder
-
-    def bind(self, attr):
-        def decorator(func):
-            binding = FnBinding(self.binder, func)
-            setattr(self.binder.__class__, attr, binding)
-            return func
-
-        return decorator
 
 
 def notify(func):
