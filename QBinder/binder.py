@@ -19,25 +19,17 @@ from functools import partial
 from collections import OrderedDict, defaultdict
 from .binding import Binding, FnBinding
 
-# TODO get all the binder
-class BinderCollector(object):
-    Binders = defaultdict(list)
-    GBinders = {}
-    # @classmethod
-    # def register(cls, typ: type):
-    #     name = typ.__name__
-    #     if issubclass(typ, Directive):
-    #         cls.directives[name] = typ
-    #     elif issubclass(cls, tk.Widget):
-    #         cls.widgets[name] = typ
-
+# NOTE https://stackoverflow.com/a/8702435
+nested_dict = lambda: defaultdict(nested_dict)
 
 # TODO collect all the exist binder for dumping
-
+class BinderCollector(object):
+    Binders = defaultdict(list)
+    GBinders = nested_dict()
 
 class BinderDispatcher(object):
     __instance = None
-    __trace_dict = defaultdict(dict)
+    __trace_dict = nested_dict()
 
     def __new__(cls, binder):
         cls.binder = binder
@@ -85,8 +77,6 @@ class BinderDispatcher(object):
             frame = stack[0]
             module = inspect.getmodule(frame)
 
-            if cls_name not in self.__trace_dict[module]:
-                self.__trace_dict[module][cls_name] = {}
             self.__trace_dict[module][cls_name][fn_name] = binding
             
             return func
@@ -159,13 +149,13 @@ class BinderBase(object):
         # NOTE get the outer frame
         frame = inspect.currentframe().f_back
 
-        # NOTE add to the local scope
         for k, v in frame.f_locals.items():
             if self.proxy is v:
                 for n, s in inspect.getmembers(self.proxy):
                     if isinstance(s, Binding):
                         self._var_dict_[n] = s
                         setattr(self.__class__, n, s)
+                # NOTE overwrite the local scope like `return` action
                 frame.f_locals.update({k: self})
                 break
 
@@ -183,7 +173,7 @@ class Binder(BinderBase):
         code = frame.f_code
 
         rd = random.Random()
-        rd.seed(0)
+        rd.seed(1024)
         hex = uuid.UUID(int=rd.getrandbits(128)).hex
 
         # print(dir(code))

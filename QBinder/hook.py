@@ -89,7 +89,7 @@ def binding_handler(func, options=None):
     typ = options.get("type")
 
     def fix_cursor_position(func, widget):
-        """fix the lineedit cusorPosition after setting the value"""
+        """maintain the Qt edit cusorPosition after setting a new value"""
 
         def wrapper(*args, **kwargs):
             pos = widget.property("cursorPosition")

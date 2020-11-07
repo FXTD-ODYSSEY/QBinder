@@ -2,6 +2,7 @@
 
 - [x] 单例模式 - 数据全局共享
 - [ ] 数据 dump 输入输出
+- [ ] 自动加载上次的配置 利用 QTimer 0 timeout 实现 idle 执行 https://doc.qt.io/qtforpython/PySide2/QtCore/QCoreApplication.html
 - [x] Qt model 进行数据绑定
     - [ ] Model 实现可扩展
     - [ ] 实现 QCombobox addItem 扩展支持

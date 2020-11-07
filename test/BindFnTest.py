@@ -58,7 +58,7 @@ class ButtonTest(QtWidgets.QWidget):
         state.num += 1
     
 class ButtonTest2(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self,widget):
         super(ButtonTest2, self).__init__()
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -66,19 +66,22 @@ class ButtonTest2(QtWidgets.QWidget):
 
         button = QtWidgets.QPushButton("click me ButtonTest2")
         layout.addWidget(button)
-        # print(state.callback)
-        button.clicked.connect(state.callback)
-        # button.clicked.connect(state.callback)
 
+        button.clicked.connect(state.callback) # NOTE auto predict
+        # button.clicked.connect(state.callback["input_ui"])
+        # button.clicked.connect(state.callback[state.input_ui])
+        # button.clicked.connect(state.callback[widget])
+ 
 
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    state.input_ui = ButtonTest()
-    state.input_ui.show()
-    # widget = ButtonTest()
-    # widget.show()
-
-    widget2 = ButtonTest2()
+    # state.input_ui = ButtonTest()
+    # state.input_ui.show()
+    widget = ButtonTest()
+    widget.show()
+    state.input_ui = widget
+    
+    widget2 = ButtonTest2(widget)
     widget2.show()
     sys.exit(app.exec_())
