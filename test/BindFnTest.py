@@ -76,6 +76,11 @@ class ButtonTest2(QtWidgets.QWidget):
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
+    dispatcher = state('dispatcher')
+    # QtCore.QTimer.singleShot(0,dispatcher.__bind_cls__)
+    # dispatcher.__timer__.start(0)
+    
+    # print(dir(dispatcher))
     # state.input_ui = ButtonTest()
     # state.input_ui.show()
     widget = ButtonTest()

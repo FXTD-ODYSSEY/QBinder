@@ -17,6 +17,8 @@ import random
 import inspect
 from functools import partial
 from collections import OrderedDict, defaultdict
+
+from Qt import QtCore, QtWidgets
 from .binding import Binding, FnBinding
 
 # NOTE https://stackoverflow.com/a/8702435
@@ -27,15 +29,33 @@ class BinderCollector(object):
     Binders = defaultdict(list)
     GBinders = nested_dict()
 
-class BinderDispatcher(object):
+
+class BinderDispatcher(QtCore.QObject):
     __instance = None
+    __init_flag = False
     __trace_dict = nested_dict()
 
     def __new__(cls, binder):
         cls.binder = binder
         if cls.__instance is None:
             cls.__instance = super(BinderDispatcher, cls).__new__(cls)
+            cls.__init_flag = True
+
         return cls.__instance
+
+    def __init__(self, binder):
+        if self.__init_flag:
+            self.__init_flag = False
+            super(BinderDispatcher, self).__init__()
+            # NOTE 
+            # post Qt event loop so that I can wait until app instantiate
+            # using event filter receive show event (no mater what the event it is)
+            QtWidgets.QApplication.postEvent(self, QtCore.QEvent(QtCore.QEvent.Show))
+            self.installEventFilter(self)
+
+    def eventFilter(self, reciver, event):
+        QtCore.QTimer.singleShot(0, self.__bind_cls__)
+        return False
 
     def dispatch(self, command, *args, **kwargs):
         method_dict = inspect.getmembers(self, predicate=inspect.ismethod)
@@ -55,46 +75,29 @@ class BinderDispatcher(object):
         https://stackoverflow.com/a/13699329
         """
 
-        stack = inspect.stack()[3]
-        path = stack[1]
-        # NOTE bind the class type instance with settrace
-        callback = sys.gettrace()
-        if not callback:
-            callback = partial(self.__trace__, path)
-            sys.settrace(callback)
-
-        return self.__bind__(attr)
-
-    def __bind__(self, attr):
         def decorator(func):
             binding = FnBinding(self.binder, func)
             function = func if callable(func) else func.__func__
             fn_name = attr if attr else function.__name__
             setattr(self.binder.__class__, fn_name, binding)
-            
+
             stack = inspect.stack()[1]
             cls_name = stack[3]
             frame = stack[0]
             module = inspect.getmodule(frame)
 
             self.__trace_dict[module][cls_name][fn_name] = binding
-            
+
             return func
 
         return decorator
 
-    def __trace__(self, file_path, frame, *arg):
-        code = frame.f_code
-        path = code.co_filename
-        if path == file_path:
-            # NOTE trace set the default class type to the binding
-            for module, data in self.__trace_dict.items():
-                for cls_name, _data in data.items():
-                    for _, binding in _data.items():
-                        binding.cls = getattr(module, cls_name)
-
-            sys.settrace(None)
-            self.__trace_dict.clear()
+    def __bind_cls__(self):
+        # NOTE trace set the default class type to the binding
+        for module, data in self.__trace_dict.items():
+            for cls_name, _data in data.items():
+                for _, binding in _data.items():
+                    binding.cls = getattr(module, cls_name)
 
     def dispatcher(self):
         return self

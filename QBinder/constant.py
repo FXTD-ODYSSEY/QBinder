@@ -11,7 +11,6 @@ __author__ = 'timmyliang'
 __email__ = '820472580@qq.com'
 __date__ = '2020-11-07 22:26:11'
 
-PREDICT_FN_BINDING = True
 AUTO_LOAD_CONFIG = True
 
 
