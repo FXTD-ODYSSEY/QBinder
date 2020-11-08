@@ -27,12 +27,14 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder
+from QBinder import Binder, GBinder,show_info_panel
 from Qt import QtGui, QtWidgets, QtCore
+show_info_panel()
 
 state = GBinder()
 state.msg = "msg"
 state.num = 1
+state.input_ui = 1
 # state.text = 'text'
 
 
@@ -76,16 +78,12 @@ class ButtonTest2(QtWidgets.QWidget):
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    dispatcher = state('dispatcher')
-    # QtCore.QTimer.singleShot(0,dispatcher.__bind_cls__)
-    # dispatcher.__timer__.start(0)
-    
-    # print(dir(dispatcher))
+    # SHOW_INFO_PANEL = True
     # state.input_ui = ButtonTest()
     # state.input_ui.show()
     widget = ButtonTest()
     widget.show()
-    state.input_ui = widget
+    widget >> state["input_ui"]
     
     widget2 = ButtonTest2(widget)
     widget2.show()

@@ -19,7 +19,7 @@ from functools import partial
 from collections import OrderedDict, defaultdict
 
 from Qt import QtCore, QtWidgets
-from .binding import Binding, FnBinding
+from .binding import Binding, FnBinding, BindingProxy
 
 # NOTE https://stackoverflow.com/a/8702435
 nested_dict = lambda: defaultdict(nested_dict)
@@ -47,14 +47,22 @@ class BinderDispatcher(QtCore.QObject):
         if self.__init_flag:
             self.__init_flag = False
             super(BinderDispatcher, self).__init__()
-            # NOTE 
-            # post Qt event loop so that I can wait until app instantiate
-            # using event filter receive show event (no mater what the event it is)
-            QtWidgets.QApplication.postEvent(self, QtCore.QEvent(QtCore.QEvent.Show))
             self.installEventFilter(self)
 
+        # NOTE
+        # post Qt event loop so that I can wait until qapp instantiate
+        # using event filter receive event
+        event = QtCore.QEvent(QtCore.QEvent.User)
+        QtWidgets.QApplication.postEvent(self, event)
+
     def eventFilter(self, reciver, event):
-        QtCore.QTimer.singleShot(0, self.__bind_cls__)
+        if reciver is self and reciver.__trace_dict:
+            for module, data in reciver.__trace_dict.items():
+                for cls_name, _data in data.items():
+                    cls = getattr(module, cls_name)
+                    for _, binding in _data.items():
+                        binding.cls = cls
+            reciver.__trace_dict.clear()
         return False
 
     def dispatch(self, command, *args, **kwargs):
@@ -92,13 +100,6 @@ class BinderDispatcher(QtCore.QObject):
 
         return decorator
 
-    def __bind_cls__(self):
-        # NOTE trace set the default class type to the binding
-        for module, data in self.__trace_dict.items():
-            for cls_name, _data in data.items():
-                for _, binding in _data.items():
-                    binding.cls = getattr(module, cls_name)
-
     def dispatcher(self):
         return self
 
@@ -123,11 +124,18 @@ class BinderBase(object):
     _var_dict_ = {}
 
     def __getitem__(self, key):
-        return self._var_dict_.get(key)
+        val = self._var_dict_.get(key)
+        if val is not None:
+            return val
+        else:
+            return BindingProxy(self, key)
 
     def __setitem__(self, key, value):
         var = self._var_dict_.get(key)
         var.set(value) if var else None
+
+    # def __getattr__(self, key):
+    #     return BindingProxy(self, key)
 
     def __setattr__(self, key, value):
         binding = self._var_dict_.get(key)

@@ -392,6 +392,25 @@ class InfoPanel(QtWidgets.QWidget,Ui_Form):
     def clear(self):
         self.Filter_Table.clearItems()
 
+class PanelEvent(QtCore.QObject):
+    
+    def __init__(self):
+        super(PanelEvent,self).__init__()
+        event = QtCore.QEvent(QtCore.QEvent.User)
+        QtWidgets.QApplication.postEvent(self, event)
+        self.installEventFilter(self)
+
+    def eventFilter(self,receiver,event):
+        global __QBinder_info_panel__
+        __QBinder_info_panel__ = InfoPanel()
+        __QBinder_info_panel__.show()
+        return False
+
+def show_info_panel():
+    # NOTE show pannel with event loop 
+    global __QBinder_info_panel__
+    __QBinder_info_panel__ = PanelEvent()
+
 if __name__ == "__main__":
     
     app = QtWidgets.QApplication(sys.argv)
@@ -400,5 +419,4 @@ if __name__ == "__main__":
     widget.show()
 
     sys.exit(app.exec_())
-    
     

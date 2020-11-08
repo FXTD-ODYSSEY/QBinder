@@ -33,8 +33,6 @@ from Qt import QtGui, QtWidgets, QtCore
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    # state.input_ui = ButtonTest()
-    # state.input_ui.show()
     widget = InfoPanel()
     widget.show()
     sys.exit(app.exec_())

@@ -19,7 +19,25 @@ from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 
 
-class FnBinding(object):
+class BindingBase(object):
+    pass
+
+class BindingProxy(BindingBase):
+    def __init__(self, binder, attr):
+        self.binder = binder
+        self.attr = attr
+
+    def __rrshift__(self, d):
+        self.binder.__setattr__(self.attr, d)
+        del self
+        return d
+
+    def __iter__(self):
+        for attr in dir(self):
+            yield attr
+
+
+class FnBinding(BindingBase):
     def __init__(self, binder, func):
         self.binder = binder
         self.func = func if callable(func) else func.__func__
@@ -32,6 +50,8 @@ class FnBinding(object):
             return self.func(*args, **kwargs)
         elif self.cls:
             # NOTE Try to Get A Default Instance from binder
+            # print("self.binder",self.binder)
+            # print(object.__bases__)
             for _, member in inspect.getmembers(self.binder, lambda f: not callable(f)):
                 if type(member) is self.cls:
                     arg = member
@@ -133,7 +153,7 @@ class NotifyDict(OrderedDict):
         return OrderedDict.__setitem__(self, key, value)
 
 
-class Binding(QtGui.QStandardItem):
+class Binding(QtGui.QStandardItem, BindingBase):
 
     TRACE = False
     SET_FLAG = False
@@ -203,6 +223,10 @@ class Binding(QtGui.QStandardItem):
     def __get__(self, instance, owner):
         self.TRACE_LIST.append(self) if self.TRACE else None
         return self.get()
+    
+    def __rrshift__(self, d):
+        self.set(d)
+        return d
 
     def set(self, value):
         self.val = self.retrieve2Notify(value)
