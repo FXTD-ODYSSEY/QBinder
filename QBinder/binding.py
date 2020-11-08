@@ -285,9 +285,12 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.event_loop.remove(callback)
 
     def emit(self, *args, **kwargs):
-        for callback in self.event_loop:
+        for callback in self.event_loop[:]:
             if callable(callback):
-                callback(*args, **kwargs)
+                try:
+                    callback(*args, **kwargs)
+                except:
+                    self.event_loop.remove(callback)
 
 
 class Model(QtCore.QAbstractItemModel):

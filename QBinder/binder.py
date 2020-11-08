@@ -173,7 +173,6 @@ class BinderBase(object):
 
 class Binder(BinderBase):
     def __new__(cls, *args, **kw):
-        print(args)
         # NOTE spawn differenct class instance to contain static member
         class BinderInstance(BinderBase):
             _var_dict_ = {}

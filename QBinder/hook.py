@@ -23,6 +23,14 @@ from Qt import QtGui
 from .binding import Binding
 
 HOOKS = {
+    QtWidgets.QWidget: {
+        "setStyleSheet": {
+            "type": str,
+        },
+        "setVisible": {
+            "type": bool,
+        },
+    },
     QtWidgets.QComboBox: {
         "setCurrentIndex": {
             "type": int,

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>430</height>
+    <width>493</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,6 +54,7 @@ font-size:50px;</string>
        <property name="styleSheet">
         <string notr="true">#TodoContainer{
 background:rgb(254, 254, 254);
+border:1px solid lightgray;
 }</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -72,7 +73,7 @@ background:rgb(254, 254, 254);
         <item>
          <widget class="QWidget" name="TodoHeader" native="true">
           <property name="styleSheet">
-           <string notr="true">#TodoHeader{border-bottom:1px solid gray;}</string>
+           <string notr="true"/>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
@@ -113,7 +114,7 @@ background:rgb(254, 254, 254);
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit">
+            <widget class="QLineEdit" name="TodoInput">
              <property name="font">
               <font>
                <family>Microsoft YaHei</family>
@@ -135,10 +136,24 @@ background:rgb(254, 254, 254);
          </widget>
         </item>
         <item>
+         <widget class="QWidget" name="TodoList" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3"/>
+         </widget>
+        </item>
+        <item>
          <widget class="QWidget" name="TodoFooter" native="true">
+          <property name="styleSheet">
+           <string notr="true">color:gray;</string>
+          </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
-            <widget class="QLabel" name="label_4">
+            <widget class="QLabel" name="ItemCount">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -151,12 +166,41 @@ background:rgb(254, 254, 254);
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="StateGroup">
              <property name="styleSheet">
               <string notr="true">QGroupBox{border:none;}
-QRadioButton::indicator{ width:0px;height:0px}
-QRadioButton{color:gray;padding-right:3px;}
-QRadioButton::checked{padding-right:3px;border:1px solid rgb(239, 213, 213)}</string>
+QRadioButton::indicator {
+image:none;
+width: 0px;
+}
+
+
+QRadioButton{
+
+text-align:center;
+padding-right:3px;
+
+}
+QRadioButton::hover {
+border:1px solid rgba(175, 47, 47, 0.1);
+}
+QRadioButton::checked{
+border:1px solid rgba(175, 47, 47, 0.2);
+font-weight:bold;
+}</string>
              </property>
              <property name="title">
               <string/>
@@ -165,26 +209,19 @@ QRadioButton::checked{padding-right:3px;border:1px solid rgb(239, 213, 213)}</st
               <bool>false</bool>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <item>
-               <spacer name="horizontalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton">
+               <widget class="QRadioButton" name="AllState">
                 <property name="styleSheet">
                  <string notr="true"/>
                 </property>
                 <property name="text">
-                 <string>All</string>
+                 <string>All </string>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
@@ -192,33 +229,73 @@ QRadioButton::checked{padding-right:3px;border:1px solid rgb(239, 213, 213)}</st
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_2">
+               <widget class="QRadioButton" name="ActiveState">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
-                 <string>Active</string>
+                 <string>Active </string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_3">
-                <property name="text">
-                 <string>Completed</string>
+               <widget class="QRadioButton" name="CompletedState">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
+                <property name="minimumSize">
                  <size>
-                  <width>40</width>
-                  <height>20</height>
+                  <width>0</width>
+                  <height>0</height>
                  </size>
                 </property>
-               </spacer>
+                <property name="text">
+                 <string>Completed </string>
+                </property>
+               </widget>
               </item>
              </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="HoverLabel" name="ItemClear">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>Microsoft YaHei</family>
+               <underline>false</underline>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;ahref=&quot;clear&quot; style=&quot;text-decoration: none;color:gray&quot;&gt;Clear Completed&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
             </widget>
            </item>
           </layout>
@@ -245,6 +322,12 @@ QRadioButton::checked{padding-right:3px;border:1px solid rgb(239, 213, 213)}</st
      </item>
      <item>
       <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei</family>
+         <underline>false</underline>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">color:gray</string>
        </property>
@@ -283,6 +366,13 @@ QRadioButton::checked{padding-right:3px;border:1px solid rgb(239, 213, 213)}</st
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HoverLabel</class>
+   <extends>QLabel</extends>
+   <header>__main__.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
