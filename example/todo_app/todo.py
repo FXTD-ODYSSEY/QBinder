@@ -34,11 +34,12 @@ from Qt.QtCompat import loadUi
 
 gstate = GBinder()
 # TODO reconstruct large data very slow
-# gstate.todo_data = [
-#     {"text": "todo1", "completed": False},
-#     {"text": "todo2", "completed": True},
-# ]*20
-gstate.todo_data = []
+gstate.todo_data = [
+    {"text": "todo1", "completed": False},
+    {"text": "todo2", "completed": True},
+]*10
+# gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
+# gstate.todo_data = []
 gstate.item_count = 0
 gstate.input_font = "italic"
 gstate.completed_color = "lightgray"
@@ -63,8 +64,10 @@ class EditableLabel(QtWidgets.QLabel):
         self.edit = QtWidgets.QLineEdit()
         self.edit.setVisible(False)
         self.edit.editingFinished.connect(self.__complete__)
-        # self.edit.setStyleSheet("border:None")
 
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # self.edit.setSizePolicy(sizePolicy)
+        
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
@@ -244,7 +247,7 @@ class TodoWidget(QtWidgets.QWidget):
         self.load_item()
 
     def clear_items(self):
-        del gstate.todo_data[:]
+        gstate.todo_data = [todo for todo in gstate.todo_data if not todo["completed"]]
 
     def add_item(self):
         gstate.todo_data.append(
