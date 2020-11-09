@@ -77,7 +77,7 @@ border:1px solid lightgray;
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
-            <widget class="QLabel" name="label_3">
+            <widget class="HoverLabel" name="ItemComplted">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                <horstretch>0</horstretch>
@@ -109,7 +109,7 @@ border:1px solid lightgray;
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;﹀&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;complted&quot; style=&quot;text-decoration:none;color:lightgray&quot;&gt;﹀&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -142,6 +142,9 @@ border:1px solid lightgray;
             <width>0</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3"/>
          </widget>
@@ -294,7 +297,7 @@ font-weight:bold;
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;ahref=&quot;clear&quot; style=&quot;text-decoration: none;color:gray&quot;&gt;Clear Completed&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;clear&quot; style=&quot;text-decoration: none;color:gray&quot;&gt;Clear Completed&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
