@@ -34,12 +34,12 @@ from Qt.QtCompat import loadUi
 
 gstate = GBinder()
 # TODO reconstruct large data very slow
-gstate.todo_data = [
-    {"text": "todo1", "completed": False},
-    {"text": "todo2", "completed": True},
-]*10
+# gstate.todo_data = [
+#     {"text": "todo1", "completed": False},
+#     {"text": "todo2", "completed": True},
+# ]*10
 # gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
-# gstate.todo_data = []
+gstate.todo_data = []
 gstate.item_count = 0
 gstate.input_font = "italic"
 gstate.completed_color = "lightgray"
@@ -178,11 +178,9 @@ class HoverLabel(QtWidgets.QLabel):
         self.state.clear_text_style = "none"
 
     def enterEvent(self, event):
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.PointingHandCursor)
         self.state.clear_text_style = "underline"
 
     def leaveEvent(self, event):
-        QtWidgets.QApplication.restoreOverrideCursor()
         self.state.clear_text_style = "none"
 
 

@@ -144,6 +144,9 @@ border:1px solid lightgray;
                    <bold>true</bold>
                   </font>
                  </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true"/>
                  </property>
@@ -180,6 +183,12 @@ border:1px solid lightgray;
                <size>
                 <width>0</width>
                 <height>0</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -344,6 +353,9 @@ font-weight:bold;
                    <family>Microsoft YaHei</family>
                    <underline>false</underline>
                   </font>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
                  </property>
                  <property name="styleSheet">
                   <string notr="true"/>
