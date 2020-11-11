@@ -14,27 +14,33 @@ __date__ = '2020-11-01 17:59:06'
 import inspect
 from PySide2 import QtCore
 
+
+
 class State(object):
     
+    container = set()
+    
     def __init__(self,val):
-        self.__val = val
+        self._val = val
     
     def __get__(self, instance, owner):
         print("__get__",owner)
-        return self.__val
+        self.container.add(self)
+        return self._val
 
     def __set__(self, instance, val):
         print("__set__",val)
-        self.__val = val
+        self._val = val
         
 class StateDescriptor(QtCore.QObject):
     
+    _var_dict = {}
+    
     def __getitem__(self,key):
-        print(self.__dict__)
-        return self.__dict__[key]
+        return self._var_dict[key]
 
-    def __setitem__(self,key,value):
-        self.__dict__[key] = value
+    # def __setitem__(self,key,value):
+    #     self._var_dict[key] = value
     
     def __setattr__(self, key, value):
         print("attr",key,value)
@@ -44,7 +50,7 @@ class StateDescriptor(QtCore.QObject):
 
     def __getattr__(self, key):
         print("__getattr__")
-        return self.__dict__[key].__val
+        return self.__dict__[key]._val
     
     def _set_(self, instance, val):
         print("__set__",val)
@@ -70,6 +76,7 @@ def connect_binding(cls):
     setattr(cls,name,StateDescriptorInstance())
     return cls
 
+
 @connect_binding
 class TestCase(object):
     state = StateDescriptor()
@@ -87,27 +94,21 @@ class TestCase(object):
     def __init__(self):
         super(TestCase, self).__init__()
         print("start")
-        self.a_str = 'a'
-        self.member = StateDescriptor()
-        callback = lambda: "%s test %s : %s %s" % (self.state.member,self.state.number,self.a_str,self.member)
-
-        closure = callback.__closure__
-        code = callback.__code__ 
-        # print(dir(closure))
-        for c in closure:
-            print(c.cell_contents)
+        print(self.state.)
+        print(self.state["member"])
         
-        res = inspect.getargspec (callback)
-        print(res)
-        # print(code.co_varnames)
-        # print(dir(code))
-        # for attr in dir(code):
-        #     if not attr.startswith('__'):
-        #         try:
-        #             print(attr,getattr(code, attr))
-        #         except:
-        #             print(attr,'error')
-        #             continue
-                
+        # self.a_str = 'a'
+        # callback = lambda: "%s test %s : %s %s" % (self.state.member,self.state.number,self.a_str)
+        
+        # self.test_call(callback)
+
+    @staticmethod
+    def test_call(callback):
+        State.container.clear()
+        val = callback()
+        print(State.container)
+        print(val)
+
+
 case = TestCase()
 # print(getattr(name))
