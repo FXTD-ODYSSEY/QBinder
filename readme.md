@@ -26,7 +26,6 @@
 - [ ] 自动 bind QGroupBox CheckBox 和 RadioButton
 - [x] hook setStylesheet
 
-
-[Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)
-[PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)
+[Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    
+[PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)    
 

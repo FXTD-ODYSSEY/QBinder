@@ -116,7 +116,7 @@ border:1px solid lightgray;
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout">
                <item>
-                <widget class="HoverLabel" name="ItemComplted">
+                <widget class="QLabel" name="ItemComplted">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                    <horstretch>0</horstretch>
@@ -341,7 +341,7 @@ font-weight:bold;
                 </spacer>
                </item>
                <item>
-                <widget class="HoverLabel" name="ItemClear">
+                <widget class="QLabel" name="ItemClear">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                    <horstretch>0</horstretch>
@@ -355,7 +355,7 @@ font-weight:bold;
                   </font>
                  </property>
                  <property name="cursor">
-                  <cursorShape>PointingHandCursor</cursorShape>
+                  <cursorShape>ArrowCursor</cursorShape>
                  </property>
                  <property name="styleSheet">
                   <string notr="true"/>
@@ -437,13 +437,6 @@ font-weight:bold;
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>HoverLabel</class>
-   <extends>QLabel</extends>
-   <header>__main__.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

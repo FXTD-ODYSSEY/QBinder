@@ -62,11 +62,31 @@ class QEventHook(QtCore.QObject):
         return receiver
 
     def __call__(self, event, callbacks):
+        """__call__ drive add_hook
+        
+        https://doc.qt.io/qtforpython/PySide2/QtCore/QEvent.html
+        
+        :param event: QEvent Type 
+        :type event: str | QEvent.Type
+        :param callbacks: callable list or callable object
+        :type callbacks: callable
+        """        
         self.__event = event
         self.__callbacks = callbacks
         return self
 
-    def add_hook(self, receiver, event=None, callbacks=None):
+    def add_hook(self, receiver, event=None, callbacks=None):   
+        """add_hook global hook
+        
+        https://doc.qt.io/qtforpython/PySide2/QtCore/QEvent.html
+        
+        :param receiver: object or widget
+        :type receiver: QtCore.QObject
+        :param event: QEvent Type , defaults to None
+        :type event: str | QEvent.Type
+        :param callbacks: callable list or callable object , defaults to None
+        :type callbacks: callable
+        """    
         event = event if event else self.__event
         event = getattr(QtCore.QEvent, event) if isinstance(event, str) else event
         callbacks = callbacks if callbacks else self.__callbacks
@@ -75,7 +95,7 @@ class QEventHook(QtCore.QObject):
         self.__hook.setdefault(receiver, {})
         self.__hook[receiver].setdefault(event, [])
         self.__hook[receiver][event].extend(
-            callbacks if isinstance(callbacks, list) else [callbacks]
+            [c for c in callbacks if callable(c)] if isinstance(callbacks, list) else [callbacks]
         )
 
     def get_hook(self):

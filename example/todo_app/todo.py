@@ -27,10 +27,11 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder
+from QBinder import Binder, GBinder , QEventHook
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
+event_hook = QEventHook()
 
 gstate = GBinder()
 # TODO reconstruct large data very slow
@@ -167,23 +168,6 @@ class TodoItem(QtWidgets.QWidget):
         self.state.visible = False
 
 
-class HoverLabel(QtWidgets.QLabel):
-    """
-    https://stackoverflow.com/a/57088301
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(HoverLabel, self).__init__(*args, **kwargs)
-        self.state = Binder()
-        self.state.clear_text_style = "none"
-
-    def enterEvent(self, event):
-        self.state.clear_text_style = "underline"
-
-    def leaveEvent(self, event):
-        self.state.clear_text_style = "none"
-
-
 class TodoWidget(QtWidgets.QWidget):
     item_list = []
 
@@ -191,7 +175,9 @@ class TodoWidget(QtWidgets.QWidget):
         super(TodoWidget, self).__init__()
         ui_file = os.path.join(__file__, "..", "todo.ui")
         loadUi(ui_file, self)
-
+        self.state = Binder()
+        self.state.clear_text_style = "none"
+        
         self.TodoHeader.setStyleSheet(
             lambda: "#TodoHeader { border-bottom:%spx solid lightgray; }"
             % (gstate.header_border)
@@ -201,7 +187,7 @@ class TodoWidget(QtWidgets.QWidget):
         self.TodoInput.returnPressed.connect(self.add_item)
         self.TodoFooter.setVisible(lambda: gstate.footer_visible)
         self.TodoList.setVisible(lambda: gstate.todolist_visible)
-
+        
         # NOTE add hover effect
         self.effect = QtWidgets.QGraphicsDropShadowEffect()
         self.effect.setBlurRadius(40)
@@ -211,16 +197,18 @@ class TodoWidget(QtWidgets.QWidget):
         self.ItemClear.linkActivated.connect(self.clear_items)
         self.ItemClear.setText(
             lambda: '<html><head/><body><p><a href="clear" style="text-decoration: %s;color:gray">Clear completed</a></p></body></html>'
-            % self.ItemClear.state.clear_text_style
+            % self.state.clear_text_style
         )
-
+        self.ItemClear >> event_hook("Enter",lambda: self.state["clear_text_style"].set("underline"))
+        self.ItemClear >> event_hook("Leave",lambda: self.state["clear_text_style"].set("none"))
+        
         self.ItemComplted.linkActivated.connect(self.complete_items)
         self.ItemComplted.setText(
             lambda: '<html><head/><body><a href="complted" style="text-decoration:none;color:%s">﹀</p></body></html>'
             % gstate.completed_color
         )
         gstate["item_count"].connect(self.change_completed_color)
-
+        
         self.ItemCount.setText(lambda: "%s item left" % gstate.item_count)
 
         # NOTE filter radiobutton
