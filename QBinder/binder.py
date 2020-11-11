@@ -49,33 +49,19 @@ class BinderDispatcher(QtCore.QObject):
         if self.__init_flag:
             self.__init_flag = False
             super(BinderDispatcher, self).__init__()
-            self.installEventFilter(self)
-            self >> event_hook("ActivationChange",self.__bind_cls__)
-            
-    def __bind_cls__(self):
-        for module, data in self.__trace_dict.items():
-            for cls_name, _data in data.items():
-                cls = getattr(module, cls_name)
-                for _, binding in _data.items():
-                    binding.cls = cls
-        self.__trace_dict.clear()
+        event = QtCore.QEvent(QtCore.QEvent.User)
+        QtWidgets.QApplication.postEvent(self,event)
+    
+    def event(self,event):
+        if event.type() is QtCore.QEvent.User:
+            for module, data in self.__trace_dict.items():
+                for cls_name, _data in data.items():
+                    cls = getattr(module, cls_name)
+                    for _, binding in _data.items():
+                        binding.cls = cls
+            self.__trace_dict.clear()
+        return super(BinderDispatcher,self).event(event)
 
-    #     # NOTE
-    #     # post Qt event loop so that I can wait until qapp instantiate
-    #     # using event filter receive event
-    #     event = QtCore.QEvent(QtCore.QEvent.User)
-    #     QtWidgets.QApplication.postEvent(self, event)
-
-    # def eventFilter(self, reciver, event):
-    #     print(reciver)
-    #     if reciver is self and reciver.__trace_dict:
-    #         for module, data in reciver.__trace_dict.items():
-    #             for cls_name, _data in data.items():
-    #                 cls = getattr(module, cls_name)
-    #                 for _, binding in _data.items():
-    #                     binding.cls = cls
-    #         reciver.__trace_dict.clear()
-    #     return False
 
     def dispatch(self, command, *args, **kwargs):
         method_dict = OrderedDict(inspect.getmembers(self, predicate=inspect.ismethod))

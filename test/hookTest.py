@@ -33,6 +33,7 @@ from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
 
+event_hook = QEventHook()
 
 class WidgetTest(QtWidgets.QWidget):
     with Binder("test") as state:
@@ -103,7 +104,7 @@ class WidgetTest(QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
-    event_hook = QEventHook()
+
     app = QtWidgets.QApplication([])
     widget = WidgetTest()
     widget.show()

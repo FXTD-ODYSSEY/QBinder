@@ -15,6 +15,7 @@ import os
 import sys
 # os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5'
 
+
 repo = (lambda f: lambda p=__file__: f(f, p))(
     lambda f, p: p
     if [
@@ -54,9 +55,11 @@ class ButtonTest(QtWidgets.QWidget):
 
         button.clicked.connect(self.callback)
         
+    
+        
     @state("fn_bind")
     def callback(self):
-        print(self)
+        print("callback",self)
         state.num += 1
     
 class ButtonTest2(QtWidgets.QWidget):
@@ -74,7 +77,11 @@ class ButtonTest2(QtWidgets.QWidget):
         # button.clicked.connect(state.callback[state.input_ui])
         # button.clicked.connect(state.callback[widget])
  
-
+        @state("fn_bind")
+        def callback2(self):
+            print("callback2",self)
+            state.num += 3
+            
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)

@@ -12,22 +12,11 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-02 23:47:53"
 
-import sys
-import six
-import inspect
-from functools import partial
 
 from Qt import QtCore
 from Qt import QtWidgets
 from Qt import QtGui
 
-class CustomThread(QtCore.QThread):
-    def __init__(self, target):
-        super(CustomThread, self).__init__()
-        self.target = target
-    def run(self, *args, **kwargs):
-        self.target(*args, **kwargs)
-        
 class QEventHook(QtCore.QObject):
 
     __instance = None
@@ -48,23 +37,26 @@ class QEventHook(QtCore.QObject):
             self.__init_flag = False
             self.__app_flag = True
             super(QEventHook, self).__init__()
-            self.installEventFilter(self)
-            # self.timer = QtCore.QTimer()
-            
-            # self.thread = QtCore.QThread()
-            # self.moveToThread(self.thread)
-            # self.thread.started.connect(self.start)
-            # self.thread.start()
-            # QtCore.QMetaObject.invokeMethod(self,"start",QtCore.Qt.QueuedConnection)
-        
-        # TODO May be Hook QApplication
-        instance = QtWidgets.QApplication.instance()
-        if self.__app_flag and instance:
-            self.__app_flag = True
-            QtCore.QTimer.singleShot(
-                0, lambda: QtWidgets.QApplication.instance().installEventFilter(self)
-            )
-                
+            # TODO Test PyQt
+            event = QtCore.QEvent(QtCore.QEvent.User)
+            QtWidgets.QApplication.postEvent(self,event)
+    
+    def event(self,event):
+        # NOTE https://doc.qt.io/qtforpython/overviews/eventsandfilters.html
+        if event.type() is QtCore.QEvent.User:
+            app = QtWidgets.QApplication.instance()
+            app.installEventFilter(self)
+        return super(QEventHook,self).event(event)
+
+    def eventFilter(self, receiver, event):
+        data = self.__hook.get(receiver)
+        if data:
+            callbacks = data.get(event.type(), [])
+            for callback in callbacks:
+                callback()
+
+        return super(QEventHook, self).eventFilter(receiver, event)
+
     def __rrshift__(self, receiver):
         self.add_hook(receiver)
         return receiver
@@ -92,11 +84,4 @@ class QEventHook(QtCore.QObject):
     def set_hook(self, hook):
         self.__hook = hook
 
-    def eventFilter(self, receiver, event):
-        data = self.__hook.get(receiver)
-        if data:
-            callbacks = data.get(event.type(), [])
-            for callback in callbacks:
-                callback()
-
-        return super(QEventHook, self).eventFilter(receiver, event)
+    
