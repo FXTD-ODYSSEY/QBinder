@@ -18,6 +18,8 @@ from .hook import HOOKS, hook_initialize
 from .binding import  Model , Binding
 from .binder import GBinder, Binder
 from .panel import InfoPanel,show_info_panel
+from .eventhook import QEventHook
 
 # NOTE hook Qt caller to accept lambda argument
 hook_initialize()
+

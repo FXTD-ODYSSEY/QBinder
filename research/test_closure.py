@@ -1,23 +1,46 @@
+# -*- coding: utf-8 -*-
+"""
 
-def main(test='das'):
-    a = test
-    b = 'bcc'
-    callback = lambda : "%s : %s" % (a,b)
-    callback = lambda : "{} : {} {}".format(a,b,"end")
-    a = '4242'
-    return callback
+"""
 
-callback = main()
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
+__author__ = 'timmyliang'
+__email__ = '820472580@qq.com'
+__date__ = '2020-11-11 10:03:02'
+
+import inspect
+
+from PySide2 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+
+
+callback = QtWidgets.QLabel.setText
+
+print(dir(type))
 # print(dir(callback))
+# res = inspect.signature(callback)
+# print(res)
+
+
+# print(callback.__signature__)
+
+# for name,member in inspect.getmembers(QtWidgets.QLabel):
+#     if not name.startswith('__') and callable(member) and hasattr(member,"__signature__"):
+#         print(name,member.__signature__)
+
+
 
 # func_closure = callback.func_closure 
 # func_code = callback.__code__ 
 # func_defaults = callback.func_defaults 
 # func_dict = callback.func_dict 
 
-code = callback.__code__ 
-closure = callback.__closure__ 
+# code = callback.__code__ 
+# closure = callback.__closure__ 
 
 # print ("co_argcount",code.co_argcount)
 # print ("co_cellvars",code.co_cellvars)
@@ -37,11 +60,11 @@ closure = callback.__closure__
 # print ("co_varnames",code.co_varnames)
 # print ("replace",code.replace)
 
-for c in closure:
-    print(c.cell_contents)
+# for c in closure:
+#     print(c.cell_contents)
 
-print(closure)
-print(callback())
+# print(closure)
+# print(callback())
 # code = code.co_code
 
 

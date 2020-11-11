@@ -5,6 +5,7 @@
 - [ ] 自动加载上次的配置 利用 QTimer 0 timeout 实现 idle 执行 https://doc.qt.io/qtforpython/PySide2/QtCore/QCoreApplication.html
 - [x] Qt model 进行数据绑定
 - [ ] HOOK 添加自定义的 setter getter updater
+- [ ] ~~自动 Hook 尝试~~
 - [x] Binder 绑定函数
 - [x] Create todo app example
 - [ ] 模仿 vuex 添加 Binder action commit
@@ -12,7 +13,7 @@
 - [ ] GBinder 括号 传入字符串参数作为分组
 - [ ] 全局数据分组管理 - vue submodule
 - [ ] 使用 Qt State Machine 管理状态变化
-- [ ] 使用 application eventFilter Hook 事件队列 
+- [x] 使用 application eventFilter Hook 事件队列 
 - [ ] 数组 | 字典 update 更新视图，性能优化问题~
 
 > 细化 Todo

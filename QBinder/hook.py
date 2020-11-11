@@ -37,11 +37,11 @@ HOOKS = {
             "getter": "currentIndex",
             "updater": "currentIndexChanged",
         },
-        "setCurrentText": {
-            "type": str,
-            "getter": "currentText",
-            "updater": "currentTextChanged",
-        },
+        # "setCurrentText": {
+        #     "type": str,
+        #     "getter": "currentText",
+        #     "updater": "currentTextChanged",
+        # },
         # "addItem": {
         #     "type":str,
         # },

@@ -56,7 +56,11 @@ class FnBinding(BindingBase):
                 if type(member) is self.cls:
                     arg = member
                     break
-        return self.func(arg, *args, **kwargs)
+        try:
+            return self.func(arg, *args, **kwargs)
+        except:
+            return self.func(arg)
+
 
     def __getitem__(self, attr):
         attr = getattr(self.binder, attr) if type(attr) is str else attr

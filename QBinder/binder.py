@@ -20,6 +20,7 @@ from collections import OrderedDict, defaultdict
 
 from Qt import QtCore, QtWidgets
 from .binding import Binding, FnBinding, BindingProxy
+from .eventhook import QEventHook
 
 # NOTE https://stackoverflow.com/a/8702435
 nested_dict = lambda: defaultdict(nested_dict)
@@ -29,6 +30,7 @@ class BinderCollector(object):
     Binders = defaultdict(list)
     GBinders = nested_dict()
 
+event_hook = QEventHook()
 
 class BinderDispatcher(QtCore.QObject):
     __instance = None
@@ -48,26 +50,35 @@ class BinderDispatcher(QtCore.QObject):
             self.__init_flag = False
             super(BinderDispatcher, self).__init__()
             self.installEventFilter(self)
+            self >> event_hook("ActivationChange",self.__bind_cls__)
+            
+    def __bind_cls__(self):
+        for module, data in self.__trace_dict.items():
+            for cls_name, _data in data.items():
+                cls = getattr(module, cls_name)
+                for _, binding in _data.items():
+                    binding.cls = cls
+        self.__trace_dict.clear()
 
-        # NOTE
-        # post Qt event loop so that I can wait until qapp instantiate
-        # using event filter receive event
-        event = QtCore.QEvent(QtCore.QEvent.User)
-        QtWidgets.QApplication.postEvent(self, event)
+    #     # NOTE
+    #     # post Qt event loop so that I can wait until qapp instantiate
+    #     # using event filter receive event
+    #     event = QtCore.QEvent(QtCore.QEvent.User)
+    #     QtWidgets.QApplication.postEvent(self, event)
 
-    def eventFilter(self, reciver, event):
-        if reciver is self and reciver.__trace_dict:
-            for module, data in reciver.__trace_dict.items():
-                for cls_name, _data in data.items():
-                    cls = getattr(module, cls_name)
-                    for _, binding in _data.items():
-                        binding.cls = cls
-            reciver.__trace_dict.clear()
-        return False
+    # def eventFilter(self, reciver, event):
+    #     print(reciver)
+    #     if reciver is self and reciver.__trace_dict:
+    #         for module, data in reciver.__trace_dict.items():
+    #             for cls_name, _data in data.items():
+    #                 cls = getattr(module, cls_name)
+    #                 for _, binding in _data.items():
+    #                     binding.cls = cls
+    #         reciver.__trace_dict.clear()
+    #     return False
 
     def dispatch(self, command, *args, **kwargs):
-        method_dict = inspect.getmembers(self, predicate=inspect.ismethod)
-        method_dict = OrderedDict(method_dict)
+        method_dict = OrderedDict(inspect.getmembers(self, predicate=inspect.ismethod))
         method_dict.pop("dispatch")
         func = method_dict.get(command)
         if func is None:
