@@ -159,10 +159,10 @@ class NotifyDict(OrderedDict):
 
 class Binding(QtGui.QStandardItem, BindingBase):
 
-    TRACE = False
-    SET_FLAG = False
-    TRACE_LIST = []
-
+    __trace = False
+    _trace_list_ = []
+    _inst_ = None
+    
     __repr__ = lambda self: repr(self.val)
     __str__ = lambda self: str(self.val)
 
@@ -219,13 +219,14 @@ class Binding(QtGui.QStandardItem, BindingBase):
     @classmethod
     @contextmanager
     def set_trace(cls):
-        del cls.TRACE_LIST[:]
-        cls.TRACE = True
+        del cls._trace_list_[:]
+        cls.__trace = True
         yield
-        cls.TRACE = False
+        cls.__trace = False
 
     def __get__(self, instance, owner):
-        self.TRACE_LIST.append(self) if self.TRACE else None
+        self.__class__._inst_ = instance
+        self._trace_list_.append(self) if self.__trace else None
         return self.get()
     
     def __rrshift__(self, d):

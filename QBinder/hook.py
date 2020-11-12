@@ -118,7 +118,7 @@ def binding_handler(func, options=None):
             callback = partial(
                 lambda c: func(self, typ(c()) if typ else c(), *args, **kwargs), value
             )
-            for binding in Binding.TRACE_LIST:
+            for binding in Binding._trace_list_:
                 binding.bind_widgets.append(self) if self not in binding.bind_widgets else None
                 binding.connect(callback)
 
@@ -130,7 +130,7 @@ def binding_handler(func, options=None):
             if (
                 updater
                 and getter
-                and len(Binding.TRACE_LIST) == 1  # NOTE only bind one response variable
+                and len(Binding._trace_list_) == 1  # NOTE only bind one response variable
                 and len(code.co_consts) == 1  # NOTE only bind directly variable
             ):
                 updater = getattr(self, updater)
