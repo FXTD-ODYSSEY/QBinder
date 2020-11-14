@@ -39,8 +39,8 @@ gstate = GBinder()
 #     {"text": "todo1", "completed": False},
 #     {"text": "todo2", "completed": True},
 # ]*10
-# gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
-gstate.todo_data = []
+gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
+# gstate.todo_data = []
 gstate.item_count = 0
 gstate.input_font = "italic"
 gstate.completed_color = "lightgray"
@@ -64,7 +64,7 @@ class EditableLabel(QtWidgets.QLabel):
         self.editable = True
         self.edit = QtWidgets.QLineEdit()
         self.edit.setVisible(False)
-        self.edit.editingFinished.connect(self.__complete__)
+        # self.edit.editingFinished.connect(self.__complete__)
 
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         # self.edit.setSizePolicy(sizePolicy)
@@ -73,13 +73,18 @@ class EditableLabel(QtWidgets.QLabel):
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(self.edit)
+        # app = QtWidgets.QApplication.instance()
+        # app.installEventFilter(self)
+        self.edit >> ~event_hook("MouseButtonPress",self.press_complete)
 
-        app = QtWidgets.QApplication.instance()
-        app.installEventFilter(self)
-
+    def press_complete(self,receiver,event):
+        if self.editable and self.edit.isVisible():
+            if receiver.__class__.__name__ != "QWindow":
+                self.__complete__()
+        
     def eventFilter(self, receiver, event):
         # NOTE auto hide when click out of the lineedit 
-        if event.type() == 2 and self.editable and self.edit.isVisible():
+        if event.type() == QtCore.QEvent.MouseButtonPress and self.editable and self.edit.isVisible():
             if (
                 receiver.__class__.__name__ != "QWindow"
                 and receiver is not self.edit
@@ -97,9 +102,9 @@ class EditableLabel(QtWidgets.QLabel):
             if text != edit_text:
                 gstate.todo_data[self.item.index]["text"] = edit_text
 
-    def mouseClickEvent(self, event):
-        if event.button() == 1 and self.editable:
-            self.__complete__()
+    # def mouseClickEvent(self, event):
+    #     if event.button() == 1 and self.editable:
+    #         self.__complete__()
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == 1 and self.editable:

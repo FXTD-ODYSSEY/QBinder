@@ -19,8 +19,56 @@ from PySide2 import QtGui
 
 
 callback = QtWidgets.QLabel.setText
+class Test(object):
+    def test(self,a):
+        print(a)
+    
+    @classmethod
+    def test2(cls,a):
+        print(a)
 
-print(dir(type))
+    @staticmethod
+    def test3(a):
+        print(a)
+
+t = Test()
+callback = t.test
+
+arg = inspect.getargspec(callback)
+print(arg.args)
+print(callback)
+print(dir(callback))
+
+callback = t.test2
+
+arg = inspect.getargspec(callback)
+print(arg.args)
+print(callback)
+print(dir(callback))
+
+static_method = t.test3
+
+arg = inspect.getargspec(static_method)
+print(arg.args)
+print(static_method)
+print(dir(static_method))
+
+callback = Test.test
+
+arg = inspect.getargspec(callback)
+print(arg.args)
+print(callback)
+print(dir(callback))
+
+
+print('======================')
+
+print(inspect.ismethod(callback))
+print(inspect.ismethod(static_method))
+
+a = ('a',)
+print(a[:0])
+
 # print(dir(callback))
 # res = inspect.signature(callback)
 # print(res)
