@@ -73,12 +73,6 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QLabel" name="label">
-           <property name="font">
-            <font>
-             <family>Microsoft YaHei</family>
-             <pointsize>-1</pointsize>
-            </font>
-           </property>
            <property name="styleSheet">
             <string notr="true">color:rgb(234, 215, 215);
 font-size:50px;</string>

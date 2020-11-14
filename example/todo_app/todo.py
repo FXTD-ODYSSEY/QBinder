@@ -27,7 +27,12 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
+os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
+# os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
+
 from QBinder import Binder, GBinder , QEventHook
+import Qt
+print(Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
@@ -58,12 +63,15 @@ def update_count():
 
 
 class EditableLabel(QtWidgets.QLabel):
+    count = 0
     def __init__(self, *args, **kwargs):
         super(EditableLabel, self).__init__(*args, **kwargs)
-        self.item = None
+        self.count += 1 
         self.editable = True
+        self.item = None
         self.edit = QtWidgets.QLineEdit()
         self.edit.setVisible(False)
+        self.edit.count = self.count
         # self.edit.editingFinished.connect(self.__complete__)
 
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -73,32 +81,24 @@ class EditableLabel(QtWidgets.QLabel):
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(self.edit)
-        # app = QtWidgets.QApplication.instance()
-        # app.installEventFilter(self)
-        self.edit >> ~event_hook("MouseButtonPress",self.press_complete)
+        self.edit >> ~event_hook(("MouseButtonPress","KeyPress"),self.press_complete)
 
     def press_complete(self,receiver,event):
-        if self.editable and self.edit.isVisible():
-            if receiver.__class__.__name__ != "QWindow":
+        if self.editable:
+            # print(self.edit,self.edit.count)
+            vis = self.edit.isVisible()
+            if vis and receiver.__class__.__name__ != "QWindow":
                 self.__complete__()
-        
-    def eventFilter(self, receiver, event):
-        # NOTE auto hide when click out of the lineedit 
-        if event.type() == QtCore.QEvent.MouseButtonPress and self.editable and self.edit.isVisible():
-            if (
-                receiver.__class__.__name__ != "QWindow"
-                and receiver is not self.edit
-            ):
-                self.__complete__()
-        return False
-
+      
     def __complete__(self):
+        print('__complete__')
         self.edit.setVisible(False)
-        self.setText(self.edit.text())
+        edit_text = self.edit.text()
+        self.setText(edit_text)
         if self.item:
             self.item.completedChanged()
             text = gstate.todo_data[self.item.index]["text"]
-            edit_text = self.edit.text()
+            # TODO reconstruct lead to C++ delete error
             if text != edit_text:
                 gstate.todo_data[self.item.index]["text"] = edit_text
 

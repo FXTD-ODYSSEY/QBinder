@@ -12,11 +12,18 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-02 23:47:53"
 
+try:
+    from collections import Iterable
+except:
+    from collections.abc import Iterable
+
+import six
 import inspect
 
 from Qt import QtCore
 from Qt import QtWidgets
 from Qt import QtGui
+
 
 class QEventHook(QtCore.QObject):
 
@@ -40,25 +47,34 @@ class QEventHook(QtCore.QObject):
             super(QEventHook, self).__init__()
             self.installEventFilter(self)
             event = QtCore.QEvent(QtCore.QEvent.User)
-            QtCore.QCoreApplication.postEvent(self,event)
-    
+            QtCore.QCoreApplication.postEvent(self, event)
+
     def eventFilter(self, receiver, event):
         data = self.__hook.get(receiver)
         if data:
             callbacks = data.get(event.type(), [])
             for callback in callbacks:
-                length = len(inspect.getargspec(callback).args) 
+                length = len(inspect.getargspec(callback).args)
                 count = length - 1 if inspect.ismethod(callback) else length
-                args = (event,)
+                args = (
+                    receiver,
+                    event,
+                )
                 callback(*args[:count])
+                
+        # NOTE invert event hook
         data = self.__invert_hook.get(receiver)
         if data is None:
-            callbacks = self.__invert_hook.get(event.type(),[])
+            callbacks = self.__invert_hook.get(event.type(), [])
             for callback in callbacks:
-                length = len(inspect.getargspec(callback).args) 
+                length = len(inspect.getargspec(callback).args)
                 count = length - 1 if inspect.ismethod(callback) else length
-                args = (receiver,event,)
+                args = (
+                    receiver,
+                    event,
+                )
                 callback(*args[:count])
+
         if receiver is self and event.type() == QtCore.QEvent.User:
             self.removeEventFilter(self)
             app = QtWidgets.QApplication.instance()
@@ -67,60 +83,72 @@ class QEventHook(QtCore.QObject):
 
     def __rrshift__(self, receiver):
         event = self.__event
-        event = getattr(QtCore.QEvent, event) if isinstance(event, str) else event
-        if self.__invert_flag:
-            self.__invert_flag = False
-            self.add_invert_hook(receiver,event,self.__callbacks)   
-        else:
-            self.add_hook(receiver,event,self.__callbacks)
+        # TODO event hook all
+        events = (
+            (event,)
+            if isinstance(event, six.string_types) or not isinstance(event, Iterable)
+            else event
+        )
+        for event in events:
+            event = getattr(QtCore.QEvent, event) if isinstance(event, str) else event
+            if self.__invert_flag:
+                self.add_invert_hook(receiver, event, self.__callbacks)
+            else:
+                self.add_hook(receiver, event, self.__callbacks)
+        self.__invert_flag = False
         return receiver
-    
+
     def __invert__(self):
         self.__invert_flag = True
         return self
-            
+
     def __call__(self, event, callbacks):
         """__call__ drive add_hook
-        
+
         https://doc.qt.io/qtforpython/PySide2/QtCore/QEvent.html
-        
-        :param event: QEvent Type 
+
+        :param event: QEvent Type
         :type event: str | QEvent.Type
         :param callbacks: callable list or callable object
         :type callbacks: callable
-        """        
+        """
+
         self.__event = event
         self.__callbacks = callbacks
         return self
 
-    def add_hook(self, receiver, event, callbacks):   
+    def add_hook(self, receiver, event, callbacks):
         """add_hook global hook
-        
+
         https://doc.qt.io/qtforpython/PySide2/QtCore/QEvent.html
-        
+
         :param receiver: object or widget
         :type receiver: QtCore.QObject
         :param event: QEvent Type , defaults to None
         :type event: str | QEvent.Type
         :param callbacks: callable list or callable object , defaults to None
         :type callbacks: callable
-        """    
-        
+        """
+
         if not event or not callbacks:
             return
         self.__hook.setdefault(receiver, {})
         self.__hook[receiver].setdefault(event, [])
         self.__hook[receiver][event].extend(
-            [c for c in callbacks if callable(c)] if isinstance(callbacks, list) else [callbacks]
+            [c for c in callbacks if callable(c)]
+            if isinstance(callbacks, list)
+            else [callbacks]
         )
-        
-    def add_invert_hook(self, receiver, event, callbacks):   
+
+    def add_invert_hook(self, receiver, event, callbacks):
         if not event or not callbacks:
             return
-        self.__invert_hook.setdefault(receiver,True)
-        self.__invert_hook.setdefault(event,[])
+        self.__invert_hook.setdefault(receiver, True)
+        self.__invert_hook.setdefault(event, [])
         self.__invert_hook[event].extend(
-            [c for c in callbacks if callable(c)] if isinstance(callbacks, list) else [callbacks]
+            [c for c in callbacks if callable(c)]
+            if isinstance(callbacks, list)
+            else [callbacks]
         )
 
     def get_hook(self):
@@ -128,5 +156,3 @@ class QEventHook(QtCore.QObject):
 
     def set_hook(self, hook):
         self.__hook = hook
-
-    
