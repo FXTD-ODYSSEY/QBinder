@@ -37,23 +37,21 @@ class QEventHook(QtCore.QObject):
             self.__init_flag = False
             self.__app_flag = True
             super(QEventHook, self).__init__()
-            # TODO Test PyQt
+            self.installEventFilter(self)
             event = QtCore.QEvent(QtCore.QEvent.User)
-            QtWidgets.QApplication.postEvent(self,event)
+            QtCore.QCoreApplication.postEvent(self,event)
     
-    def event(self,event):
-        # NOTE https://doc.qt.io/qtforpython/overviews/eventsandfilters.html
-        if event.type() is QtCore.QEvent.User:
+    def eventFilter(self, receiver, event):
+        if receiver is self and event.type() == QtCore.QEvent.User:
+            self.removeEventFilter(self)
             app = QtWidgets.QApplication.instance()
             app.installEventFilter(self)
-        return super(QEventHook,self).event(event)
-
-    def eventFilter(self, receiver, event):
-        data = self.__hook.get(receiver)
-        if data:
-            callbacks = data.get(event.type(), [])
-            for callback in callbacks:
-                callback()
+        else:
+            data = self.__hook.get(receiver)
+            if data:
+                callbacks = data.get(event.type(), [])
+                for callback in callbacks:
+                    callback()
 
         return super(QEventHook, self).eventFilter(receiver, event)
 

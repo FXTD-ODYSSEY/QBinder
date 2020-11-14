@@ -13,7 +13,7 @@ __date__ = "2020-11-03 15:55:15"
 
 import os
 import sys
-# os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5'
+os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
 
 
 repo = (lambda f: lambda p=__file__: f(f, p))(
@@ -31,6 +31,9 @@ sys.path.insert(0, repo) if repo not in sys.path else None
 
 from QBinder import Binder, GBinder,show_info_panel
 from Qt import QtGui, QtWidgets, QtCore
+
+import Qt
+print(Qt.__binding__)
 
 state = GBinder()
 state.msg = "msg"
