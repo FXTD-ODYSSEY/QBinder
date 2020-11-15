@@ -108,7 +108,7 @@ def binding_handler(func, options=None):
         return wrapper
 
     def wrapper(self, value, *args, **kwargs):
-        if callable(value):
+        if six.callable(value):
 
             # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
             with Binding.set_trace():

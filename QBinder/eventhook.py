@@ -135,7 +135,7 @@ class QEventHook(QtCore.QObject):
         self.__hook.setdefault(receiver, {})
         self.__hook[receiver].setdefault(event, [])
         self.__hook[receiver][event].extend(
-            [c for c in callbacks if callable(c)]
+            [c for c in callbacks if six.callable(c)]
             if isinstance(callbacks, list)
             else [callbacks]
         )
@@ -146,7 +146,7 @@ class QEventHook(QtCore.QObject):
         self.__invert_hook.setdefault(receiver, True)
         self.__invert_hook.setdefault(event, [])
         self.__invert_hook[event].extend(
-            [c for c in callbacks if callable(c)]
+            [c for c in callbacks if six.callable(c)]
             if isinstance(callbacks, list)
             else [callbacks]
         )

@@ -25,6 +25,7 @@
 - [ ] Model 实现可扩展
 - [ ] 实现 QCombobox addItem 扩展支持
 - [ ] 自动 bind QGroupBox CheckBox 和 RadioButton
+- [ ] self.state = Binder() 如何自动绑定实例化的函数
 - [x] hook setStylesheet
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    

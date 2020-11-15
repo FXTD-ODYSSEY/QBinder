@@ -40,7 +40,7 @@ class BindingProxy(BindingBase):
 class FnBinding(BindingBase):
     def __init__(self, binder, func):
         self.binder = binder
-        self.func = func if callable(func) else func.__func__
+        self.func = func if six.callable(func) else func.__func__
         self.static = type(func) is staticmethod
         self.cls = None
 
@@ -156,12 +156,11 @@ class NotifyDict(OrderedDict):
                 value = NotifyList(value, self.STATE)
         return OrderedDict.__setitem__(self, key, value)
 
-
 class Binding(QtGui.QStandardItem, BindingBase):
 
     __trace = False
     _trace_list_ = []
-    _inst_ = None
+    _inst_ = []
     
     __repr__ = lambda self: repr(self.val)
     __str__ = lambda self: str(self.val)
@@ -225,7 +224,8 @@ class Binding(QtGui.QStandardItem, BindingBase):
         cls.__trace = False
 
     def __get__(self, instance, owner):
-        self.__class__._inst_ = instance
+        self.__class__._inst_ = [self]
+        # setattr(self.__class__,"_inst_",self)
         self._trace_list_.append(self) if self.__trace else None
         return self.get()
     
@@ -240,7 +240,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.emit()
 
     def get(self):
-        return self.val() if callable(self.val) else self.val
+        return self.val
 
     @classmethod
     def overrideOperator(cls, val):
@@ -291,7 +291,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
 
     def emit(self, *args, **kwargs):
         for callback in self.event_loop[:]:
-            if callable(callback):
+            if six.callable(callback):
                 try:
                     callback(*args, **kwargs)
                 except:

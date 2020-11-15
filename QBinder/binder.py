@@ -11,6 +11,7 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-04 15:30:25"
 
+import six
 import sys
 import uuid
 import random
@@ -80,7 +81,7 @@ class BinderDispatcher(QtCore.QObject):
 
         def decorator(func):
             binding = FnBinding(self.binder, func)
-            function = func if callable(func) else func.__func__
+            function = func if six.callable(func) else func.__func__
             fn_name = attr if attr else function.__name__
             setattr(self.binder.__class__, fn_name, binding)
 

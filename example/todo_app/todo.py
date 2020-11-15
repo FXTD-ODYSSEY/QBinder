@@ -30,7 +30,8 @@ sys.path.insert(0, repo) if repo not in sys.path else None
 os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
 # os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
 
-from QBinder import Binder, GBinder , QEventHook
+from QBinder import Binder, GBinder , QEventHook,inject
+from QBinder.handler import ItemMixin,Set
 import Qt
 print(Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
@@ -41,7 +42,7 @@ event_hook = QEventHook()
 gstate = GBinder()
 # TODO reconstruct large data very slow
 # gstate.todo_data = [
-#     {"text": "todo1", "completed": False},
+#     {"text"o: "todo1", "completed": False},
 #     {"text": "todo2", "completed": True},
 # ]*10
 gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
@@ -72,7 +73,7 @@ class EditableLabel(QtWidgets.QLabel):
         self.edit = QtWidgets.QLineEdit()
         self.edit.setVisible(False)
         self.edit.count = self.count
-        # self.edit.editingFinished.connect(self.__complete__)
+        self.edit.editingFinished.connect(self.__complete__)
 
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         # self.edit.setSizePolicy(sizePolicy)
@@ -81,13 +82,11 @@ class EditableLabel(QtWidgets.QLabel):
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(self.edit)
-        self.edit >> ~event_hook(("MouseButtonPress","KeyPress"),self.press_complete)
+        # self.edit >> ~event_hook(("MouseButtonPress","KeyPress"),self.press_complete)
 
     def press_complete(self,receiver,event):
-        if self.editable:
-            # print(self.edit,self.edit.count)
-            vis = self.edit.isVisible()
-            if vis and receiver.__class__.__name__ != "QWindow":
+        if self.editable and self.edit.isVisible():
+            if receiver.__class__.__name__ != "QWindow":
                 self.__complete__()
       
     def __complete__(self):
@@ -124,17 +123,28 @@ class EditableLabel(QtWidgets.QLabel):
         self.item = item
 
 
-class TodoItem(QtWidgets.QWidget):
-    def __init__(self, index):
+class TodoItem(QtWidgets.QWidget,ItemMixin):
+
+    state = Binder()
+    state.test = '1'
+    
+    @inject(state)
+    def __init__(self, index,data=None):
+        data = data if isinstance(data,dict) else {}
         super(TodoItem, self).__init__()
         self.index = index
-        self.state = Binder()
-        self.state.text = ""
+        
+        self.state.text = "a"
         self.state.completed = False
         self.state.visible = False
         self.state.text_style = "none"
         self.state.text_color = "black"
+        
+        for k,v in data.items():
+            setattr(self.state,k,v)
+            # self.mapper[k](self,v)
 
+            
         ui_file = os.path.join(__file__, "..", "item.ui")
         loadUi(ui_file, self)
 
@@ -251,10 +261,6 @@ class TodoWidget(QtWidgets.QWidget):
 
     def load_item(self):
         layout = self.TodoList.layout()
-        # NOTE clear item
-        [item.deleteLater() for item in self.item_list]
-        del self.item_list[:]
-
         # TODO reconstruct item not optimized
         if gstate.todo_data:
             gstate.header_border = 1
@@ -268,10 +274,7 @@ class TodoWidget(QtWidgets.QWidget):
                 elif gstate.selected == "Completed" and not completed:
                     continue
 
-                item = TodoItem(i)
-                item.setText(todo["text"])
-                item.setCompleted(completed)
-                self.item_list.append(item)
+                item = TodoItem(i,todo)
                 layout.addWidget(item)
             update_count()
         else:
