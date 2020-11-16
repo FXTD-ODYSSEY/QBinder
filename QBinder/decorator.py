@@ -11,6 +11,7 @@ __author__ = 'timmyliang'
 __email__ = '820472580@qq.com'
 __date__ = '2020-11-15 20:56:50'
 
+import six
 import inspect
 from .binder import Binder
 from functools import wraps
@@ -21,7 +22,7 @@ def inject(binder):
         if v is binder:
             break
     def caller(func):
-        @wraps(func)
+        @six.wraps(func)
         def wrapper(self,*args, **kwargs):
             # NOTE inject class binder to self binder
             _binder = Binder()

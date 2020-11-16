@@ -27,12 +27,13 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 # os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
 
-from QBinder import Binder, GBinder , QEventHook,inject
-from QBinder.handler import ItemMixin,Set
+from QBinder import Binder, GBinder, QEventHook, inject
+from QBinder.handler import ItemMixin, Set
 import Qt
+
 print(Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
@@ -65,9 +66,10 @@ def update_count():
 
 class EditableLabel(QtWidgets.QLabel):
     count = 0
+
     def __init__(self, *args, **kwargs):
         super(EditableLabel, self).__init__(*args, **kwargs)
-        self.count += 1 
+        self.count += 1
         self.editable = True
         self.item = None
         self.edit = QtWidgets.QLineEdit()
@@ -77,20 +79,20 @@ class EditableLabel(QtWidgets.QLabel):
 
         # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         # self.edit.setSizePolicy(sizePolicy)
-        
+
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(self.edit)
         # self.edit >> ~event_hook(("MouseButtonPress","KeyPress"),self.press_complete)
 
-    def press_complete(self,receiver,event):
+    def press_complete(self, receiver, event):
         if self.editable and self.edit.isVisible():
             if receiver.__class__.__name__ != "QWindow":
                 self.__complete__()
-      
+
     def __complete__(self):
-        print('__complete__')
+        print("__complete__")
         self.edit.setVisible(False)
         edit_text = self.edit.text()
         self.setText(edit_text)
@@ -115,36 +117,30 @@ class EditableLabel(QtWidgets.QLabel):
                 state = self.item.state
                 state.text_style = "none"
                 state.text_color = "black"
-                
+
     def setEditable(self, editable):
         self.editable = bool(editable)
-        
-    def bind(self,item):
+
+    def bind(self, item):
         self.item = item
 
 
-class TodoItem(QtWidgets.QWidget,ItemMixin):
+class TodoItem(QtWidgets.QWidget, ItemMixin):
 
     state = Binder()
-    state.test = '1'
-    
-    @inject(state)
-    def __init__(self, index,data=None):
-        data = data if isinstance(data,dict) else {}
+    state.test = "1"
+
+    # @inject(state)
+    def __init__(self):
         super(TodoItem, self).__init__()
-        self.index = index
-        
+        # self.index = index
+
         self.state.text = "a"
         self.state.completed = False
         self.state.visible = False
         self.state.text_style = "none"
         self.state.text_color = "black"
-        
-        for k,v in data.items():
-            setattr(self.state,k,v)
-            # self.mapper[k](self,v)
 
-            
         ui_file = os.path.join(__file__, "..", "item.ui")
         loadUi(ui_file, self)
 
@@ -192,7 +188,7 @@ class TodoWidget(QtWidgets.QWidget):
         loadUi(ui_file, self)
         self.state = Binder()
         self.state.clear_text_style = "none"
-        
+
         self.TodoHeader.setStyleSheet(
             lambda: "#TodoHeader { border-bottom:%spx solid lightgray; }"
             % (gstate.header_border)
@@ -202,7 +198,7 @@ class TodoWidget(QtWidgets.QWidget):
         self.TodoInput.returnPressed.connect(self.add_item)
         self.TodoFooter.setVisible(lambda: gstate.footer_visible)
         self.TodoList.setVisible(lambda: gstate.todolist_visible)
-        
+
         # NOTE add hover effect
         self.effect = QtWidgets.QGraphicsDropShadowEffect()
         self.effect.setBlurRadius(40)
@@ -214,16 +210,20 @@ class TodoWidget(QtWidgets.QWidget):
             lambda: '<html><head/><body><p><a href="clear" style="text-decoration: %s;color:gray">Clear completed</a></p></body></html>'
             % self.state.clear_text_style
         )
-        self.ItemClear >> event_hook("Enter",lambda: self.state["clear_text_style"].set("underline"))
-        self.ItemClear >> event_hook("Leave",lambda: self.state["clear_text_style"].set("none"))
-        
+        self.ItemClear >> event_hook(
+            "Enter", lambda: self.state["clear_text_style"].set("underline")
+        )
+        self.ItemClear >> event_hook(
+            "Leave", lambda: self.state["clear_text_style"].set("none")
+        )
+
         self.ItemComplted.linkActivated.connect(self.complete_items)
         self.ItemComplted.setText(
             lambda: '<html><head/><body><a href="complted" style="text-decoration:none;color:%s">﹀</p></body></html>'
             % gstate.completed_color
         )
         gstate["item_count"].connect(self.change_completed_color)
-        
+
         self.ItemCount.setText(lambda: "%s item left" % gstate.item_count)
 
         # NOTE filter radiobutton
@@ -262,20 +262,31 @@ class TodoWidget(QtWidgets.QWidget):
     def load_item(self):
         layout = self.TodoList.layout()
         # TODO reconstruct item not optimized
+        TodoItem(
+            __layout__=layout,
+            __data__=gstate.todo_data,
+        )
+
         if gstate.todo_data:
             gstate.header_border = 1
             gstate.footer_visible = True
             gstate.todolist_visible = True
-            for i, todo in enumerate(gstate.todo_data):
-                completed = todo["completed"]
 
-                if gstate.selected == "Active" and completed:
-                    continue
-                elif gstate.selected == "Completed" and not completed:
-                    continue
+            # index = 0
+            # for todo in gstate.todo_data:
+            #     completed = todo["completed"]
 
-                item = TodoItem(i,todo)
-                layout.addWidget(item)
+            #     if gstate.selected == "Active" and completed:
+            #         continue
+            #     elif gstate.selected == "Completed" and not completed:
+            #         continue
+
+            #     index += 1
+            #     item = TodoItem(**{
+            #         '__index__':index,
+            #         '__data__':todo,
+            #     })
+            #     layout.addWidget(item)
             update_count()
         else:
             gstate.header_border = 0

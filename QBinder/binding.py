@@ -65,7 +65,7 @@ class FnBinding(BindingBase):
     def __getitem__(self, attr):
         attr = getattr(self.binder, attr) if type(attr) is str else attr
 
-        @wraps(self.func)
+        @six.wraps(self.func)
         def wrapper(*args, **kw):
             if self.static:
                 return self.func(*args, **kw)
