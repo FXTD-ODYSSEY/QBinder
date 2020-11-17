@@ -125,7 +125,7 @@ class EditableLabel(QtWidgets.QLabel):
         self.item = item
 
 
-class TodoItem(QtWidgets.QWidget, ItemMixin):
+class TodoItem(ItemMixin,QtWidgets.QWidget):
 
     state = Binder()
     state.test = "1"
@@ -266,6 +266,7 @@ class TodoWidget(QtWidgets.QWidget):
             __layout__=layout,
             __data__=gstate.todo_data,
         )
+        # TodoItem()
 
         if gstate.todo_data:
             gstate.header_border = 1
@@ -283,7 +284,7 @@ class TodoWidget(QtWidgets.QWidget):
 
             #     index += 1
             #     item = TodoItem(**{
-            #         '__index__':index,
+            #         # '__index__':index,
             #         '__data__':todo,
             #     })
             #     layout.addWidget(item)

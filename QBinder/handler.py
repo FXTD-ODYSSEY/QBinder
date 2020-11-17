@@ -15,18 +15,19 @@ import six
 import inspect
 from .binding import Binding
 from .binder import Binder,BinderBase
-from Qt import QtCore
+from Qt import QtCore,QtWidgets
 
-class ItemMeta(type):
+class ItemMeta(type(QtCore.QObject)):
     def __new__(cls, name, bases, attrs):
         init = attrs.get('__init__')
         if init:
             binder_dict = {name:binder for name,binder in attrs.items() if isinstance(binder,BinderBase)}
-            attrs['__init__'] = cls.inject(init,binder_dict)
+            attrs['__init__'] = cls.init_deco(init,binder_dict)
+
         return super(ItemMeta,cls).__new__(cls,name,bases,attrs)
 
     @classmethod
-    def inject(cls,func,binder_dict):
+    def init_deco(cls,func,binder_dict):
         @six.wraps(func)
         def wrapper(self,*args, **kwargs):
             # NOTE inject class binder to self binder
@@ -38,7 +39,6 @@ class ItemMeta(type):
                 setattr(self,name,_binder)
             
             data = kwargs.pop('__data__',{})
-            layout = kwargs.pop('__layout__')
             binder = binder_dict.get(kwargs.pop('__binder__','')) 
             binder = binder if binder else _binder
 
@@ -48,21 +48,31 @@ class ItemMeta(type):
                 for k,v in data.items():
                     setattr(binder,k,v)
                     
-            return res
         return wrapper
-    
-# NOTE avoid metalclass conflict
-class ItemMixMeta(ItemMeta,type(QtCore.QObject)):
-    pass
 
-class ItemMixin(object,six.with_metaclass(ItemMixMeta)):
+class ItemMixin(six.with_metaclass(ItemMeta)):
     
     __instance = None
-
-    # def __new__(cls):
-    #     if cls.__instance is None:
-    #         cls.__instance = super(ItemMixin, cls).__new__(cls)
-    #     return cls.__instance
+    __instance_list = []
+   
+   
+    def __new__(cls,*args,**kwargs):
+        print('__new__',args,kwargs)
+        data = kwargs.pop('__data__',[])
+        layout = kwargs.pop('__layout__')
+        if not layout:
+            raise RuntimeError("need to pass __layout__ parameter to the ItemMixin")
+        
+        for i in range(len(cls.__instance_list),len(data)):
+            super(ItemMixin, cls).__new__(cls)
+        
+        for item in data:
+            pass
+        
+        if cls.__instance is None:
+            cls.__instance = super(ItemMixin, cls).__new__(cls)
+        return cls.__instance
+    
 
 
 class Set(object):
