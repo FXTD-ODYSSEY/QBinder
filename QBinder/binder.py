@@ -17,26 +17,24 @@ import uuid
 import random
 import inspect
 from functools import partial
-from collections import OrderedDict, defaultdict
-
+from collections import OrderedDict
 from Qt import QtCore, QtWidgets
 from .binding import Binding, FnBinding, BindingProxy
+from .util import nestdict, defaultdict
 from .eventhook import QEventHook
 
-# NOTE https://stackoverflow.com/a/8702435
-nested_dict = lambda: defaultdict(nested_dict)
 
 # TODO collect all the exist binder for dumping
 class BinderCollector(object):
     Binders = defaultdict(list)
-    GBinders = nested_dict()
+    GBinders = nestdict()
 
 event_hook = QEventHook()
 
 class BinderDispatcher(QtCore.QObject):
     __instance = None
     __init_flag = False
-    __trace_dict = nested_dict()
+    __trace_dict = nestdict()
 
     def __new__(cls, binder):
         cls.binder = binder

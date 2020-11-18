@@ -60,8 +60,8 @@ class ItemMixin(six.with_metaclass(ItemMeta)):
         print('__new__',args,kwargs)
         data = kwargs.pop('__data__',[])
         layout = kwargs.pop('__layout__')
-        if not layout:
-            raise RuntimeError("need to pass __layout__ parameter to the ItemMixin")
+        # if not layout:
+        #     raise RuntimeError("need to pass __layout__ parameter to the ItemMixin")
         
         for i in range(len(cls.__instance_list),len(data)):
             super(ItemMixin, cls).__new__(cls)

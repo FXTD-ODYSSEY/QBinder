@@ -125,15 +125,15 @@ class EditableLabel(QtWidgets.QLabel):
         self.item = item
 
 
-class TodoItem(ItemMixin,QtWidgets.QWidget):
+class TodoItem(QtWidgets.QWidget,ItemMixin):
 
     state = Binder()
     state.test = "1"
 
     # @inject(state)
-    def __init__(self):
+    def __init__(self,index):
         super(TodoItem, self).__init__()
-        # self.index = index
+        self.index = index
 
         self.state.text = "a"
         self.state.completed = False
@@ -262,10 +262,10 @@ class TodoWidget(QtWidgets.QWidget):
     def load_item(self):
         layout = self.TodoList.layout()
         # TODO reconstruct item not optimized
-        TodoItem(
-            __layout__=layout,
-            __data__=gstate.todo_data,
-        )
+        # TodoItem(
+        #     __layout__=layout,
+        #     __data__=gstate.todo_data,
+        # )
         # TodoItem()
 
         if gstate.todo_data:
@@ -273,21 +273,18 @@ class TodoWidget(QtWidgets.QWidget):
             gstate.footer_visible = True
             gstate.todolist_visible = True
 
-            # index = 0
-            # for todo in gstate.todo_data:
-            #     completed = todo["completed"]
+            index = 0
+            for todo in gstate.todo_data:
+                completed = todo["completed"]
 
-            #     if gstate.selected == "Active" and completed:
-            #         continue
-            #     elif gstate.selected == "Completed" and not completed:
-            #         continue
+                if gstate.selected == "Active" and completed:
+                    continue
+                elif gstate.selected == "Completed" and not completed:
+                    continue
 
-            #     index += 1
-            #     item = TodoItem(**{
-            #         # '__index__':index,
-            #         '__data__':todo,
-            #     })
-            #     layout.addWidget(item)
+                index += 1
+                item = TodoItem(index,__data__=todo)
+                layout.addWidget(item)
             update_count()
         else:
             gstate.header_border = 0

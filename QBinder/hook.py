@@ -15,79 +15,117 @@ import sys
 import six
 import inspect
 from functools import partial
+from collections import defaultdict
 
 from Qt import QtCore
 from Qt import QtWidgets
 from Qt import QtGui
 
 from .binding import Binding
+from .util import nestdict, defaultdict
 
-HOOKS = {
-    QtWidgets.QWidget: {
-        "setStyleSheet": {
-            "type": str,
-        },
-        "setVisible": {
-            "type": bool,
-        },
-    },
-    QtWidgets.QComboBox: {
-        "setCurrentIndex": {
-            "type": int,
-            "getter": "currentIndex",
-            "updater": "currentIndexChanged",
-        },
-        # "setCurrentText": {
-        #     "type": str,
-        #     "getter": "currentText",
-        #     "updater": "currentTextChanged",
-        # },
-        # "addItem": {
-        #     "type":str,
-        # },
-    },
-    QtWidgets.QLineEdit: {
-        "setText": {
-            "type": str,
-            "getter": "text",
-            "updater": "textChanged",
-        },
-    },
-    QtWidgets.QLabel: {
-        "setText": {"type": str, "getter": "text"},
-    },
-    QtWidgets.QCheckBox: {
-        "setChecked": {
-            "type": bool,
-            "getter": "isChecked",
-            "updater": "stateChanged",
-        },
-        "setText": {"type": str, "getter": "text"},
-    },
-    QtWidgets.QRadioButton: {
-        "setChecked": {
-            "type": bool,
-            "getter": "isChecked",
-            "updater": "stateChanged",
-        },
-        "setText": {"type": str, "getter": "text"},
-    },
-    QtWidgets.QSpinBox: {
-        "setValue": {
-            "type": int,
-            "getter": "value",
-            "updater": "valueChanged",
-        },
-    },
-    QtWidgets.QDoubleSpinBox: {
-        "setValue": {
-            "type": float,
-            "getter": "value",
-            "updater": "valueChanged",
-        },
-    },
-}
+HOOKS = nestdict()
+_HOOKS_REL = nestdict()
+# method_comp = defaultdict(list)
+qt_dict = inspect.getmembers(QtWidgets)
+qt_dict.extend(inspect.getmembers(QtCore))
+qt_dict.extend(inspect.getmembers(QtGui))
 
+for name,member in qt_dict:
+    if not hasattr(member,'staticMetaObject'):
+        continue
+    meta_obj = getattr(member,'staticMetaObject')
+    # NOTE hook method has parmeter 
+    for i in range(meta_obj.methodCount()):
+        method = meta_obj.method(i)
+        method_name = str(method.name())
+        if method.parameterCount() and method.methodType() != QtCore.QMetaMethod.Signal and not method_name.startswith('_') :
+            if hasattr(member,method_name):
+                HOOKS[member][method_name] = {}
+                _HOOKS_REL[member][method_name.lower()] = method_name
+    
+    # NOTE hook signal updater 
+    for i in range(meta_obj.propertyCount()):
+        property = meta_obj.property(i)
+        if not property.hasNotifySignal():
+            continue
+        property_name = property.name()
+        setter = "set%s" % property_name
+        method_name = _HOOKS_REL[member].get(setter)
+        data = HOOKS[member].get(method_name)
+        if data is not None:
+            updater = str(property.notifySignal().name())
+            if updater:
+                data.update({
+                    "updater" : updater,
+                    "getter" : property_name
+                })        
+                
+# HOOKS.update({
+#     QtWidgets.QWidget: {
+#         "setStyleSheet": {
+#             "type": str,
+#         },
+#         "setVisible": {
+#             "type": bool,
+#         },
+#     },
+#     QtWidgets.QComboBox: {
+#         "setCurrentIndex": {
+#             "type": int,
+#             "getter": "currentIndex",
+#             "updater": "currentIndexChanged",
+#         },
+#         # "setCurrentText": {
+#         #     "type": str,
+#         #     "getter": "currentText",
+#         #     "updater": "currentTextChanged",
+#         # },
+#         # "addItem": {
+#         #     "type":str,
+#         # },
+#     },
+#     QtWidgets.QLineEdit: {
+#         "setText": {
+#             "type": str,
+#             "getter": "text",
+#             "updater": "textChanged",
+#         },
+#     },
+#     QtWidgets.QLabel: {
+#         "setText": {"type": str, "getter": "text"},
+#     },
+#     QtWidgets.QCheckBox: {
+#         "setChecked": {
+#             "type": bool,
+#             "getter": "isChecked",
+#             "updater": "stateChanged",
+#         },
+#         "setText": {"type": str, "getter": "text"},
+#     },
+#     QtWidgets.QRadioButton: {
+#         "setChecked": {
+#             "type": bool,
+#             "getter": "isChecked",
+#             "updater": "stateChanged",
+#         },
+#         "setText": {"type": str, "getter": "text"},
+#     },
+#     QtWidgets.QSpinBox: {
+#         "setValue": {
+#             "type": int,
+#             "getter": "value",
+#             "updater": "valueChanged",
+#         },
+#     },
+#     QtWidgets.QDoubleSpinBox: {
+#         "setValue": {
+#             "type": float,
+#             "getter": "value",
+#             "updater": "valueChanged",
+#         },
+#     },
+# })
 
 def binding_handler(func, options=None):
     """
@@ -134,9 +172,9 @@ def binding_handler(func, options=None):
                 and len(code.co_consts) == 1  # NOTE only bind directly variable
             ):
                 updater = getattr(self, updater)
-                getter = getattr(self, getter)
+                _getter_ = getattr(self, getter) if hasattr(self, getter) else lambda:self.property(getter)
                 updater.connect(
-                    fix_cursor_position(lambda *args: binding.set(getter()), self)
+                    fix_cursor_position(lambda *args: binding.set(_getter_()), self)
                 )
 
             value = typ(val) if typ else val
@@ -145,7 +183,6 @@ def binding_handler(func, options=None):
         return res
 
     return wrapper
-
 
 def hook_initialize():
     """
