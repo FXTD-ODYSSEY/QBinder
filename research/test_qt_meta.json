@@ -1,1613 +1,1390 @@
 {
-    "QAbstractButton": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setchecked": {
-            "getter": "checked", 
+    "QtWidgets.QCompleter": {
+        "setWrapAround": {}, 
+        "setCompletionPrefix": {}, 
+        "complete": {}
+    }, 
+    "QtCore.QTimer": {
+        "start": {}
+    }, 
+    "QtWidgets.QUndoView": {
+        "currentChanged": {}, 
+        "setGroup": {}, 
+        "selectionChanged": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "setStack": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtWidgets.QTableWidget": {
+        "currentChanged": {}, 
+        "showRow": {}, 
+        "selectionChanged": {}, 
+        "rowMoved": {}, 
+        "insertColumn": {}, 
+        "rowResized": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "scrollToItem": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "insertRow": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "setShowGrid": {}, 
+        "selectRow": {}, 
+        "removeRow": {}, 
+        "showColumn": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "rowCountChanged": {}, 
+        "hideColumn": {}, 
+        "removeColumn": {}, 
+        "hideRow": {}, 
+        "columnCountChanged": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "selectColumn": {}, 
+        "sortByColumn": {}, 
+        "resizeColumnToContents": {}, 
+        "columnMoved": {}, 
+        "resizeRowToContents": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "columnResized": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtCore.QSequentialAnimationGroup": {
+        "start": {}, 
+        "setCurrentTime": {}, 
+        "setPaused": {}
+    }, 
+    "QtWidgets.QCheckBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setChecked": {
+            "property": "checked", 
             "updater": "toggled"
         }, 
-        "seticonsize": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "animateclick": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+        "setIconSize": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "animateClick": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QMainWindow": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setunifiedtitleandtoolbaronmac": {}, 
-        "setdocknestingenabled": {}, 
-        "setanimated": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+    "QtWidgets.QInputDialog": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QStandardItemModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "rowcount": {}, 
-        "hasindex": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
+    "QtWidgets.QDockWidget": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QState": {}, 
-    "QGraphicsScene": {
-        "invalidate": {}, 
-        "focusnextprevchild": {}, 
-        "update": {}
+    "QtWidgets.QDataWidgetMapper": {
+        "setCurrentModelIndex": {}, 
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentIndexChanged"
+        }
     }, 
-    "QDrag": {}, 
-    "QGraphicsColorizeEffect": {
-        "setstrength": {
-            "getter": "strength", 
+    "QtWidgets.QColorDialog": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QSpinBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {
+            "property": "value", 
+            "updater": "valueChanged"
+        }, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QGraphicsRotation": {}, 
+    "QtWidgets.QDialog": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QAnimationGroup": {
+        "start": {}, 
+        "setCurrentTime": {}, 
+        "setPaused": {}
+    }, 
+    "QtWidgets.QGraphicsColorizeEffect": {
+        "setStrength": {
+            "property": "strength", 
             "updater": "strengthChanged"
         }, 
-        "setenabled": {
-            "getter": "enabled", 
+        "setEnabled": {
+            "property": "enabled", 
             "updater": "enabledChanged"
         }, 
-        "setcolor": {
-            "getter": "color", 
+        "setColor": {
+            "property": "color", 
             "updater": "colorChanged"
         }
     }, 
-    "QTimeLine": {
-        "setcurrenttime": {}, 
-        "setpaused": {}
+    "QtWidgets.QGraphicsScene": {
+        "invalidate": {}, 
+        "focusNextPrevChild": {}, 
+        "update": {}
     }, 
-    "QEventTransition": {}, 
-    "QSizeGrip": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QVariantAnimation": {
-        "start": {}, 
-        "setcurrenttime": {}, 
-        "setpaused": {}
-    }, 
-    "QProgressDialog": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {}, 
-        "setminimumduration": {}, 
-        "setlabeltext": {}, 
-        "showextension": {}, 
-        "setcancelbuttontext": {}, 
-        "setmaximum": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setrange": {}, 
-        "setvisible": {}, 
-        "setminimum": {}, 
-        "sethidden": {}
-    }, 
-    "QTextList": {}, 
-    "QRadioButton": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setchecked": {
-            "getter": "checked", 
-            "updater": "toggled"
+    "QtWidgets.QScrollBar": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {
+            "property": "value", 
+            "updater": "valueChanged"
         }, 
-        "seticonsize": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "animateclick": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setOrientation": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QHeaderView": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "setoffsettosectionposition": {}, 
-        "updatesection": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "sectionsinserted": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "update": {}, 
-        "headerdatachanged": {}, 
-        "sectionsabouttoberemoved": {}, 
-        "setcurrentindex": {}, 
-        "setoffset": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
-    }, 
-    "QStringListModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "rowcount": {}, 
-        "hasindex": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QAbstractSpinBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QTreeView": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "columncountchanged": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "columnresized": {}, 
-        "hidecolumn": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "resizecolumntocontents": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "rowsremoved": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "collapse": {}, 
-        "update": {}, 
-        "setcurrentindex": {}, 
-        "showcolumn": {}, 
-        "expand": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "sortbycolumn": {}, 
-        "expandtodepth": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
-    }, 
-    "QComboBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setedittext": {}, 
-        "setdisabled": {}, 
-        "setcurrenttext": {}, 
-        "setstylesheet": {}, 
-        "setcurrentindex": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QToolButton": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setchecked": {
-            "getter": "checked", 
-            "updater": "toggled"
-        }, 
-        "seticonsize": {}, 
-        "setdefaultaction": {}, 
-        "settoolbuttonstyle": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "animateclick": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QDialog": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QGraphicsTextItem": {}, 
-    "QTimer": {
-        "start": {}
-    }, 
-    "QLineEdit": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "settext": {
-            "getter": "text", 
-            "updater": "textChanged"
-        }, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QSyntaxHighlighter": {
-        "rehighlightblock": {}
-    }, 
-    "QTabWidget": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setcurrentwidget": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setcurrentindex": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QStatusBar": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "showmessage": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QTextDocument": {
-        "loadresource": {}, 
-        "setmodified": {}
-    }, 
-    "QAbstractItemDelegate": {}, 
-    "QUndoGroup": {
-        "setactivestack": {}
-    }, 
-    "QMdiArea": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setupviewport": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "setactivesubwindow": {}, 
-        "sethidden": {}
-    }, 
-    "QStyle": {}, 
-    "QSplitter": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QDataWidgetMapper": {
-        "setcurrentmodelindex": {}, 
-        "setcurrentindex": {}
-    }, 
-    "QGraphicsDropShadowEffect": {
-        "setenabled": {
-            "getter": "enabled", 
+    "QtWidgets.QGraphicsOpacityEffect": {
+        "setEnabled": {
+            "property": "enabled", 
             "updater": "enabledChanged"
         }, 
-        "setyoffset": {}, 
-        "setcolor": {
-            "getter": "color", 
+        "setOpacity": {
+            "property": "opacity", 
+            "updater": "opacityChanged"
+        }, 
+        "setOpacityMask": {
+            "property": "opacityMask", 
+            "updater": "opacityMaskChanged"
+        }
+    }, 
+    "QtWidgets.QGraphicsEffect": {
+        "setEnabled": {
+            "property": "enabled", 
+            "updater": "enabledChanged"
+        }
+    }, 
+    "QtWidgets.QHeaderView": {
+        "currentChanged": {}, 
+        "setOffsetToSectionPosition": {}, 
+        "selectionChanged": {}, 
+        "sectionsInserted": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "updateSection": {}, 
+        "setOffset": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "headerDataChanged": {}, 
+        "sectionsAboutToBeRemoved": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtWidgets.QSplashScreen": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "showMessage": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QDial": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {
+            "property": "value", 
+            "updater": "valueChanged"
+        }, 
+        "setNotchesVisible": {}, 
+        "setWrapping": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setOrientation": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QSocketNotifier": {
+        "setEnabled": {}
+    }, 
+    "QtWidgets.QSystemTrayIcon": {
+        "setVisible": {}
+    }, 
+    "QtWidgets.QSizeGrip": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QListWidget": {
+        "currentChanged": {}, 
+        "selectionChanged": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "scrollToItem": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtWidgets.QStyledItemDelegate": {
+        "helpEvent": {}
+    }, 
+    "QtWidgets.QActionGroup": {
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setVisible": {}, 
+        "setExclusive": {}
+    }, 
+    "QtWidgets.QGraphicsBlurEffect": {
+        "setBlurRadius": {
+            "property": "blurRadius", 
+            "updater": "blurRadiusChanged"
+        }, 
+        "setEnabled": {
+            "property": "enabled", 
+            "updater": "enabledChanged"
+        }, 
+        "setBlurHints": {
+            "property": "blurHints", 
+            "updater": "blurHintsChanged"
+        }
+    }, 
+    "QtWidgets.QMessageBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QMenuBar": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QParallelAnimationGroup": {
+        "start": {}, 
+        "setCurrentTime": {}, 
+        "setPaused": {}
+    }, 
+    "QtWidgets.QGroupBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setChecked": {
+            "property": "checked", 
+            "updater": "toggled"
+        }, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QStackedWidget": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setCurrentWidget": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentChanged"
+        }, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QStatusBar": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "showMessage": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QDesktopWidget": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QTreeWidget": {
+        "currentChanged": {}, 
+        "selectionChanged": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "scrollToItem": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "expandItem": {}, 
+        "editorDestroyed": {}, 
+        "showColumn": {}, 
+        "collapseItem": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "collapse": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "rowsRemoved": {}, 
+        "hideColumn": {}, 
+        "columnCountChanged": {}, 
+        "verticalScrollbarAction": {}, 
+        "expand": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "sortByColumn": {}, 
+        "expandToDepth": {}, 
+        "resizeColumnToContents": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "columnResized": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtWidgets.QUndoStack": {
+        "setIndex": {}, 
+        "setActive": {}
+    }, 
+    "QtWidgets.QDialogButtonBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QComboBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setEditText": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentIndexChanged"
+        }, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QMdiSubWindow": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QWizard": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QAbstractSpinBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QAbstractSlider": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {
+            "property": "value", 
+            "updater": "valueChanged"
+        }, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setOrientation": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QSlider": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {
+            "property": "value", 
+            "updater": "valueChanged"
+        }, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setOrientation": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QFileDialog": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QSplitter": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QMdiArea": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setActiveSubWindow": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QMenu": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QRadioButton": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setChecked": {
+            "property": "checked", 
+            "updater": "toggled"
+        }, 
+        "setIconSize": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "animateClick": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QPlainTextEdit": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "appendPlainText": {}, 
+        "setPlainText": {
+            "property": "plainText", 
+            "updater": "textChanged"
+        }, 
+        "insertPlainText": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "appendHtml": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QAbstractAnimation": {
+        "start": {}, 
+        "setCurrentTime": {}, 
+        "setPaused": {}
+    }, 
+    "QtWidgets.QAbstractItemDelegate": {
+        "helpEvent": {}
+    }, 
+    "QtGui.QTextDocument": {
+        "setModified": {}
+    }, 
+    "QtWidgets.QTextEdit": {
+        "zoomOut": {}, 
+        "insertHtml": {}, 
+        "setPlainText": {}, 
+        "insertPlainText": {}, 
+        "setHtml": {
+            "property": "html", 
+            "updater": "textChanged"
+        }, 
+        "setHidden": {}, 
+        "setFontUnderline": {}, 
+        "append": {}, 
+        "setFontFamily": {}, 
+        "setFontPointSize": {}, 
+        "setFontItalic": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "scrollToAnchor": {}, 
+        "setTextColor": {}, 
+        "setTextBackgroundColor": {}, 
+        "setText": {}, 
+        "setCurrentFont": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setFontWeight": {}, 
+        "setWindowModified": {}, 
+        "setAlignment": {}, 
+        "setVisible": {}, 
+        "zoomIn": {}
+    }, 
+    "QtWidgets.QWidgetAction": {
+        "setChecked": {
+            "property": "checked", 
+            "updater": "toggled"
+        }, 
+        "setDisabled": {}, 
+        "setVisible": {
+            "property": "visible", 
+            "updater": "changed"
+        }, 
+        "setEnabled": {
+            "property": "enabled", 
+            "updater": "changed"
+        }
+    }, 
+    "QtWidgets.QGraphicsProxyWidget": {
+        "newProxyWidget": {}
+    }, 
+    "QtCore.QItemSelectionModel": {
+        "select": {}, 
+        "setCurrentIndex": {}
+    }, 
+    "QtWidgets.QScrollArea": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtGui.QMovie": {
+        "setSpeed": {}, 
+        "setPaused": {}
+    }, 
+    "QtWidgets.QPushButton": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setChecked": {
+            "property": "checked", 
+            "updater": "toggled"
+        }, 
+        "setIconSize": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "animateClick": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QTimeEdit": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDateTime": {
+            "property": "dateTime", 
+            "updater": "dateTimeChanged"
+        }, 
+        "setDisabled": {}, 
+        "setTime": {
+            "property": "time", 
+            "updater": "timeChanged"
+        }, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setDate": {
+            "property": "date", 
+            "updater": "dateChanged"
+        }, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QGraphicsView": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "invalidateScene": {}, 
+        "updateScene": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "updateSceneRect": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QCommonStyle": {
+        "layoutSpacingImplementation": {}, 
+        "standardIconImplementation": {}
+    }, 
+    "QtWidgets.QToolBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setCurrentWidget": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentChanged"
+        }, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QSplitterHandle": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QThread": {
+        "start": {}
+    }, 
+    "QtWidgets.QItemDelegate": {
+        "helpEvent": {}
+    }, 
+    "QtWidgets.QListView": {
+        "currentChanged": {}, 
+        "selectionChanged": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtWidgets.QProgressDialog": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {}, 
+        "setMaximum": {}, 
+        "setMinimumDuration": {}, 
+        "setLabelText": {}, 
+        "setCancelButtonText": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setRange": {}, 
+        "setVisible": {}, 
+        "setMinimum": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QDateTimeEdit": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDateTime": {
+            "property": "dateTime", 
+            "updater": "dateTimeChanged"
+        }, 
+        "setDisabled": {}, 
+        "setTime": {
+            "property": "time", 
+            "updater": "timeChanged"
+        }, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setDate": {
+            "property": "date", 
+            "updater": "dateChanged"
+        }, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QLineEdit": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setText": {
+            "property": "text", 
+            "updater": "textChanged"
+        }, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QSortFilterProxyModel": {
+        "setFilterWildcard": {}, 
+        "setFilterRegExp": {}, 
+        "setFilterFixedString": {}
+    }, 
+    "QtWidgets.QCommandLinkButton": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setChecked": {
+            "property": "checked", 
+            "updater": "toggled"
+        }, 
+        "setIconSize": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "animateClick": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QPauseAnimation": {
+        "start": {}, 
+        "setCurrentTime": {}, 
+        "setPaused": {}
+    }, 
+    "QtWidgets.QGraphicsScale": {}, 
+    "QtWidgets.QDirModel": {
+        "refresh": {}
+    }, 
+    "QtWidgets.QFrame": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QFontDialog": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QAbstractScrollArea": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QDoubleSpinBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {
+            "property": "value", 
+            "updater": "valueChanged"
+        }, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QTextBrowser": {
+        "zoomOut": {}, 
+        "insertHtml": {}, 
+        "setPlainText": {}, 
+        "insertPlainText": {}, 
+        "setHtml": {
+            "property": "html", 
+            "updater": "textChanged"
+        }, 
+        "setHidden": {}, 
+        "setFontUnderline": {}, 
+        "append": {}, 
+        "setSource": {}, 
+        "setFontFamily": {}, 
+        "setFontPointSize": {}, 
+        "setFontItalic": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "scrollToAnchor": {}, 
+        "setTextColor": {}, 
+        "setTextBackgroundColor": {}, 
+        "setText": {}, 
+        "setCurrentFont": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setFontWeight": {}, 
+        "setWindowModified": {}, 
+        "setAlignment": {}, 
+        "setVisible": {}, 
+        "zoomIn": {}
+    }, 
+    "QtWidgets.QGraphicsWidget": {}, 
+    "QtWidgets.QGraphicsDropShadowEffect": {
+        "setEnabled": {
+            "property": "enabled", 
+            "updater": "enabledChanged"
+        }, 
+        "setYOffset": {
+            "property": "yOffset", 
+            "updater": "offsetChanged"
+        }, 
+        "setColor": {
+            "property": "color", 
             "updater": "colorChanged"
         }, 
-        "setblurradius": {}, 
-        "setxoffset": {}, 
-        "setoffset": {
-            "getter": "offset", 
+        "setBlurRadius": {
+            "property": "blurRadius", 
+            "updater": "blurRadiusChanged"
+        }, 
+        "setXOffset": {
+            "property": "xOffset", 
+            "updater": "offsetChanged"
+        }, 
+        "setOffset": {
+            "property": "offset", 
             "updater": "offsetChanged"
         }
     }, 
-    "QToolBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setcurrentwidget": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setcurrentindex": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+    "QtGui.QSyntaxHighlighter": {
+        "rehighlightBlock": {}
     }, 
-    "QStackedLayout": {
-        "setcurrentindex": {}, 
-        "setcurrentwidget": {}
+    "QtWidgets.QStackedLayout": {
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentChanged"
+        }, 
+        "setCurrentWidget": {}
     }, 
-    "QThread": {
-        "start": {}
+    "QtWidgets.QFocusFrame": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QSwipeGesture": {}, 
-    "QAbstractTransition": {}, 
-    "QDoubleValidator": {}, 
-    "QSocketNotifier": {
-        "setenabled": {}
+    "QtWidgets.QWizardPage": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QPauseAnimation": {
+    "QtWidgets.QLCDNumber": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setSmallDecimalPoint": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "display": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QMainWindow": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDockNestingEnabled": {}, 
+        "setAnimated": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QColumnView": {
+        "currentChanged": {}, 
+        "selectionChanged": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtWidgets.QAction": {
+        "setChecked": {
+            "property": "checked", 
+            "updater": "toggled"
+        }, 
+        "setDisabled": {}, 
+        "setVisible": {
+            "property": "visible", 
+            "updater": "changed"
+        }, 
+        "setEnabled": {
+            "property": "enabled", 
+            "updater": "changed"
+        }
+    }, 
+    "QtWidgets.QTabWidget": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setCurrentWidget": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentChanged"
+        }, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QStyle": {
+        "layoutSpacingImplementation": {}, 
+        "standardIconImplementation": {}
+    }, 
+    "QtCore.QPropertyAnimation": {
         "start": {}, 
-        "setcurrenttime": {}, 
-        "setpaused": {}
+        "setCurrentTime": {}, 
+        "setPaused": {}
     }, 
-    "QWidget": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+    "QtWidgets.QAbstractButton": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setChecked": {
+            "property": "checked", 
+            "updater": "toggled"
+        }, 
+        "setIconSize": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "animateClick": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QSlider": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {
-            "getter": "value", 
+    "QtWidgets.QAbstractItemView": {
+        "currentChanged": {}, 
+        "selectionChanged": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "update": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
+        "edit": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
+    }, 
+    "QtWidgets.QDateEdit": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDateTime": {
+            "property": "dateTime", 
+            "updater": "dateTimeChanged"
+        }, 
+        "setDisabled": {}, 
+        "setTime": {
+            "property": "time", 
+            "updater": "timeChanged"
+        }, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setDate": {
+            "property": "date", 
+            "updater": "dateChanged"
+        }, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QToolBar": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setIconSize": {
+            "property": "iconSize", 
+            "updater": "iconSizeChanged"
+        }, 
+        "setToolButtonStyle": {
+            "property": "toolButtonStyle", 
+            "updater": "toolButtonStyleChanged"
+        }, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QProgressBar": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setValue": {
+            "property": "value", 
             "updater": "valueChanged"
         }, 
-        "setorientation": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setrange": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+        "setMaximum": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setOrientation": {}, 
+        "setRange": {}, 
+        "setVisible": {}, 
+        "setMinimum": {}, 
+        "setHidden": {}
     }, 
-    "QMessageBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QLCDNumber": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setsmalldecimalpoint": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "display": {}, 
-        "sethidden": {}
-    }, 
-    "QTextObject": {}, 
-    "QGesture": {}, 
-    "QGraphicsBlurEffect": {
-        "setblurradius": {}, 
-        "setenabled": {
-            "getter": "enabled", 
-            "updater": "enabledChanged"
+    "QtWidgets.QFontComboBox": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setEditText": {}, 
+        "setCurrentFont": {
+            "property": "currentFont", 
+            "updater": "currentFontChanged"
         }, 
-        "setblurhints": {}
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentIndexChanged"
+        }, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QFileSystemWatcher": {}, 
-    "QVBoxLayout": {}, 
-    "QErrorMessage": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "showmessage": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QPanGesture": {}, 
-    "QSystemTrayIcon": {
-        "showmessage": {}, 
-        "setvisible": {}
-    }, 
-    "QSequentialAnimationGroup": {
-        "start": {}, 
-        "setcurrenttime": {}, 
-        "setpaused": {}
-    }, 
-    "QTreeWidget": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "columncountchanged": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "columnresized": {}, 
-        "hidecolumn": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "collapseitem": {}, 
-        "resizecolumntocontents": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "rowsremoved": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "collapse": {}, 
-        "expanditem": {}, 
+    "QtWidgets.QTableView": {
+        "currentChanged": {}, 
+        "showRow": {}, 
+        "selectionChanged": {}, 
+        "rowMoved": {}, 
+        "rowResized": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "setShowGrid": {}, 
+        "selectRow": {}, 
+        "showColumn": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
         "update": {}, 
-        "setcurrentindex": {}, 
-        "scrolltoitem": {}, 
-        "showcolumn": {}, 
-        "expand": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "rowCountChanged": {}, 
+        "hideColumn": {}, 
+        "hideRow": {}, 
+        "columnCountChanged": {}, 
+        "verticalScrollbarAction": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
         "edit": {}, 
-        "sortbycolumn": {}, 
-        "expandtodepth": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
+        "selectColumn": {}, 
+        "sortByColumn": {}, 
+        "resizeColumnToContents": {}, 
+        "columnMoved": {}, 
+        "resizeRowToContents": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "columnResized": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
     }, 
-    "QValidator": {}, 
-    "QThreadPool": {}, 
-    "QFocusFrame": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QFileSystemModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "rowcount": {}, 
-        "hasindex": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QKeyEventTransition": {}, 
-    "QMdiSubWindow": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QGraphicsScale": {}, 
-    "QSignalMapper": {
+    "QtCore.QSignalMapper": {
         "map": {}
     }, 
-    "QGroupBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setchecked": {
-            "getter": "checked", 
-            "updater": "toggled"
+    "QtCore.QTimeLine": {
+        "setCurrentTime": {}, 
+        "setPaused": {}
+    }, 
+    "QtWidgets.QApplication": {
+        "setAutoSipEnabled": {}, 
+        "setStyleSheet": {}
+    }, 
+    "QtWidgets.QErrorMessage": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "done": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "showMessage": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QTabBar": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setCurrentIndex": {
+            "property": "currentIndex", 
+            "updater": "currentChanged"
         }, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QTableWidget": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "columncountchanged": {}, 
-        "columnmoved": {}, 
-        "selectcolumn": {}, 
-        "rowmoved": {}, 
-        "removerow": {}, 
-        "setrootindex": {}, 
-        "resizerowtocontents": {}, 
-        "setdisabled": {}, 
-        "rowcountchanged": {}, 
-        "columnresized": {}, 
-        "hidecolumn": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "showrow": {}, 
-        "setshowgrid": {}, 
-        "resizecolumntocontents": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "rowresized": {}, 
-        "setstylesheet": {}, 
-        "removecolumn": {}, 
-        "hiderow": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "update": {}, 
-        "insertrow": {}, 
-        "setcurrentindex": {}, 
-        "scrolltoitem": {}, 
-        "showcolumn": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "sortbycolumn": {}, 
-        "insertcolumn": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "selectrow": {}, 
-        "datachanged": {}
+    "QtWidgets.QGraphicsTextItem": {}, 
+    "QtWidgets.QCalendarWidget": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setGridVisible": {}, 
+        "setCurrentPage": {}, 
+        "setDateRange": {}, 
+        "setSelectedDate": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setNavigationBarVisible": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QParallelAnimationGroup": {
+    "QtWidgets.QWidget": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtWidgets.QLabel": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setMovie": {}, 
+        "setText": {}, 
+        "setPicture": {}, 
+        "setPixmap": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setNum": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
+    }, 
+    "QtCore.QVariantAnimation": {
         "start": {}, 
-        "setcurrenttime": {}, 
-        "setpaused": {}
+        "setCurrentTime": {}, 
+        "setPaused": {}
     }, 
-    "QPinchGesture": {}, 
-    "QPushButton": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setchecked": {
-            "getter": "checked", 
+    "QtWidgets.QUndoGroup": {
+        "setActiveStack": {}
+    }, 
+    "QtWidgets.QToolButton": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setChecked": {
+            "property": "checked", 
             "updater": "toggled"
         }, 
-        "seticonsize": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "animateclick": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
+        "setIconSize": {}, 
+        "setDefaultAction": {}, 
+        "setToolButtonStyle": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "animateClick": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }, 
-    "QGraphicsOpacityEffect": {
-        "setenabled": {
-            "getter": "enabled", 
-            "updater": "enabledChanged"
-        }, 
-        "setopacity": {
-            "getter": "opacity", 
-            "updater": "opacityChanged"
-        }, 
-        "setopacitymask": {}
-    }, 
-    "QBuffer": {}, 
-    "QToolBar": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "seticonsize": {}, 
-        "settoolbuttonstyle": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QSignalTransition": {}, 
-    "QAbstractState": {}, 
-    "QListWidget": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
+    "QtWidgets.QTreeView": {
+        "currentChanged": {}, 
+        "selectionChanged": {}, 
+        "setHidden": {}, 
+        "setCurrentIndex": {}, 
+        "closeEditor": {}, 
+        "horizontalScrollbarValueChanged": {}, 
+        "verticalScrollbarValueChanged": {}, 
+        "horizontalScrollbarAction": {}, 
+        "editorDestroyed": {}, 
+        "showColumn": {}, 
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setupViewport": {}, 
+        "collapse": {}, 
         "update": {}, 
-        "setcurrentindex": {}, 
-        "scrolltoitem": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
+        "rowsInserted": {}, 
+        "setRootIndex": {}, 
+        "rowsRemoved": {}, 
+        "hideColumn": {}, 
+        "columnCountChanged": {}, 
+        "verticalScrollbarAction": {}, 
+        "expand": {}, 
+        "dataChanged": {}, 
+        "rowsAboutToBeRemoved": {}, 
         "edit": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
+        "sortByColumn": {}, 
+        "expandToDepth": {}, 
+        "resizeColumnToContents": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "columnResized": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "commitData": {}
     }, 
-    "QSettings": {}, 
-    "QDoubleSpinBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {
-            "getter": "value", 
-            "updater": "valueChanged"
-        }, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QAbstractScrollArea": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QInputDialog": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QAbstractListModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "rowcount": {}, 
-        "hasindex": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QCoreApplication": {}, 
-    "QDockWidget": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QMouseEventTransition": {}, 
-    "QGraphicsWidget": {}, 
-    "QDateTimeEdit": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdatetime": {}, 
-        "setdisabled": {}, 
-        "settime": {
-            "getter": "time", 
-            "updater": "timeChanged"
-        }, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setdate": {
-            "getter": "date", 
-            "updater": "dateChanged"
-        }, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QStyledItemDelegate": {}, 
-    "QAbstractSlider": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {
-            "getter": "value", 
-            "updater": "valueChanged"
-        }, 
-        "setorientation": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setrange": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QUndoView": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "setgroup": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "update": {}, 
-        "setstack": {}, 
-        "setcurrentindex": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
-    }, 
-    "QPropertyAnimation": {
-        "start": {}, 
-        "setcurrenttime": {}, 
-        "setpaused": {}
-    }, 
-    "QDirModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "refresh": {}, 
-        "rowcount": {}, 
-        "hasindex": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QApplication": {
-        "setcustomdpioverride": {}, 
-        "setautosipenabled": {}, 
-        "setstylesheet": {}
-    }, 
-    "QWizardPage": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QTextBlockGroup": {}, 
-    "QTemporaryFile": {}, 
-    "QWizard": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QIntValidator": {}, 
-    "QFile": {}, 
-    "QAbstractItemModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "rowcount": {}, 
-        "hasindex": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QSpinBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {
-            "getter": "value", 
-            "updater": "valueChanged"
-        }, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QButtonGroup": {}, 
-    "QCommandLinkButton": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setchecked": {
-            "getter": "checked", 
-            "updater": "toggled"
-        }, 
-        "seticonsize": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "animateclick": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QProcess": {}, 
-    "QTapAndHoldGesture": {}, 
-    "QRegExpValidator": {}, 
-    "QGraphicsView": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "updatescenerect": {}, 
-        "invalidatescene": {}, 
-        "updatescene": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "setupviewport": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QDial": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {
-            "getter": "value", 
-            "updater": "valueChanged"
-        }, 
-        "setorientation": {}, 
-        "setnotchesvisible": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwrapping": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setrange": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QAbstractAnimation": {
-        "start": {}, 
-        "setcurrenttime": {}, 
-        "setpaused": {}
-    }, 
-    "QTranslator": {}, 
-    "QFontComboBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setedittext": {}, 
-        "setcurrentfont": {}, 
-        "setdisabled": {}, 
-        "setcurrenttext": {}, 
-        "setstylesheet": {}, 
-        "setcurrentindex": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QEventLoop": {}, 
-    "QDateEdit": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdatetime": {}, 
-        "setdisabled": {}, 
-        "settime": {
-            "getter": "time", 
-            "updater": "timeChanged"
-        }, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setdate": {
-            "getter": "date", 
-            "updater": "userDateChanged"
-        }, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QGraphicsAnchor": {}, 
-    "QActionGroup": {
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setvisible": {}, 
-        "setexclusive": {}
-    }, 
-    "QTableView": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "columncountchanged": {}, 
-        "columnmoved": {}, 
-        "selectcolumn": {}, 
-        "rowmoved": {}, 
-        "setrootindex": {}, 
-        "resizerowtocontents": {}, 
-        "setdisabled": {}, 
-        "rowcountchanged": {}, 
-        "columnresized": {}, 
-        "hidecolumn": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "showrow": {}, 
-        "setshowgrid": {}, 
-        "resizecolumntocontents": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "rowresized": {}, 
-        "setstylesheet": {}, 
-        "hiderow": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "update": {}, 
-        "setcurrentindex": {}, 
-        "showcolumn": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "sortbycolumn": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "selectrow": {}, 
-        "datachanged": {}
-    }, 
-    "QAbstractTextDocumentLayout": {}, 
-    "QGraphicsProxyWidget": {
-        "newproxywidget": {}
-    }, 
-    "QObject": {}, 
-    "QMovie": {
-        "setspeed": {}, 
-        "setpaused": {}
-    }, 
-    "QGraphicsTransform": {}, 
-    "QUndoStack": {
-        "setindex": {}, 
-        "setactive": {}
-    }, 
-    "QShortcut": {}, 
-    "QSessionManager": {}, 
-    "QLayout": {}, 
-    "QTabBar": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setcurrentindex": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QGraphicsObject": {}, 
-    "QRubberBand": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QAbstractEventDispatcher": {}, 
-    "QClipboard": {}, 
-    "QBoxLayout": {}, 
-    "QMenu": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QStackedWidget": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setcurrentwidget": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setcurrentindex": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QPluginLoader": {}, 
-    "QScrollArea": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QItemSelectionModel": {
-        "setcurrentindex": {}, 
-        "iscolumnselected": {}, 
-        "selectedcolumns": {}, 
-        "isselected": {}, 
-        "columnintersectsselection": {}, 
-        "rowintersectsselection": {}, 
-        "selectedrows": {}, 
-        "isrowselected": {}, 
-        "select": {}
-    }, 
-    "QPlainTextEdit": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "appendhtml": {}, 
-        "appendplaintext": {}, 
-        "zoomout": {}, 
-        "inputmethodquery": {}, 
-        "setplaintext": {}, 
-        "insertplaintext": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "zoomin": {}, 
-        "sethidden": {}
-    }, 
-    "QSortFilterProxyModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "setfilterregexp": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "maptosource": {}, 
-        "rowcount": {}, 
-        "mapfromsource": {}, 
-        "mapselectiontosource": {}, 
-        "hasindex": {}, 
-        "setfilterwildcard": {}, 
-        "mapselectionfromsource": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "setfilterfixedstring": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QHBoxLayout": {}, 
-    "QWidgetAction": {
-        "setchecked": {
-            "getter": "checked", 
-            "updater": "toggled"
-        }, 
-        "setdisabled": {}, 
-        "setvisible": {
-            "getter": "visible", 
-            "updater": "changed"
-        }, 
-        "setenabled": {
-            "getter": "enabled", 
-            "updater": "changed"
-        }
-    }, 
-    "QAction": {
-        "setchecked": {
-            "getter": "checked", 
-            "updater": "toggled"
-        }, 
-        "setdisabled": {}, 
-        "setvisible": {
-            "getter": "visible", 
-            "updater": "changed"
-        }, 
-        "setenabled": {
-            "getter": "enabled", 
-            "updater": "changed"
-        }
-    }, 
-    "QHistoryState": {}, 
-    "QProgressBar": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {
-            "getter": "value", 
-            "updater": "valueChanged"
-        }, 
-        "setorientation": {}, 
-        "setmaximum": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setrange": {}, 
-        "setvisible": {}, 
-        "setminimum": {}, 
-        "sethidden": {}
-    }, 
-    "QFileDialog": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QMimeData": {}, 
-    "QAbstractTableModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "rowcount": {}, 
-        "hasindex": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QStateMachine": {
-        "setrunning": {
-            "getter": "running", 
-            "updater": "runningChanged"
-        }
-    }, 
-    "QAbstractProxyModel": {
-        "columncount": {}, 
-        "index": {}, 
-        "haschildren": {}, 
-        "parent": {}, 
-        "sibling": {}, 
-        "canfetchmore": {}, 
-        "maptosource": {}, 
-        "rowcount": {}, 
-        "mapfromsource": {}, 
-        "mapselectiontosource": {}, 
-        "hasindex": {}, 
-        "mapselectionfromsource": {}, 
-        "flags": {}, 
-        "fetchmore": {}, 
-        "data": {}, 
-        "headerdata": {}, 
-        "match": {}, 
-        "setdata": {}
-    }, 
-    "QAbstractItemView": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "update": {}, 
-        "setcurrentindex": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
-    }, 
-    "QAnimationGroup": {
-        "start": {}, 
-        "setcurrenttime": {}, 
-        "setpaused": {}
-    }, 
-    "QFinalState": {}, 
-    "QDialogButtonBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QFormLayout": {}, 
-    "QListView": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "update": {}, 
-        "setcurrentindex": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
-    }, 
-    "QTextEdit": {
-        "settextbackgroundcolor": {}, 
-        "settext": {}, 
-        "setplaintext": {}, 
-        "insertplaintext": {}, 
-        "setdisabled": {}, 
-        "setfontpointsize": {}, 
-        "setalignment": {}, 
-        "setvisible": {}, 
-        "setfontunderline": {}, 
-        "settextcolor": {}, 
-        "inputmethodquery": {}, 
-        "setcurrentfont": {}, 
-        "sethtml": {
-            "getter": "html", 
-            "updater": "textChanged"
-        }, 
-        "setstylesheet": {}, 
-        "setfontfamily": {}, 
-        "setfontitalic": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "append": {}, 
-        "scrolltoanchor": {}, 
-        "zoomin": {}, 
-        "setenabled": {}, 
-        "zoomout": {}, 
-        "inserthtml": {}, 
-        "loadresource": {}, 
-        "setfontweight": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}
-    }, 
-    "QTapGesture": {}, 
-    "QCheckBox": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setchecked": {
-            "getter": "checked", 
-            "updater": "toggled"
-        }, 
-        "seticonsize": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "animateclick": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QTextBrowser": {
-        "settextbackgroundcolor": {}, 
-        "settext": {}, 
-        "setplaintext": {}, 
-        "insertplaintext": {}, 
-        "setdisabled": {}, 
-        "setfontpointsize": {}, 
-        "setalignment": {}, 
-        "setvisible": {}, 
-        "setfontunderline": {}, 
-        "settextcolor": {}, 
-        "inputmethodquery": {}, 
-        "setcurrentfont": {}, 
-        "sethtml": {
-            "getter": "html", 
-            "updater": "textChanged"
-        }, 
-        "setstylesheet": {}, 
-        "setfontfamily": {}, 
-        "setfontitalic": {}, 
-        "setsource": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "append": {}, 
-        "scrolltoanchor": {}, 
-        "zoomin": {}, 
-        "setenabled": {}, 
-        "zoomout": {}, 
-        "inserthtml": {}, 
-        "loadresource": {}, 
-        "setfontweight": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}
-    }, 
-    "QScrollBar": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setvalue": {
-            "getter": "value", 
-            "updater": "valueChanged"
-        }, 
-        "setorientation": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setrange": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QGridLayout": {}, 
-    "QFontDialog": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QSplashScreen": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "showmessage": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QFrame": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QLabel": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setmovie": {}, 
-        "settext": {}, 
-        "setpicture": {}, 
-        "setpixmap": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setnum": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QCommonStyle": {}, 
-    "QTimeEdit": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdatetime": {}, 
-        "setdisabled": {}, 
-        "settime": {
-            "getter": "time", 
-            "updater": "userTimeChanged"
-        }, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setdate": {
-            "getter": "date", 
-            "updater": "dateChanged"
-        }, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QDesktopWidget": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QCompleter": {
-        "setwraparound": {}, 
-        "setcompletionprefix": {}, 
-        "complete": {}
-    }, 
-    "QIODevice": {}, 
-    "QTextFrame": {}, 
-    "QMenuBar": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QGraphicsEffect": {
-        "setenabled": {
-            "getter": "enabled", 
-            "updater": "enabledChanged"
-        }
-    }, 
-    "QColumnView": {
-        "horizontalscrollbarvaluechanged": {}, 
-        "verticalscrollbarvaluechanged": {}, 
-        "setrootindex": {}, 
-        "setdisabled": {}, 
-        "setvisible": {}, 
-        "verticalscrollbaraction": {}, 
-        "editordestroyed": {}, 
-        "selectionchanged": {}, 
-        "rowsinserted": {}, 
-        "setstylesheet": {}, 
-        "sethidden": {}, 
-        "setwindowtitle": {}, 
-        "update": {}, 
-        "setcurrentindex": {}, 
-        "setenabled": {}, 
-        "closeeditor": {}, 
-        "horizontalscrollbaraction": {}, 
-        "rowsabouttoberemoved": {}, 
-        "currentchanged": {}, 
-        "edit": {}, 
-        "commitdata": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "datachanged": {}
-    }, 
-    "QColorDialog": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "showextension": {}, 
-        "setdisabled": {}, 
-        "done": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QPlainTextDocumentLayout": {}, 
-    "QItemDelegate": {}, 
-    "QTextTable": {}, 
-    "QGraphicsRotation": {}, 
-    "QSplitterHandle": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "sethidden": {}
-    }, 
-    "QCalendarWidget": {
-        "setwindowtitle": {}, 
-        "setenabled": {}, 
-        "setgridvisible": {}, 
-        "setcurrentpage": {}, 
-        "setdaterange": {}, 
-        "setselecteddate": {}, 
-        "setdisabled": {}, 
-        "setstylesheet": {}, 
-        "setwindowmodified": {}, 
-        "grab": {}, 
-        "setvisible": {}, 
-        "setnavigationbarvisible": {}, 
-        "sethidden": {}
+    "QtWidgets.QGraphicsObject": {}, 
+    "QtWidgets.QRubberBand": {
+        "setWindowTitle": {}, 
+        "setEnabled": {}, 
+        "setDisabled": {}, 
+        "setStyleSheet": {}, 
+        "setWindowModified": {}, 
+        "setVisible": {}, 
+        "setHidden": {}
     }
 }

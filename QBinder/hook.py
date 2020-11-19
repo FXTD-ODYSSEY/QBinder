@@ -17,6 +17,7 @@ import inspect
 from functools import partial
 from collections import defaultdict
 
+import Qt
 from Qt import QtCore
 from Qt import QtWidgets
 from Qt import QtGui
@@ -26,43 +27,60 @@ from .util import nestdict, defaultdict
 
 HOOKS = nestdict()
 _HOOKS_REL = nestdict()
-# method_comp = defaultdict(list)
-qt_dict = inspect.getmembers(QtWidgets)
-qt_dict.extend(inspect.getmembers(QtCore))
-qt_dict.extend(inspect.getmembers(QtGui))
+qt_dict = {"QtWidgets.%s" % n:m for n,m in inspect.getmembers(QtWidgets)}
+qt_dict.update({"QtCore.%s" % n:m for n,m in inspect.getmembers(QtCore)})
+qt_dict.update({"QtGui.%s" % n:m for n,m in inspect.getmembers(QtGui)})
 
-for name,member in qt_dict:
+def byte2str(text):
+    # NOTE compat python 2 and 3
+    return str(text,encoding = "utf-8") if sys.hexversion >= 0x3000000 else str(text)
+
+def get_method_name(method):
+    # NOTE compat Qt 4 and 5
+    version = QtCore.qVersion()
+    name = ''
+    count = False
+    if version.startswith('5'):
+        name = method.name()
+        count = method.parameterCount()
+    elif version.startswith('4'):
+        name = method.signature()
+        name = name.split('(')[0]
+        count = method.parameterNames()
+    return byte2str(name),count
+
+
+for name,member in qt_dict.items():
     if not hasattr(member,'staticMetaObject'):
         continue
     meta_obj = getattr(member,'staticMetaObject')
-    # NOTE hook method has parmeter 
+    
     for i in range(meta_obj.methodCount()):
         method = meta_obj.method(i)
-        method_name = str(method.name())
-        if method.parameterCount() and method.methodType() != QtCore.QMetaMethod.Signal and not method_name.startswith('_') :
+        method_name,count = get_method_name(method)
+        if count and method.methodType() != QtCore.QMetaMethod.Signal:
             if hasattr(member,method_name):
-                HOOKS[member][method_name] = {}
-                _HOOKS_REL[member][method_name.lower()] = method_name
-    
-    # NOTE hook signal updater 
+                HOOKS[name][method_name] = {}
+                _HOOKS_REL[name][method_name.lower()] = method_name
+
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)
         if not property.hasNotifySignal():
             continue
         property_name = property.name()
-        setter = "set%s" % property_name
-        method_name = _HOOKS_REL[member].get(setter)
-        data = HOOKS[member].get(method_name)
-        if data is not None:
-            updater = str(property.notifySignal().name())
+        method_name = _HOOKS_REL[name].get("set%s" % property_name.lower())
+        data = HOOKS[name].get(method_name)
+        if isinstance(data,dict):
+            updater,_ = get_method_name(property.notifySignal())
             if updater:
                 data.update({
                     "updater" : updater,
-                    "getter" : property_name
-                })        
+                    "property" : property_name
+                })
+                
                 
 # HOOKS.update({
-#     QtWidgets.QWidget: {
+#     "QtWidgets.QWidget": {
 #         "setStyleSheet": {
 #             "type": str,
 #         },
@@ -70,7 +88,7 @@ for name,member in qt_dict:
 #             "type": bool,
 #         },
 #     },
-#     QtWidgets.QComboBox: {
+#     "QtWidgets.QComboBox": {
 #         "setCurrentIndex": {
 #             "type": int,
 #             "getter": "currentIndex",
@@ -85,17 +103,17 @@ for name,member in qt_dict:
 #         #     "type":str,
 #         # },
 #     },
-#     QtWidgets.QLineEdit: {
+#     "QtWidgets.QLineEdit": {
 #         "setText": {
 #             "type": str,
 #             "getter": "text",
 #             "updater": "textChanged",
 #         },
 #     },
-#     QtWidgets.QLabel: {
+#     "QtWidgets.QLabel": {
 #         "setText": {"type": str, "getter": "text"},
 #     },
-#     QtWidgets.QCheckBox: {
+#     "QtWidgets.QCheckBox": {
 #         "setChecked": {
 #             "type": bool,
 #             "getter": "isChecked",
@@ -103,7 +121,7 @@ for name,member in qt_dict:
 #         },
 #         "setText": {"type": str, "getter": "text"},
 #     },
-#     QtWidgets.QRadioButton: {
+#     "QtWidgets.QRadioButton": {
 #         "setChecked": {
 #             "type": bool,
 #             "getter": "isChecked",
@@ -111,14 +129,14 @@ for name,member in qt_dict:
 #         },
 #         "setText": {"type": str, "getter": "text"},
 #     },
-#     QtWidgets.QSpinBox: {
+#     "QtWidgets.QSpinBox": {
 #         "setValue": {
 #             "type": int,
 #             "getter": "value",
 #             "updater": "valueChanged",
 #         },
 #     },
-#     QtWidgets.QDoubleSpinBox: {
+#     "QtWidgets.QDoubleSpinBox": {
 #         "setValue": {
 #             "type": float,
 #             "getter": "value",
@@ -161,9 +179,14 @@ def binding_handler(func, options=None):
                 binding.connect(callback)
 
             updater = options.get("updater")
-            getter = options.get("getter")
+            prop = options.get("property")
 
+            getter = options.get("getter")
+            _getter_1 = getattr(self, getter) if getter else None
+            _getter_2 = lambda:self.property(prop) if prop else None
+            getter = _getter_1 if _getter_1 else _getter_2
             code = value.__code__
+            
             # NOTE Single binding connect to the updater
             if (
                 updater
@@ -172,9 +195,8 @@ def binding_handler(func, options=None):
                 and len(code.co_consts) == 1  # NOTE only bind directly variable
             ):
                 updater = getattr(self, updater)
-                _getter_ = getattr(self, getter) if hasattr(self, getter) else lambda:self.property(getter)
                 updater.connect(
-                    fix_cursor_position(lambda *args: binding.set(_getter_()), self)
+                    fix_cursor_position(lambda *args: binding.set(getter()), self)
                 )
 
             value = typ(val) if typ else val
@@ -189,6 +211,8 @@ def hook_initialize():
     # NOTE Dynamic wrap the Qt Widget setter base on the HOOKS Definition
     """
     for widget, setters in HOOKS.items():
+        lib,widget = widget.split('.')
+        widget = getattr(getattr(Qt,lib),widget)
         for setter, options in setters.items():
             wrapper = binding_handler(getattr(widget, setter), options)
             setattr(widget, setter, wrapper)

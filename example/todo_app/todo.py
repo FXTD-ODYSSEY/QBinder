@@ -263,7 +263,7 @@ class TodoWidget(QtWidgets.QWidget):
     def load_item(self):
         layout = self.TodoList.layout()
 
-        gstate.todo_data >> TodoItem["state"] % () >> layout
+        gstate.todo_data >> TodoItem["state"] >> layout
         if gstate.todo_data:
             gstate.header_border = 1
             gstate.footer_visible = True

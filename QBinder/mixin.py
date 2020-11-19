@@ -69,9 +69,12 @@ class ItemMeta(type(QtCore.QObject)):
             if not widget:
                 widget = self(*self.__args__)
                 layout.addWidget(widget)
-            binder = getattr(widget,widget.__binder__)
+                self.__items__.append(widget)
+                
+            binder = getattr(widget,self.__binder__)
             for k,v in data.items():
                 setattr(binder,k,v)
+            
         for i in range(len(self.__data__),len(self.__items__)):
             widget = self.__items__ >> ListGet(i)
             widget.hide()
