@@ -10,14 +10,17 @@ __date__ = "2020-05-06 23:02:37"
 """
 
 
-import sys
 import six
+import sys
+import time
 import inspect
 from functools import partial, wraps
 from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
+from .eventhook import QEventHook
 
+event_hook = QEventHook()
 
 class BindingBase(object):
     pass
@@ -116,7 +119,7 @@ class NotifyList(list):
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            return self.__class__(list.__getitem__(self, item))
+            return list(list.__getitem__(self, item))
         else:
             return list.__getitem__(self, item)
 
@@ -159,6 +162,8 @@ class NotifyDict(OrderedDict):
 class Binding(QtGui.QStandardItem, BindingBase):
 
     __trace = False
+    __emit_flag = False
+    __emit_block = False
     _trace_list_ = []
     _inst_ = []
     
@@ -222,6 +227,13 @@ class Binding(QtGui.QStandardItem, BindingBase):
         cls.__trace = True
         yield
         cls.__trace = False
+        
+    @classmethod
+    @contextmanager
+    def set_block(cls):
+        cls.__emit_block = True
+        yield
+        cls.__emit_block = False
 
     def __get__(self, instance, owner):
         self.__class__._inst_ = [self]
@@ -290,12 +302,19 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.event_loop.remove(callback)
 
     def emit(self, *args, **kwargs):
-        for callback in self.event_loop[:]:
-            if six.callable(callback):
-                try:
-                    callback(*args, **kwargs)
-                except:
-                    self.event_loop.remove(callback)
+        if not self.__emit_block:
+            QtCore.QTimer.singleShot(0,lambda:self.run_event(*args, **kwargs))
+            self.__emit_flag = True
+            
+    def run_event(self,*args, **kwargs):
+        if self.__emit_flag:
+            self.__emit_flag = False
+            for callback in self.event_loop[:]:
+                if six.callable(callback):
+                    try:
+                        callback(*args, **kwargs)
+                    except:
+                        self.event_loop.remove(callback)
 
 
 class Model(QtCore.QAbstractItemModel):

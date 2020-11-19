@@ -31,7 +31,7 @@ os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 # os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
 
 from QBinder import Binder, GBinder, QEventHook
-from QBinder.handler import Set
+from QBinder.handler import Set , ItemConstructor
 from QBinder.mixin import ItemMixin
 import Qt
 
@@ -43,11 +43,11 @@ event_hook = QEventHook()
 
 gstate = GBinder()
 # TODO reconstruct large data very slow
-# gstate.todo_data = [
-#     {"text"o: "todo1", "completed": False},
-#     {"text": "todo2", "completed": True},
-# ]*10
-gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
+gstate.todo_data = [
+    {"text": "todo1", "completed": False},
+    {"text": "todo2", "completed": True},
+]*10
+# gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
 # gstate.todo_data = []
 gstate.item_count = 0
 gstate.input_font = "italic"
@@ -134,7 +134,6 @@ class TodoItem(QtWidgets.QWidget,ItemMixin):
     # @inject(state)
     def __init__(self):
         super(TodoItem, self).__init__()
-        # self.index = index
 
         self.state.text = "a"
         self.state.completed = False
@@ -157,15 +156,15 @@ class TodoItem(QtWidgets.QWidget,ItemMixin):
         self.state["completed"].connect(self.completedChanged)
         self.state["completed"].connect(update_count)
 
-        self.ItemDelete.clicked.connect(lambda: gstate.todo_data.pop(self.index))
+        self.ItemDelete.clicked.connect(lambda: gstate.todo_data.pop(self.__index__))
 
     def completedChanged(self):
         completed = self.state.completed
         self.state.text_style = "line-through" if completed else "none"
         self.state.text_color = "gray" if completed else "black"
-        check = gstate.todo_data[self.index]["completed"]
+        check = gstate.todo_data[self.__index__]["completed"]
         if check != completed:
-            gstate.todo_data[self.index]["completed"] = completed
+            gstate.todo_data[self.__index__]["completed"] = completed
 
     def setCompleted(self, completed):
         self.state.completed = completed
@@ -231,14 +230,20 @@ class TodoWidget(QtWidgets.QWidget):
         for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
             rb.toggled.connect(self.filter_state)
 
+        # print(gstate.todo_data)
+        self.filter_func= {
+            "All":lambda : gstate.todo_data,
+            "Active":lambda : [d for d in gstate.todo_data if not d["completed"]],
+            "Completed":lambda : [d for d in gstate.todo_data if d["completed"]],
+        }
         gstate["todo_data"].connect(self.load_item)
         self.load_item()
 
     def filter_state(self, filter):
-        for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
-            if rb.isChecked():
-                gstate.selected = rb.text().strip()
-        self.load_item()
+        rb = self.sender()
+        if rb.isChecked():
+            gstate.selected = rb.text().strip()
+            self.load_item()
 
     def change_completed_color(self):
         gstate.completed_color = "lightgray" if gstate.item_count else "black"
@@ -246,7 +251,7 @@ class TodoWidget(QtWidgets.QWidget):
     def complete_items(self):
         for todo in gstate.todo_data:
             todo["completed"] = True
-        self.load_item()
+        # self.load_item()
 
     def clear_items(self):
         gstate.todo_data = [todo for todo in gstate.todo_data if not todo["completed"]]
@@ -261,26 +266,19 @@ class TodoWidget(QtWidgets.QWidget):
         self.TodoInput.clear()
 
     def load_item(self):
-        layout = self.TodoList.layout()
 
-        gstate.todo_data >> TodoItem["state"] >> layout
+        data = self.filter_func[gstate.selected]() 
+        print(gstate.selected)
+        TodoItem >> ItemConstructor(
+            __layout__ = self.TodoList.layout(),
+            __binder__ = "state",
+            __data__ = data
+        )
+        # gstate.todo_data >> TodoItem["state"] >> layout
         if gstate.todo_data:
             gstate.header_border = 1
             gstate.footer_visible = True
             gstate.todolist_visible = True
-
-            # index = 0
-            # for todo in gstate.todo_data:
-            #     completed = todo["completed"]
-
-            #     if gstate.selected == "Active" and completed:
-            #         continue
-            #     elif gstate.selected == "Completed" and not completed:
-            #         continue
-
-            #     index += 1
-            #     item = TodoItem(index,__data__=todo)
-            #     layout.addWidget(item)
             update_count()
         else:
             gstate.header_border = 0

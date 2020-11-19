@@ -43,56 +43,11 @@ class ItemMeta(type(QtCore.QObject)):
             if not cls.__binder__:
                 cls.__binder__ = name 
             
-            # data = kwargs.pop('__data__',{})
-            # cls_data = getattr(self.__class__,"__data__") if hasattr(self.__class__,"__data__") else None
-            # data = data if data else cls_data if cls_data else {}
-            
-            # binder = binder_dict.get(kwargs.pop('__binder__',None)) 
-            # cls_binder = getattr(self.__class__,"__binder__") if hasattr(self.__class__,"__binder__") else None
-            # binder = binder if binder else cls_binder if cls_binder else _binder
+            return func(self,*args, **kwargs)
 
-            res = func(self,*args, **kwargs)
-
-            # if binder:
-            #     for k,v in data.items():
-            #         setattr(binder,k,v)
         return wrapper
-    
-    def __rrshift__(self,data):
-        self.__data__ = data
-        return self
-    
-    def __rshift__(self,layout):
-        # TODO reconstruct item not optimized
-        for i,data in enumerate(self.__data__):
-            widget = self.__items__ >> ListGet(i)
-            if not widget:
-                widget = self(*self.__args__)
-                layout.addWidget(widget)
-                self.__items__.append(widget)
-                
-            binder = getattr(widget,self.__binder__)
-            for k,v in data.items():
-                setattr(binder,k,v)
-            
-        for i in range(len(self.__data__),len(self.__items__)):
-            widget = self.__items__ >> ListGet(i)
-            widget.hide()
-        # for todo in self.__data__:
-        #     self()
-        
-        return self
-    
-    def __getitem__(self,binder):
-        self.__binder__ = binder
-        return self
-    
-    def __mod__(self,args):
-        self.__args__ = args
-        return self
-
 class ItemMixin(six.with_metaclass(ItemMeta)):
     __binder__ = ""   
     __data__ = {}   
     __items__ = []   
-    __args__ = ()   
+    __layout__ = None   
