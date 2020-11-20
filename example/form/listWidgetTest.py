@@ -37,9 +37,7 @@ class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-        print(self.state("dump"))
         dispatcher = self.state("dispatcher")
-        print(dispatcher)
 
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
@@ -55,12 +53,10 @@ class WidgetTest(QtWidgets.QWidget):
 
         self.label.setText(lambda: "Selected: %s" % self.state.selected)
 
-        self.listWidget.itemSelectionChanged.connect(
-            partial(self.update, self.listWidget)
-        )
+        self.listWidget.itemSelectionChanged.connect(self.update)
 
-    def update(self, widget):
-        self.state.selected = [item.text() for item in widget.selectedItems()]
+    def update(self):
+        self.state.selected = [item.text() for item in self.listWidget.selectedItems()]
 
 
 def main():

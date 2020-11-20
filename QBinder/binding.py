@@ -44,7 +44,7 @@ class FnBinding(BindingBase):
     def __init__(self, binder, func):
         self.binder = binder
         self.func = func if six.callable(func) else func.__func__
-        self.static = type(func) is staticmethod
+        self.static = isinstance(func,staticmethod) 
         self.cls = None
 
     def __call__(self, *args, **kwargs):

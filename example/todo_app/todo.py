@@ -42,11 +42,10 @@ from Qt.QtCompat import loadUi
 event_hook = QEventHook()
 
 gstate = GBinder()
-# TODO reconstruct large data very slow
 gstate.todo_data = [
     {"text": "todo1", "completed": False},
     {"text": "todo2", "completed": True},
-]*10
+]*5
 # gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
 # gstate.todo_data = []
 gstate.item_count = 0
@@ -59,10 +58,7 @@ gstate.selected = "All"
 
 # TODO computed attr
 def update_count():
-    count = 0
-    for todo in gstate.todo_data:
-        count += 0 if todo["completed"] else 1
-    gstate.item_count = count
+    gstate.item_count = len([todo for todo in gstate.todo_data if not todo["completed"]])
 
 
 class EditableLabel(QtWidgets.QLabel):
@@ -78,35 +74,18 @@ class EditableLabel(QtWidgets.QLabel):
         self.edit.count = self.count
         self.edit.editingFinished.connect(self.__complete__)
 
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        # self.edit.setSizePolicy(sizePolicy)
-
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(self.edit)
-        # self.edit >> ~event_hook(("MouseButtonPress","KeyPress"),self.press_complete)
-
-    def press_complete(self, receiver, event):
-        if self.editable and self.edit.isVisible():
-            if receiver.__class__.__name__ != "QWindow":
-                self.__complete__()
 
     def __complete__(self):
-        print("__complete__")
         self.edit.setVisible(False)
         edit_text = self.edit.text()
         self.setText(edit_text)
         if self.item:
             self.item.completedChanged()
-            text = gstate.todo_data[self.item.index]["text"]
-            # TODO reconstruct lead to C++ delete error
-            if text != edit_text:
-                gstate.todo_data[self.item.index]["text"] = edit_text
-
-    # def mouseClickEvent(self, event):
-    #     if event.button() == 1 and self.editable:
-    #         self.__complete__()
+            gstate.todo_data[self.item.__index__]["text"] = edit_text
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == 1 and self.editable:
@@ -125,11 +104,9 @@ class EditableLabel(QtWidgets.QLabel):
     def bind(self, item):
         self.item = item
 
-
 class TodoItem(QtWidgets.QWidget,ItemMixin):
 
     state = Binder()
-    state.test = "1"
 
     # @inject(state)
     def __init__(self):
@@ -211,10 +188,10 @@ class TodoWidget(QtWidgets.QWidget):
             % self.state.clear_text_style
         )
         self.ItemClear >> event_hook(
-            "Enter", lambda: self.state["clear_text_style"].set("underline")
+            "Enter", lambda: self.state.clear_text_style >> Set("underline")
         )
         self.ItemClear >> event_hook(
-            "Leave", lambda: self.state["clear_text_style"].set("none")
+            "Leave", lambda: self.state.clear_text_style >> Set("none")
         )
 
         self.ItemComplted.linkActivated.connect(self.complete_items)
@@ -230,20 +207,14 @@ class TodoWidget(QtWidgets.QWidget):
         for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
             rb.toggled.connect(self.filter_state)
 
-        # print(gstate.todo_data)
-        self.filter_func= {
-            "All":lambda : gstate.todo_data,
-            "Active":lambda : [d for d in gstate.todo_data if not d["completed"]],
-            "Completed":lambda : [d for d in gstate.todo_data if d["completed"]],
-        }
-        gstate["todo_data"].connect(self.load_item)
-        self.load_item()
+        gstate["todo_data"].connect(self.update_item)
+        gstate["selected"].connect(self.update_item)
+        self.update_item()
 
     def filter_state(self, filter):
         rb = self.sender()
         if rb.isChecked():
             gstate.selected = rb.text().strip()
-            self.load_item()
 
     def change_completed_color(self):
         gstate.completed_color = "lightgray" if gstate.item_count else "black"
@@ -251,7 +222,6 @@ class TodoWidget(QtWidgets.QWidget):
     def complete_items(self):
         for todo in gstate.todo_data:
             todo["completed"] = True
-        # self.load_item()
 
     def clear_items(self):
         gstate.todo_data = [todo for todo in gstate.todo_data if not todo["completed"]]
@@ -265,14 +235,18 @@ class TodoWidget(QtWidgets.QWidget):
         )
         self.TodoInput.clear()
 
-    def load_item(self):
-
-        data = self.filter_func[gstate.selected]() 
-        print(gstate.selected)
+    def update_item(self):
+        
+        filter_func= {
+            "All":[i for i,d in enumerate(gstate.todo_data)],
+            "Active":[i for i,d in enumerate(gstate.todo_data) if not d["completed"]],
+            "Completed":[i for i,d in enumerate(gstate.todo_data) if d["completed"]],
+        }
         TodoItem >> ItemConstructor(
             __layout__ = self.TodoList.layout(),
             __binder__ = "state",
-            __data__ = data
+            __data__ = gstate.todo_data,
+            __filter__ = filter_func[gstate.selected] 
         )
         # gstate.todo_data >> TodoItem["state"] >> layout
         if gstate.todo_data:

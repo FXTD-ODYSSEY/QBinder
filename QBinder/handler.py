@@ -28,7 +28,8 @@ class ItemConstructor(HandlerBase):
         item.__data__ = self.kwargs.pop('__data__',item.__data__)
         item.__layout__ = self.kwargs.pop('__layout__',item.__layout__)
         item.__binder__ = self.kwargs.pop('__binder__',item.__binder__) 
-        
+        item.__filter__ = self.kwargs.pop('__filter__',[i for i in range(len(item.__data__))]) 
+  
         # TODO reconstruct setattr trigger multiple time 
         for i,data in enumerate(item.__data__):
             widget = item.__items__ >> ListGet(i)
@@ -36,21 +37,21 @@ class ItemConstructor(HandlerBase):
                 widget = item(*self.args,**self.kwargs)
                 item.__layout__.addWidget(widget)
                 item.__items__.append(widget)
-            else:
-                widget.show() if not widget.isVisible() else None
+                widget.__index__ = i
+
+            widget.setVisible(i in item.__filter__)
             
-            widget.__index__ = i
             if hasattr(widget,item.__binder__):
                 binder = getattr(widget,item.__binder__)
                 for k,v in data.items():
                     val = getattr(binder,k)
                     if val != v:
                         setattr(binder,k,v)
-            
-        for i in range(len(item.__data__),len(item.__items__)):
-            widget = item.__items__ >> ListGet(i)
-            widget.hide() if widget.isVisible() else None
         
+        for i in range(len(item.__data__),len(item.__items__)):
+            widget = item.__items__[i]
+            widget.deleteLater()
+        item.__items__ = item.__items__[:len(item.__data__)]
 class Set(HandlerBase):
     
     def __init__(self,val):

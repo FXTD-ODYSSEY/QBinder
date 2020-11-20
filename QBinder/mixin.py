@@ -50,4 +50,5 @@ class ItemMixin(six.with_metaclass(ItemMeta)):
     __binder__ = ""   
     __data__ = {}   
     __items__ = []   
+    __filter__ = []   
     __layout__ = None   
