@@ -83,7 +83,6 @@ class QEventHook(QtCore.QObject):
 
     def __rrshift__(self, receiver):
         event = self.__event
-        # TODO event hook all
         events = (
             (event,)
             if isinstance(event, six.string_types) or not isinstance(event, Iterable)

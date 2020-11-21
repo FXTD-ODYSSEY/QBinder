@@ -17,7 +17,7 @@ import sys
 
 from functools import wraps, partial
 
-os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PySide'
+os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PySide2'
 # os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5'
 
 DIR = os.path.dirname(__file__)

@@ -23,5 +23,5 @@ from .decorator import inject
 
 
 # NOTE hook Qt caller to accept lambda argument
-hook_initialize()
+hook_initialize(HOOKS)
 

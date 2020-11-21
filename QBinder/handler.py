@@ -11,10 +11,12 @@ __author__ = 'timmyliang'
 __email__ = '820472580@qq.com'
 __date__ = '2020-11-15 20:11:41'
 
+from functools import partial
 
 from .binding import Binding
 from .util import ListGet
-    
+from Qt import QtWidgets
+
 class HandlerBase(object):
     pass
 
@@ -67,6 +69,37 @@ class ItemConstructor(HandlerBase):
             widget = item.__items__[i]
             widget.deleteLater()
         item.__items__ = item.__items__[:len(item.__data__)]
+
+class GroupBoxBind(HandlerBase):
+    def __init__(self, group):
+        self.group = group        
+
+    def __rrshift__(self,binding):
+        self.binding = Binding._inst_.pop()
+        for rb in self.group.findChildren(QtWidgets.QRadioButton):
+            rb.toggled.connect(partial(self.filter_state,rb))
+        self.binding.connect(self.check_state) >> Call()
+        
+        return self.binding
+
+    def filter_state(self, rb,state):
+        if state:
+            self.binding.set(rb.text().strip())
+            
+    def check_state(self):
+        for rb in self.group.findChildren(QtWidgets.QRadioButton):
+            if rb.text().strip() == self.binding.val:
+                rb.setChecked(True)
+
+class Call(HandlerBase):  
+    
+    def __init__(self, *args, **kwargs):
+        self.args = args        
+        self.kwargs = kwargs        
+    
+    def __rrshift__(self,func):
+        return func(*self.args, **self.kwargs)
+
 class Set(HandlerBase):
     
     def __init__(self,val):

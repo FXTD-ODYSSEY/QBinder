@@ -33,17 +33,17 @@ class BinderCollector(object):
     GBinder = None
 
 class BinderDumper(QtCore.QObject):
-    __dumper_list = []
-    def __new__(cls, *args, **kwargs):
-        instance = super(BinderDumper, cls).__new__(cls,*args, **kwargs)
-        cls.__dumper_list.append(instance)
-        return instance
+    # __dumper_list = []
+    # def __new__(cls, *args, **kwargs):
+    #     instance = super(BinderDumper, cls).__new__(cls,*args, **kwargs)
+    #     cls.__dumper_list.append(instance)
+    #     return instance
     
     def __init__(self,binder,db_name,filters=None):
         super(BinderDumper, self).__init__()
         self.binder = binder
         self.db_name = db_name
-        self.filters = filters if filters else []
+        self.__filters__ = filters if filters else []
         folder = os.path.join(tempfile.gettempdir(),"QBinder")
         if not os.path.isdir(folder):
             os.mkdir(folder)
@@ -53,34 +53,42 @@ class BinderDumper(QtCore.QObject):
         event = QtCore.QEvent(QtCore.QEvent.User)
         QtWidgets.QApplication.postEvent(self, event)
 
+    @property
+    def filters(self):
+        return self.__filters__
+    
     def __prepare__(self):
-        # binding_list = [v for k,v in self.binder._var_dict_.items() if k in self.filters]
         # NOTE value change 
         for k,binding in self.binder._var_dict_.items():
-            if k not in self.filters:
-                continue
-            binding.connect(self.save)
+            if k in self.filters:
+                binding.connect(self.save)
         self.load()
     
-    def add(self):
-        pass
+    def __enter__(self):
+        BinderBase._trace_flag_ = True
+        return self
+
+    def __exit__(self,*args):
+        BinderBase._trace_flag_ = False
+        self.filters.extend(BinderBase._trace_setattr_)
+
     
     def __del__(self):
         self.__dumper_list.remove(self)
         super(BinderDumper, self).__del__()
     
-    def save(self):
-        data = {k:v for k,v in self.binder._var_dict_.items() if k in self.filters}
-        print(data)
-        with open(self.path,'w') as f:
+    def save(self,path=""):
+        path = path if path else self.path
+        data = {k:v.val for k,v in self.binder._var_dict_.items() if k in self.filters}
+        with open(path,'w') as f:
             json.dump(data,f)
 
-    def load(self):
-        if not os.path.exists(self.path):
+    def load(self,path=""):
+        path = path if path else self.path
+        if not os.path.exists(path):
             return
-        
         try:
-            with open(self.path,'r') as f:
+            with open(path,'r') as f:
                 data = json.load(f,encoding='utf-8')
             for k,v in data.items():
                 setattr(self.binder,k,v)
@@ -172,7 +180,9 @@ class BinderProxy(object):
 
 class BinderBase(object):
     _var_dict_ = {}
-
+    _trace_flag_ = False
+    _trace_setattr_ = []
+    
     def __getitem__(self, key):
         val = self._var_dict_.get(key)
         if val is not None:
@@ -188,6 +198,8 @@ class BinderBase(object):
     #     return BindingProxy(self, key)
 
     def __setattr__(self, key, value):
+        if self._trace_flag_:
+            self._trace_setattr_.append(key)
         binding = self._var_dict_.get(key)
         if binding:
             binding.set(value)
@@ -230,10 +242,6 @@ class Binder(BinderBase):
             _var_dict_ = {}
 
         instance = cls.__new__(BinderInstance)
-
-        # rd = random.Random()
-        # rd.seed(1024)
-        # hex = uuid.UUID(int=rd.getrandbits(128)).hex
 
         # TODO add to collector
         BinderCollector.Binders.append(instance) if instance not in BinderCollector.Binders else None

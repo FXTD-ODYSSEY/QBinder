@@ -161,6 +161,7 @@ class NotifyDict(OrderedDict):
 class Binding(QtGui.QStandardItem, BindingBase):
 
     __trace = False
+    __emit_flag = False
     _trace_list_ = []
     _inst_ = []
     
@@ -224,13 +225,6 @@ class Binding(QtGui.QStandardItem, BindingBase):
         cls.__trace = True
         yield
         cls.__trace = False
-        
-    @classmethod
-    @contextmanager
-    def set_block(cls):
-        cls.__emit_block = True
-        yield
-        cls.__emit_block = False
 
     def __get__(self, instance, owner):
         self.__class__._inst_ = [self]
@@ -303,12 +297,18 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.event_loop.remove(callback)
 
     def emit(self, *args, **kwargs):
-        for callback in self.event_loop[:]:
-            if six.callable(callback):
-                try:
-                    callback(*args, **kwargs)
-                except:
-                    self.event_loop.remove(callback)
+        QtCore.QTimer.singleShot(0,lambda:self.run_event(*args, **kwargs))
+        self.__emit_flag = True
+            
+    def run_event(self,*args, **kwargs):
+        if self.__emit_flag:
+            self.__emit_flag = False
+            for callback in self.event_loop[:]:
+                if six.callable(callback):
+                    try:
+                        callback(*args, **kwargs)
+                    except:
+                        self.event_loop.remove(callback)
 
 
 class Model(QtCore.QAbstractItemModel):

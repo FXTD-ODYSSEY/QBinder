@@ -31,7 +31,7 @@ sys.path.insert(0, repo) if repo not in sys.path else None
 os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
 
 from QBinder import Binder, GBinder, QEventHook , FnHook , BinderCollector
-from QBinder.handler import Set, ItemConstructor
+from QBinder.handler import Set, Call,ItemConstructor ,GroupBoxBind
 from QBinder.mixin import ItemMixin
 
 import Qt
@@ -42,8 +42,6 @@ from Qt.QtCompat import loadUi
 
 event_hook = QEventHook()
 gstate = GBinder()
-# TODO dump
-dumper = gstate('dumper',"todo_app",["todo_data"])
 
 
 # gstate.todo_data = [
@@ -52,14 +50,18 @@ dumper = gstate('dumper',"todo_app",["todo_data"])
 # ] * 5
 # gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
 
-gstate.todo_data = []
+with gstate('dumper',"todo_app"):
+    gstate.todo_data = []
+    gstate.selected = "All"
+    gstate.input = ""
+        
 gstate.item_count = 0
 gstate.input_font = "italic"
 gstate.completed_color = "lightgray"
 gstate.footer_visible = False
 gstate.todolist_visible = False
 gstate.header_border = 0
-gstate.selected = "Active"
+
 
 gstate.update_count = FnHook()
 @gstate.update_count
@@ -142,8 +144,7 @@ class TodoItem(QtWidgets.QWidget, ItemMixin):
         completed = self.state.completed
         self.state.text_style = "line-through" if completed else "none"
         self.state.text_color = "gray" if completed else "black"
-        check = gstate.todo_data[self.__index__]["completed"]
-        if check != completed:
+        if gstate.todo_data[self.__index__]["completed"] != completed:
             gstate.todo_data[self.__index__]["completed"] = completed
 
     def setCompleted(self, completed):
@@ -173,6 +174,7 @@ class TodoWidget(QtWidgets.QWidget):
             lambda: "#TodoHeader { border-bottom:%spx solid lightgray; }"
             % (gstate.header_border)
         )
+        self.TodoInput.setText(lambda: gstate.input)
         self.TodoInput.setStyleSheet(lambda: "font-style:%s" % (gstate.input_font))
         self.TodoInput.textChanged.connect(self.input_change)
         self.TodoInput.returnPressed.connect(self.add_item)
@@ -206,28 +208,12 @@ class TodoWidget(QtWidgets.QWidget):
 
         self.ItemCount.setText(lambda: "%s item left" % gstate.item_count)
 
-        # TODO filter radiobutton handler
-        for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
-            rb.toggled.connect(self.filter_state)
-
-        gstate["selected"].connect(self.check_state)
+        # NOTE filter radiobutton handler
+        gstate.selected >> GroupBoxBind(self.StateGroup)
+        
         gstate["selected"].connect(self.update_item)
-        gstate["todo_data"].connect(self.update_item)
-        # TODO
-        # gstate["todo_data"].connect(self.update_item) >> Call()
-        self.check_state()
-        self.update_item()
+        gstate["todo_data"].connect(self.update_item) >> Call()
 
-    def filter_state(self, filter):
-        rb = self.sender()
-        if rb.isChecked():
-            gstate.selected = rb.text().strip()
-
-    def check_state(self):
-        for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
-            if rb.text().strip() == gstate.selected:
-                rb.setChecked(True)
-    
     def change_completed_color(self):
         gstate.completed_color = "lightgray" if gstate.item_count else "black"
 

@@ -78,7 +78,7 @@ for name,member in qt_dict.items():
                     "property" : property_name
                 })
                 
-                
+# print(HOOKS)          
 # HOOKS.update({
 #     "QtWidgets.QWidget": {
 #         "setStyleSheet": {
@@ -206,11 +206,11 @@ def binding_handler(func, options=None):
 
     return wrapper
 
-def hook_initialize():
+def hook_initialize(hooks):
     """
     # NOTE Dynamic wrap the Qt Widget setter base on the HOOKS Definition
     """
-    for widget, setters in HOOKS.items():
+    for widget, setters in hooks.items():
         lib,widget = widget.split('.')
         widget = getattr(getattr(Qt,lib),widget)
         for setter, options in setters.items():

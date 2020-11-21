@@ -58,8 +58,6 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         self.label.setText(lambda: "Selected: %s" % self.state.selected)
 
-        # self.state.selected = self.state.options.get(self.combo.currentText())
-
         self.combo.currentTextChanged.connect(self.update)
         self.update(self.combo.currentText())
 

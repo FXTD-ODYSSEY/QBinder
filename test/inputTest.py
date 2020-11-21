@@ -26,15 +26,16 @@ from QBinder import Binder
 
 
 class WidgetTest(QtWidgets.QWidget):
-    with Binder("test") as state:
+    # with Binder("test") as state:
+    #     state.text = "aasdsd"
+    #     state.num = 1
+    #     state.val = 2.0
+    state = Binder()
+    with state('dumper','inputTest'):
         state.text = "aasdsd"
         state.num = 1
         state.val = 2.0
-    # state = Binder()
-    # state.text = "aasdsd"
-    # state.num = 1
-    # state.val = 2.0
-    
+        
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()

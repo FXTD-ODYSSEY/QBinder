@@ -71,7 +71,7 @@ class ComboTest(QtWidgets.QWidget):
                 text2=self.state.text2, enable=self.state.enable
             )
         )
-        self.label2.setText(lambda: self.state.data_list)
+        self.label2.setText(lambda: str(self.state.data_list))
         self.cb.setChecked(lambda: self.state.enable)
 
         # self.line.textChanged.connect(self.modify)

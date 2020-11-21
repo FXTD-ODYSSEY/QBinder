@@ -25,13 +25,15 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 sys.path.insert(0, repo) if repo not in sys.path else None
 
 from QBinder import Binder
+from QBinder.handler import Set
 from Qt import QtGui, QtWidgets, QtCore
 
 
 class WidgetTest(QtWidgets.QWidget):
 
     state = Binder()
-    state.selected = ""
+    with state('dumper','combo_test1'):
+        state.selected = ""
 
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -49,12 +51,8 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
 
         self.label.setText(lambda: "Selected: %s" % self.state.selected)
-        self.state.selected = self.combo.currentText()
-
-        self.combo.currentTextChanged.connect(self.update)
-
-    def update(self, text):
-        self.state.selected = text
+        self.combo.setCurrentText(lambda: self.state.selected)
+        # self.combo.currentTextChanged.connect(lambda text:self.state.selected >> Set(text))
 
 
 def main():
