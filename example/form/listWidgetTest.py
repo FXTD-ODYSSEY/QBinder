@@ -23,6 +23,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
     else f(f, os.path.dirname(p))
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 
 from QBinder import Binder
 from Qt import QtGui, QtWidgets, QtCore
@@ -37,7 +38,6 @@ class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-        dispatcher = self.state("dispatcher")
 
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()

@@ -29,7 +29,9 @@ class BinderCollector(object):
     Binders = defaultdict(list)
     GBinders = nestdict()
 
+
 event_hook = QEventHook()
+
 
 class BinderDispatcher(QtCore.QObject):
     __instance = None
@@ -48,16 +50,17 @@ class BinderDispatcher(QtCore.QObject):
         if self.__init_flag:
             self.__init_flag = False
             super(BinderDispatcher, self).__init__()
-            self >> event_hook(QtCore.QEvent.User,self.__bind_cls__)
+            self >> event_hook(QtCore.QEvent.User, self.__bind_cls__)
         event = QtCore.QEvent(QtCore.QEvent.User)
-        QtWidgets.QApplication.postEvent(self,event)
-        
+        QtWidgets.QApplication.postEvent(self, event)
+
     def __bind_cls__(self):
         for module, data in self.__trace_dict.items():
             for cls_name, _data in data.items():
-                cls = getattr(module, cls_name)
-                for _, binding in _data.items():
-                    binding.cls = cls
+                if hasattr(module, cls_name):
+                    cls = getattr(module, cls_name)
+                    for _, binding in _data.items():
+                        binding.cls = cls
         self.__trace_dict.clear()
 
     def dispatch(self, command, *args, **kwargs):
@@ -72,18 +75,17 @@ class BinderDispatcher(QtCore.QObject):
         # TODO dump data
         print("dump", self.binder, args)
 
-    def fn_bind(self, attr=None):
+    def fn_bind(self, attr=None ,fn_hook=False):
         """fn_bind
         https://stackoverflow.com/a/13699329
         """
-
-        def decorator(func):
+        def wrapper(func):
             binding = FnBinding(self.binder, func)
             function = func if six.callable(func) else func.__func__
             fn_name = attr if attr else function.__name__
             setattr(self.binder.__class__, fn_name, binding)
 
-            stack = inspect.stack()[1]
+            stack = inspect.stack()[2 if fn_hook else 1]
             cls_name = stack[3]
             frame = stack[0]
             module = inspect.getmodule(frame)
@@ -92,7 +94,7 @@ class BinderDispatcher(QtCore.QObject):
 
             return func
 
-        return decorator
+        return wrapper
 
     def dispatcher(self):
         return self
@@ -140,6 +142,8 @@ class BinderBase(object):
             binding = Binding(value)
             self._var_dict_[key] = binding
             setattr(self.__class__, key, binding)
+            if isinstance(value,FnHook):
+                value.connect_binder(key,self)
 
     def __call__(self, *args):
         # NOTE __call__ dispatch function avoid polluting local scope
@@ -205,3 +209,20 @@ class GBinder(BinderBase):
         if cls.__instance is None:
             cls.__instance = BinderBase.__new__(cls)
         return cls.__instance
+
+
+class FnHook(object):
+    
+    def __getitem__(self,key):
+        """avoid pylint error"""        
+        pass
+
+    def __call__(self, func):
+        return self.binder("fn_bind",self.name,True)(func)
+
+    def connect_binder(self,name,binder):
+        """connect_binder automatically run by the binder setattr"""        
+        self.name = name
+        self.binder = binder
+        
+    

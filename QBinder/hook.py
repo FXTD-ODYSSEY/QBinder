@@ -179,8 +179,8 @@ def binding_handler(func, options=None):
                 binding.connect(callback)
 
             updater = options.get("updater")
+            
             prop = options.get("property")
-
             getter = options.get("getter")
             _getter_1 = getattr(self, getter) if getter else None
             _getter_2 = lambda:self.property(prop) if prop else None

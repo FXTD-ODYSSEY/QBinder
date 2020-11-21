@@ -29,7 +29,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder,show_info_panel
+from QBinder import Binder, GBinder,FnHook
 from Qt import QtGui, QtWidgets, QtCore
 
 import Qt
@@ -37,10 +37,9 @@ print(Qt.__binding__)
 
 state = GBinder()
 state.msg = "msg"
-state.num = 1
+state.num = "1"
 state.input_ui = 1
-# state.text = 'text'
-
+state.callback = FnHook()
 
 class ButtonTest(QtWidgets.QWidget):
     count = 1
@@ -56,14 +55,12 @@ class ButtonTest(QtWidgets.QWidget):
         layout.addWidget(label)
         label.setText(lambda: state.num)
 
-        button.clicked.connect(self.callback)
-        
-    
+        button.clicked.connect(state.callback)
         
     @state("fn_bind")
     def callback(self):
         print("callback",self)
-        state.num += 1
+        state.num += '1'
     
 class ButtonTest2(QtWidgets.QWidget):
     def __init__(self,widget):
@@ -78,12 +75,11 @@ class ButtonTest2(QtWidgets.QWidget):
         button.clicked.connect(state.callback) # NOTE auto predict
         # button.clicked.connect(state.callback["input_ui"])
         # button.clicked.connect(state.callback[state.input_ui])
-        # button.clicked.connect(state.callback[widget])
  
-        @state("fn_bind")
-        def callback2(self):
-            print("callback2",self)
-            state.num += 3
+        # @state("fn_bind")
+        # def callback2(self):
+        #     print("callback2",self)
+        #     state.num += 3
             
 if __name__ == "__main__":
 

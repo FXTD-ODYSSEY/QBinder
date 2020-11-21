@@ -30,9 +30,10 @@ sys.path.insert(0, repo) if repo not in sys.path else None
 os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 # os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
 
-from QBinder import Binder, GBinder, QEventHook
-from QBinder.handler import Set , ItemConstructor
+from QBinder import Binder, GBinder, QEventHook , FnHook
+from QBinder.handler import Set, ItemConstructor
 from QBinder.mixin import ItemMixin
+
 import Qt
 
 print(Qt.__binding__)
@@ -40,12 +41,13 @@ from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
 event_hook = QEventHook()
-
 gstate = GBinder()
+
+
 gstate.todo_data = [
     {"text": "todo1", "completed": False},
     {"text": "todo2", "completed": True},
-]*5
+] * 5
 # gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
 # gstate.todo_data = []
 gstate.item_count = 0
@@ -56,10 +58,10 @@ gstate.todolist_visible = False
 gstate.header_border = 0
 gstate.selected = "All"
 
-# TODO computed attr
-def update_count():
-    gstate.item_count = len([todo for todo in gstate.todo_data if not todo["completed"]])
-
+gstate.update_count = FnHook()
+@gstate.update_count
+def _(state):
+    state.item_count = len([todo for todo in state.todo_data if not todo["completed"]])
 
 class EditableLabel(QtWidgets.QLabel):
     count = 0
@@ -104,7 +106,8 @@ class EditableLabel(QtWidgets.QLabel):
     def bind(self, item):
         self.item = item
 
-class TodoItem(QtWidgets.QWidget,ItemMixin):
+
+class TodoItem(QtWidgets.QWidget, ItemMixin):
 
     state = Binder()
 
@@ -131,7 +134,7 @@ class TodoItem(QtWidgets.QWidget,ItemMixin):
         self.ItemCheck.setChecked(lambda: self.state.completed)
 
         self.state["completed"].connect(self.completedChanged)
-        self.state["completed"].connect(update_count)
+        self.state["completed"].connect(gstate.update_count)
 
         self.ItemDelete.clicked.connect(lambda: gstate.todo_data.pop(self.__index__))
 
@@ -236,24 +239,23 @@ class TodoWidget(QtWidgets.QWidget):
         self.TodoInput.clear()
 
     def update_item(self):
-        
-        filter_func= {
-            "All":[i for i,d in enumerate(gstate.todo_data)],
-            "Active":[i for i,d in enumerate(gstate.todo_data) if not d["completed"]],
-            "Completed":[i for i,d in enumerate(gstate.todo_data) if d["completed"]],
+
+        filters = {
+            "All": lambda data: data,
+            "Active": lambda data: [d for d in data if not d["completed"]],
+            "Completed": lambda data: [d for d in data if d["completed"]],
         }
+
         TodoItem >> ItemConstructor(
-            __layout__ = self.TodoList.layout(),
-            __binder__ = "state",
-            __data__ = gstate.todo_data,
-            __filter__ = filter_func[gstate.selected] 
+            __layout__=self.TodoList.layout(),
+            __binder__="state",
+            __data__=lambda: filters[gstate.selected](gstate.todo_data),
         )
-        # gstate.todo_data >> TodoItem["state"] >> layout
         if gstate.todo_data:
             gstate.header_border = 1
             gstate.footer_visible = True
             gstate.todolist_visible = True
-            update_count()
+            gstate.update_count()
         else:
             gstate.header_border = 0
             gstate.footer_visible = False

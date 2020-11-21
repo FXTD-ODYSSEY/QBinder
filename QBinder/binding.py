@@ -53,8 +53,6 @@ class FnBinding(BindingBase):
             return self.func(*args, **kwargs)
         elif self.cls:
             # NOTE Try to Get A Default Instance from binder
-            # print("self.binder",self.binder)
-            # print(object.__bases__)
             for _, member in inspect.getmembers(self.binder, lambda f: not callable(f)):
                 if type(member) is self.cls:
                     arg = member
@@ -73,7 +71,8 @@ class FnBinding(BindingBase):
             if self.static:
                 return self.func(*args, **kw)
             else:
-                return self.func(attr, *args, **kw)
+                length = len(inspect.getargspec(self.func).args)
+                return self.func(attr, *args[:length-1], **kw)
 
         return wrapper
 
@@ -162,8 +161,6 @@ class NotifyDict(OrderedDict):
 class Binding(QtGui.QStandardItem, BindingBase):
 
     __trace = False
-    __emit_flag = False
-    __emit_block = False
     _trace_list_ = []
     _inst_ = []
     
@@ -246,6 +243,9 @@ class Binding(QtGui.QStandardItem, BindingBase):
         return d
 
     def set(self, value):
+        # NOTE 如果值没有变化则不触发更新
+        if value == self.get():
+            return
         self.val = self.retrieve2Notify(value)
         self.overrideOperator(value)
         self.emitDataChanged()
@@ -302,19 +302,12 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.event_loop.remove(callback)
 
     def emit(self, *args, **kwargs):
-        if not self.__emit_block:
-            QtCore.QTimer.singleShot(0,lambda:self.run_event(*args, **kwargs))
-            self.__emit_flag = True
-            
-    def run_event(self,*args, **kwargs):
-        if self.__emit_flag:
-            self.__emit_flag = False
-            for callback in self.event_loop[:]:
-                if six.callable(callback):
-                    try:
-                        callback(*args, **kwargs)
-                    except:
-                        self.event_loop.remove(callback)
+        for callback in self.event_loop[:]:
+            if six.callable(callback):
+                try:
+                    callback(*args, **kwargs)
+                except:
+                    self.event_loop.remove(callback)
 
 
 class Model(QtCore.QAbstractItemModel):

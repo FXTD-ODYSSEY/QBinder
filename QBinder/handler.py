@@ -25,12 +25,27 @@ class ItemConstructor(HandlerBase):
 
     def __rrshift__(self,item):
         
-        item.__data__ = self.kwargs.pop('__data__',item.__data__)
+        __filter__ = []
+        data = self.kwargs.pop('__data__',item.__data__)
+        # NOTE trace lamda function 
+        if callable(data):
+            with Binding.set_trace():
+                data = data()
+            for binding in Binding._trace_list_:
+                val = binding.val
+                if not isinstance(val,list):
+                    continue
+                item.__data__ = val
+                compare = {id(d):i for i,d in enumerate(item.__data__)}
+                __filter__ = [compare.get(id(d),-1) for d in data]
+                break
+        else:
+            item.__data__ = data
+            __filter__ = [i for i in range(len(data))]
+        
         item.__layout__ = self.kwargs.pop('__layout__',item.__layout__)
         item.__binder__ = self.kwargs.pop('__binder__',item.__binder__) 
-        item.__filter__ = self.kwargs.pop('__filter__',[i for i in range(len(item.__data__))]) 
   
-        # TODO reconstruct setattr trigger multiple time 
         for i,data in enumerate(item.__data__):
             widget = item.__items__ >> ListGet(i)
             if not widget:
@@ -39,7 +54,7 @@ class ItemConstructor(HandlerBase):
                 item.__items__.append(widget)
                 widget.__index__ = i
 
-            widget.setVisible(i in item.__filter__)
+            widget.setVisible(i in __filter__)
             
             if hasattr(widget,item.__binder__):
                 binder = getattr(widget,item.__binder__)
