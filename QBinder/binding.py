@@ -297,6 +297,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
 
     def connect(self, callback):
         self.event_loop.append(callback)
+        return callback
 
     def disconnect(self, callback):
         self.event_loop.remove(callback)

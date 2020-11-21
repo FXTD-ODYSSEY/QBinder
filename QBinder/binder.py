@@ -11,11 +11,14 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-04 15:30:25"
 
+import os
 import six
 import sys
 import uuid
+import json
 import random
 import inspect
+import tempfile
 from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
@@ -23,16 +26,67 @@ from .binding import Binding, FnBinding, BindingProxy
 from .util import nestdict, defaultdict
 from .eventhook import QEventHook
 
-
-# TODO collect all the exist binder for dumping
-class BinderCollector(object):
-    Binders = defaultdict(list)
-    GBinders = nestdict()
-
-
 event_hook = QEventHook()
 
+class BinderCollector(object):
+    Binders = []
+    GBinder = None
 
+class BinderDumper(QtCore.QObject):
+    __dumper_list = []
+    def __new__(cls, *args, **kwargs):
+        instance = super(BinderDumper, cls).__new__(cls,*args, **kwargs)
+        cls.__dumper_list.append(instance)
+        return instance
+    
+    def __init__(self,binder,db_name,filters=None):
+        super(BinderDumper, self).__init__()
+        self.binder = binder
+        self.db_name = db_name
+        self.filters = filters if filters else []
+        folder = os.path.join(tempfile.gettempdir(),"QBinder")
+        if not os.path.isdir(folder):
+            os.mkdir(folder)
+        self.path = os.path.join(folder,"%s.json" % db_name)
+
+        self >> event_hook(QtCore.QEvent.User, self.__prepare__)
+        event = QtCore.QEvent(QtCore.QEvent.User)
+        QtWidgets.QApplication.postEvent(self, event)
+
+    def __prepare__(self):
+        # binding_list = [v for k,v in self.binder._var_dict_.items() if k in self.filters]
+        # NOTE value change 
+        for k,binding in self.binder._var_dict_.items():
+            if k not in self.filters:
+                continue
+            binding.connect(self.save)
+        self.load()
+    
+    def add(self):
+        pass
+    
+    def __del__(self):
+        self.__dumper_list.remove(self)
+        super(BinderDumper, self).__del__()
+    
+    def save(self):
+        data = {k:v for k,v in self.binder._var_dict_.items() if k in self.filters}
+        print(data)
+        with open(self.path,'w') as f:
+            json.dump(data,f)
+
+    def load(self):
+        if not os.path.exists(self.path):
+            return
+        
+        try:
+            with open(self.path,'r') as f:
+                data = json.load(f,encoding='utf-8')
+            for k,v in data.items():
+                setattr(self.binder,k,v)
+        except:
+            pass
+        
 class BinderDispatcher(QtCore.QObject):
     __instance = None
     __init_flag = False
@@ -71,8 +125,8 @@ class BinderDispatcher(QtCore.QObject):
             raise RuntimeError("Binder Action %s not found" % command)
         return func(*args, **kwargs)
 
-    def dump(self, *args, **kwargs):
-        # TODO dump data
+    def dumper(self, db_name,filters=None):
+        return BinderDumper(self.binder,db_name,filters)
         print("dump", self.binder, args)
 
     def fn_bind(self, attr=None ,fn_hook=False):
@@ -176,26 +230,13 @@ class Binder(BinderBase):
             _var_dict_ = {}
 
         instance = cls.__new__(BinderInstance)
-        # print(instance)
-        frame = inspect.currentframe().f_back
-        code = frame.f_code
 
-        rd = random.Random()
-        rd.seed(1024)
-        hex = uuid.UUID(int=rd.getrandbits(128)).hex
+        # rd = random.Random()
+        # rd.seed(1024)
+        # hex = uuid.UUID(int=rd.getrandbits(128)).hex
 
-        # print(dir(code))
-        # print(code.co_filename)
-        # print(code.co_name)
-        # print(code.co_flags)
-        # print(code.co_stacksize)
-        # print(code.co_varnames)
-        # print(dir(frame))
-        # print(instance.__module__)
-
-        # # TODO 通过 frame 获取唯一表示符 给 collector
-        # binders = BinderCollector.Binders
-        # binders.append(instance) if instance not in binders else None
+        # TODO add to collector
+        BinderCollector.Binders.append(instance) if instance not in BinderCollector.Binders else None
         return instance
 
 
@@ -208,6 +249,7 @@ class GBinder(BinderBase):
     def __new__(cls, *args, **kw):
         if cls.__instance is None:
             cls.__instance = BinderBase.__new__(cls)
+            BinderCollector.GBinder = cls.__instance
         return cls.__instance
 
 
@@ -224,5 +266,3 @@ class FnHook(object):
         """connect_binder automatically run by the binder setattr"""        
         self.name = name
         self.binder = binder
-        
-    

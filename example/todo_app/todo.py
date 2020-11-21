@@ -27,10 +27,10 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
-# os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
+# os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
+os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
 
-from QBinder import Binder, GBinder, QEventHook , FnHook
+from QBinder import Binder, GBinder, QEventHook , FnHook , BinderCollector
 from QBinder.handler import Set, ItemConstructor
 from QBinder.mixin import ItemMixin
 
@@ -42,21 +42,24 @@ from Qt.QtCompat import loadUi
 
 event_hook = QEventHook()
 gstate = GBinder()
+# TODO dump
+dumper = gstate('dumper',"todo_app",["todo_data"])
 
 
-gstate.todo_data = [
-    {"text": "todo1", "completed": False},
-    {"text": "todo2", "completed": True},
-] * 5
+# gstate.todo_data = [
+#     {"text": "todo1", "completed": False},
+#     {"text": "todo2", "completed": True},
+# ] * 5
 # gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
-# gstate.todo_data = []
+
+gstate.todo_data = []
 gstate.item_count = 0
 gstate.input_font = "italic"
 gstate.completed_color = "lightgray"
 gstate.footer_visible = False
 gstate.todolist_visible = False
 gstate.header_border = 0
-gstate.selected = "All"
+gstate.selected = "Active"
 
 gstate.update_count = FnHook()
 @gstate.update_count
@@ -64,16 +67,13 @@ def _(state):
     state.item_count = len([todo for todo in state.todo_data if not todo["completed"]])
 
 class EditableLabel(QtWidgets.QLabel):
-    count = 0
 
     def __init__(self, *args, **kwargs):
         super(EditableLabel, self).__init__(*args, **kwargs)
-        self.count += 1
         self.editable = True
         self.item = None
         self.edit = QtWidgets.QLineEdit()
         self.edit.setVisible(False)
-        self.edit.count = self.count
         self.edit.editingFinished.connect(self.__complete__)
 
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -206,12 +206,16 @@ class TodoWidget(QtWidgets.QWidget):
 
         self.ItemCount.setText(lambda: "%s item left" % gstate.item_count)
 
-        # NOTE filter radiobutton
+        # TODO filter radiobutton handler
         for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
             rb.toggled.connect(self.filter_state)
 
-        gstate["todo_data"].connect(self.update_item)
+        gstate["selected"].connect(self.check_state)
         gstate["selected"].connect(self.update_item)
+        gstate["todo_data"].connect(self.update_item)
+        # TODO
+        # gstate["todo_data"].connect(self.update_item) >> Call()
+        self.check_state()
         self.update_item()
 
     def filter_state(self, filter):
@@ -219,6 +223,11 @@ class TodoWidget(QtWidgets.QWidget):
         if rb.isChecked():
             gstate.selected = rb.text().strip()
 
+    def check_state(self):
+        for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
+            if rb.text().strip() == gstate.selected:
+                rb.setChecked(True)
+    
     def change_completed_color(self):
         gstate.completed_color = "lightgray" if gstate.item_count else "black"
 
