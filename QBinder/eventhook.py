@@ -61,7 +61,7 @@ class QEventHook(QtCore.QObject):
                     event,
                 )
                 callback(*args[:count])
-                
+
         # NOTE invert event hook
         data = self.__invert_hook.get(receiver)
         if data is None:

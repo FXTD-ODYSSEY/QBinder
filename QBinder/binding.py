@@ -22,8 +22,10 @@ from .eventhook import QEventHook
 
 event_hook = QEventHook()
 
+
 class BindingBase(object):
     pass
+
 
 class BindingProxy(BindingBase):
     def __init__(self, binder, attr):
@@ -44,7 +46,7 @@ class FnBinding(BindingBase):
     def __init__(self, binder, func):
         self.binder = binder
         self.func = func if six.callable(func) else func.__func__
-        self.static = isinstance(func,staticmethod) 
+        self.static = isinstance(func, staticmethod)
         self.cls = None
 
     def __call__(self, *args, **kwargs):
@@ -62,7 +64,6 @@ class FnBinding(BindingBase):
         except:
             return self.func(arg)
 
-
     def __getitem__(self, attr):
         attr = getattr(self.binder, attr) if type(attr) is str else attr
 
@@ -72,7 +73,7 @@ class FnBinding(BindingBase):
                 return self.func(*args, **kw)
             else:
                 length = len(inspect.getargspec(self.func).args)
-                return self.func(attr, *args[:length-1], **kw)
+                return self.func(attr, *args[: length - 1], **kw)
 
         return wrapper
 
@@ -158,13 +159,14 @@ class NotifyDict(OrderedDict):
                 value = NotifyList(value, self.STATE)
         return OrderedDict.__setitem__(self, key, value)
 
+
 class Binding(QtGui.QStandardItem, BindingBase):
 
     __trace = False
     __emit_flag = False
     _trace_list_ = []
     _inst_ = []
-    
+
     __repr__ = lambda self: repr(self.val)
     __str__ = lambda self: str(self.val)
 
@@ -217,6 +219,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.overrideOperator(self.val)
         self.event_loop = []
         self.bind_widgets = []
+        self.__binder__ = None
 
     @classmethod
     @contextmanager
@@ -231,7 +234,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
         # setattr(self.__class__,"_inst_",self)
         self._trace_list_.append(self) if self.__trace else None
         return self.get()
-    
+
     def __rrshift__(self, d):
         self.set(d)
         return d
@@ -297,10 +300,10 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.event_loop.remove(callback)
 
     def emit(self, *args, **kwargs):
-        QtCore.QTimer.singleShot(0,lambda:self.run_event(*args, **kwargs))
+        QtCore.QTimer.singleShot(0, lambda: self.run_event(*args, **kwargs))
         self.__emit_flag = True
-            
-    def run_event(self,*args, **kwargs):
+
+    def run_event(self, *args, **kwargs):
         if self.__emit_flag:
             self.__emit_flag = False
             for callback in self.event_loop[:]:

@@ -54,6 +54,7 @@ class WidgetTest(QtWidgets.QWidget):
     # state.item_list = [
     #     state["selected"],
     #     state["option_A"],
+    
     #     state["option_B"],
     #     state["option_C"],
     # ]

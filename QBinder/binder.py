@@ -17,84 +17,115 @@ import sys
 import uuid
 import json
 import random
+import hashlib
 import inspect
 import tempfile
 from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
+from Qt.QtCompat import isValid
 from .binding import Binding, FnBinding, BindingProxy
 from .util import nestdict, defaultdict
-from .eventhook import QEventHook
+from .eventhook import QEventHook, Iterable
 
 event_hook = QEventHook()
+
 
 class BinderCollector(object):
     Binders = []
     GBinder = None
 
+    # TODO DCC development Binders index Bug for dumping
+#     @classmethod
+#     def clear(cls):
+#         for binder in cls.Binders[:]:
+#             for k,binding in binder._var_dict_.items():
+#                 if not isinstance(binding,Binding):
+#                     continue
+#                 for widget in binding.bind_widgets:
+#                     if not isValid(widget):
+#                         cls.Binders.remove(binder)
+#                         break
+
+# QtWidgets.QApplication.instance() >> ~event_hook("Show",BinderCollector.clear)
+
 class BinderDumper(QtCore.QObject):
-    # __dumper_list = []
-    # def __new__(cls, *args, **kwargs):
-    #     instance = super(BinderDumper, cls).__new__(cls,*args, **kwargs)
-    #     cls.__dumper_list.append(instance)
-    #     return instance
-    
-    def __init__(self,binder,db_name,filters=None):
+    _dumper_dict_ = {}
+    __init_flag = False
+
+    def __new__(cls, binder, *args, **kwargs):
+        instance = cls._dumper_dict_.get(id(binder))
+        cls.__init_flag = not instance
+        if cls.__init_flag:
+            instance = super(BinderDumper, cls).__new__(cls, binder, *args, **kwargs)
+            cls._dumper_dict_[id(binder)] = instance
+        return instance
+
+    def __init__(self, binder, db_name, filters=None):
+        if not self.__init_flag:
+            return
         super(BinderDumper, self).__init__()
         self.binder = binder
         self.db_name = db_name
-        self.__filters__ = filters if filters else []
-        folder = os.path.join(tempfile.gettempdir(),"QBinder")
+        self._filters_ = (
+            {filters}
+            if isinstance(filters, str)
+            else set(filters)
+            if isinstance(filters, Iterable)
+            else set()
+        )
+        folder = os.path.join(tempfile.gettempdir(), "QBinder")
         if not os.path.isdir(folder):
             os.mkdir(folder)
-        self.path = os.path.join(folder,"%s.json" % db_name)
+        self.path = os.path.join(folder, "%s.json" % db_name)
 
         self >> event_hook(QtCore.QEvent.User, self.__prepare__)
         event = QtCore.QEvent(QtCore.QEvent.User)
         QtWidgets.QApplication.postEvent(self, event)
 
-    @property
-    def filters(self):
-        return self.__filters__
-    
     def __prepare__(self):
-        # NOTE value change 
-        for k,binding in self.binder._var_dict_.items():
-            if k in self.filters:
+        # NOTE value change
+        for k, binding in self.binder._var_dict_.items():
+            if k in self._filters_:
                 binding.connect(self.save)
         self.load()
-    
+
     def __enter__(self):
         BinderBase._trace_flag_ = True
         return self
 
-    def __exit__(self,*args):
+    def __exit__(self, *args):
         BinderBase._trace_flag_ = False
-        self.filters.extend(BinderBase._trace_setattr_)
+        self._filters_.update(BinderBase._trace_setattr_)
 
-    
     def __del__(self):
         self.__dumper_list.remove(self)
         super(BinderDumper, self).__del__()
-    
-    def save(self,path=""):
-        path = path if path else self.path
-        data = {k:v.val for k,v in self.binder._var_dict_.items() if k in self.filters}
-        with open(path,'w') as f:
-            json.dump(data,f)
 
-    def load(self,path=""):
+    def save(self, path="", indent=None):
+        path = path if path else self.path
+        data = {
+            k: v.val for k, v in self.binder._var_dict_.items() if k in self._filters_
+        }
+        with open(path, "w") as f:
+            json.dump(data, f, indent=indent)
+
+    def load(self, path=""):
         path = path if path else self.path
         if not os.path.exists(path):
             return
+        QtCore.QTimer.singleShot(0, partial(self.read, path))
+
+    def read(self, path):
         try:
-            with open(path,'r') as f:
-                data = json.load(f,encoding='utf-8')
-            for k,v in data.items():
-                setattr(self.binder,k,v)
+            with open(path, "r") as f:
+                data = json.load(f, encoding="utf-8")
+            for k, v in data.items():
+                setattr(self.binder, k, v)
         except:
             pass
-        
+
+
 class BinderDispatcher(QtCore.QObject):
     __instance = None
     __init_flag = False
@@ -133,14 +164,28 @@ class BinderDispatcher(QtCore.QObject):
             raise RuntimeError("Binder Action %s not found" % command)
         return func(*args, **kwargs)
 
-    def dumper(self, db_name,filters=None):
-        return BinderDumper(self.binder,db_name,filters)
-        print("dump", self.binder, args)
+    def dumper(self, db_name=None, filters=None):
+        if not db_name:
+            dumper = BinderDumper._dumper_dict_.get(id(self.binder))
+            db_name = dumper.db_name if dumper else False
+            if not db_name:
+                path = inspect.stack()[-1][1]
+                index = BinderCollector.Binders.index(self.binder)
+                print("index", index)
+                rd = random.Random()
+                rd.seed(index)
+                hex = uuid.UUID(int=rd.getrandbits(128)).hex
+                md5 = hashlib.md5("".join((path, hex)).encode("utf-8")).hexdigest()
 
-    def fn_bind(self, attr=None ,fn_hook=False):
+                db_name = md5
+
+        return BinderDumper(self.binder, db_name, filters)
+
+    def fn_bind(self, attr=None, fn_hook=False):
         """fn_bind
         https://stackoverflow.com/a/13699329
         """
+
         def wrapper(func):
             binding = FnBinding(self.binder, func)
             function = func if six.callable(func) else func.__func__
@@ -182,7 +227,7 @@ class BinderBase(object):
     _var_dict_ = {}
     _trace_flag_ = False
     _trace_setattr_ = []
-    
+
     def __getitem__(self, key):
         val = self._var_dict_.get(key)
         if val is not None:
@@ -206,10 +251,11 @@ class BinderBase(object):
         else:
             # NOTE assign binding to class static member
             binding = Binding(value)
+            binding.__binder__ = self
             self._var_dict_[key] = binding
             setattr(self.__class__, key, binding)
-            if isinstance(value,FnHook):
-                value.connect_binder(key,self)
+            if isinstance(value, FnHook):
+                value.connect_binder(key, self)
 
     def __call__(self, *args):
         # NOTE __call__ dispatch function avoid polluting local scope
@@ -243,8 +289,7 @@ class Binder(BinderBase):
 
         instance = cls.__new__(BinderInstance)
 
-        # TODO add to collector
-        BinderCollector.Binders.append(instance) if instance not in BinderCollector.Binders else None
+        BinderCollector.Binders.append(instance)
         return instance
 
 
@@ -258,19 +303,19 @@ class GBinder(BinderBase):
         if cls.__instance is None:
             cls.__instance = BinderBase.__new__(cls)
             BinderCollector.GBinder = cls.__instance
+            BinderCollector.Binders.append(cls.__instance)
         return cls.__instance
 
 
 class FnHook(object):
-    
-    def __getitem__(self,key):
-        """avoid pylint error"""        
+    def __getitem__(self, key):
+        """avoid pylint error"""
         pass
 
     def __call__(self, func):
-        return self.binder("fn_bind",self.name,True)(func)
+        return self.binder("fn_bind", self.name, True)(func)
 
-    def connect_binder(self,name,binder):
-        """connect_binder automatically run by the binder setattr"""        
+    def connect_binder(self, name, binder):
+        """connect_binder automatically run by the binder setattr"""
         self.name = name
         self.binder = binder

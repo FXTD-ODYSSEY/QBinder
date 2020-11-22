@@ -36,13 +36,13 @@ from Qt import QtGui
 event_hook = QEventHook()
 
 class WidgetTest(QtWidgets.QWidget):
-    with Binder("test") as state:
-        state.text = "aasdsd"
-        state.num = 1
-        state.val = 2.0
-        state.color = "black"
-        state.spin_color = "black"
-    
+    state = Binder("test")
+    state.text = "aasdsd"
+    state.num = 1
+    state.val = 2.0
+    state.color = "black"
+    state.spin_color = "black"
+
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()

@@ -8,10 +8,6 @@ __date__ = "2020-03-22 22:55:38"
 
 """
 
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
-
 import os
 import sys
 
@@ -25,17 +21,20 @@ if MODULE not in sys.path:
 from QBinder import Binder
 
 
+from Qt import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+
 class WidgetTest(QtWidgets.QWidget):
     # with Binder("test") as state:
     #     state.text = "aasdsd"
     #     state.num = 1
     #     state.val = 2.0
     state = Binder()
-    with state('dumper','inputTest'):
-        state.text = "aasdsd"
-        state.num = 1
-        state.val = 2.0
-        
+    state.text = "empty"
+    state.num = 1
+    state.val = 2.0
+    
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()

@@ -28,10 +28,10 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 sys.path.insert(0, repo) if repo not in sys.path else None
 
 # os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
-os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
+os.environ["QT_PREFERRED_BINDING"] = "PySide;PySide2"
 
-from QBinder import Binder, GBinder, QEventHook , FnHook , BinderCollector
-from QBinder.handler import Set, Call,ItemConstructor ,GroupBoxBind
+from QBinder import Binder, GBinder, QEventHook, FnHook, BinderCollector
+from QBinder.handler import Set, Call, ItemConstructor, GroupBoxBind
 from QBinder.mixin import ItemMixin
 
 import Qt
@@ -50,11 +50,11 @@ gstate = GBinder()
 # ] * 5
 # gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
 
-with gstate('dumper',"todo_app"):
+with gstate("dumper"):
     gstate.todo_data = []
     gstate.selected = "All"
     gstate.input = ""
-        
+
 gstate.item_count = 0
 gstate.input_font = "italic"
 gstate.completed_color = "lightgray"
@@ -64,12 +64,14 @@ gstate.header_border = 0
 
 
 gstate.update_count = FnHook()
+
+
 @gstate.update_count
 def _(state):
     state.item_count = len([todo for todo in state.todo_data if not todo["completed"]])
 
-class EditableLabel(QtWidgets.QLabel):
 
+class EditableLabel(QtWidgets.QLabel):
     def __init__(self, *args, **kwargs):
         super(EditableLabel, self).__init__(*args, **kwargs)
         self.editable = True
