@@ -24,6 +24,9 @@
 - [x] 实例化的时候记录所有的 binder 方便后续进行 dump 统一存储
 - [ ] Model 实现可扩展
 - [ ] 实现 QCombobox addItem 扩展支持
+- [x] 解决 DCC 环境导致的 binders 数组叠加问题
+- [ ] ~~尝试用 lambda 来实现函数绑定~~
+- [ ] 指定 binder 取消 autodump
 - [x] 自动 bind QGroupBox RadioButton
 - [x] self.state = Binder() 如何自动绑定实例化的函数
 - [x] hook setStylesheet

@@ -14,6 +14,7 @@ __date__ = "2020-11-04 15:30:25"
 import os
 import six
 import sys
+import time
 import uuid
 import json
 import random
@@ -23,32 +24,43 @@ import tempfile
 from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
-from Qt.QtCompat import isValid
 from .binding import Binding, FnBinding, BindingProxy
 from .util import nestdict, defaultdict
+from collections import OrderedDict
 from .eventhook import QEventHook, Iterable
 
 event_hook = QEventHook()
 
 
-class BinderCollector(object):
-    Binders = []
+class BinderCollector(QtCore.QObject):
+    Binders = OrderedDict()
     GBinder = None
 
-    # TODO DCC development Binders index Bug for dumping
-#     @classmethod
-#     def clear(cls):
-#         for binder in cls.Binders[:]:
-#             for k,binding in binder._var_dict_.items():
-#                 if not isinstance(binding,Binding):
-#                     continue
-#                 for widget in binding.bind_widgets:
-#                     if not isValid(widget):
-#                         cls.Binders.remove(binder)
-#                         break
+    __flag__ = True
+    def get_current_Binders(self):
+        curr = time.time()
+        if self.Binders:
+            last = list(self.Binders.keys())[-1]
+            if self.__flag__:
+                curr = last
+                self >> event_hook(QtCore.QEvent.User, lambda:self.set_flag(False))
+                event = QtCore.QEvent(QtCore.QEvent.User)
+                QtWidgets.QApplication.postEvent(self, event)
+            else:
+                self.set_flag(True)
+                
+        BinderCollector.Binders.setdefault(curr, [self.GBinder])
+        return BinderCollector.Binders[curr]
 
-# QtWidgets.QApplication.instance() >> ~event_hook("Show",BinderCollector.clear)
-
+    @classmethod
+    def get_last_key(cls):
+        curr = list(cls.Binders.keys())[-1]
+        return curr
+    
+    @classmethod
+    def set_flag(cls,flag):
+        cls.__flag__ = flag
+    
 class BinderDumper(QtCore.QObject):
     _dumper_dict_ = {}
     __init_flag = False
@@ -170,8 +182,12 @@ class BinderDispatcher(QtCore.QObject):
             db_name = dumper.db_name if dumper else False
             if not db_name:
                 path = inspect.stack()[-1][1]
-                index = BinderCollector.Binders.index(self.binder)
-                print("index", index)
+                curr = BinderCollector.get_last_key()
+                binder_list = BinderCollector.Binders[curr]
+                if self.binder == BinderCollector.GBinder:
+                    index = 0
+                else:
+                    index = binder_list.index(self.binder)
                 rd = random.Random()
                 rd.seed(index)
                 hex = uuid.UUID(int=rd.getrandbits(128)).hex
@@ -181,7 +197,7 @@ class BinderDispatcher(QtCore.QObject):
 
         return BinderDumper(self.binder, db_name, filters)
 
-    def fn_bind(self, attr=None, fn_hook=False):
+    def fn_bind(self, attr=None):
         """fn_bind
         https://stackoverflow.com/a/13699329
         """
@@ -192,7 +208,7 @@ class BinderDispatcher(QtCore.QObject):
             fn_name = attr if attr else function.__name__
             setattr(self.binder.__class__, fn_name, binding)
 
-            stack = inspect.stack()[2 if fn_hook else 1]
+            stack = inspect.stack()[-2]
             cls_name = stack[3]
             frame = stack[0]
             module = inspect.getmodule(frame)
@@ -288,8 +304,8 @@ class Binder(BinderBase):
             _var_dict_ = {}
 
         instance = cls.__new__(BinderInstance)
-
-        BinderCollector.Binders.append(instance)
+        binder_list = BinderCollector().get_current_Binders()
+        binder_list.append(instance)
         return instance
 
 
@@ -302,8 +318,10 @@ class GBinder(BinderBase):
     def __new__(cls, *args, **kw):
         if cls.__instance is None:
             cls.__instance = BinderBase.__new__(cls)
-            BinderCollector.GBinder = cls.__instance
-            BinderCollector.Binders.append(cls.__instance)
+            binder_list = BinderCollector().get_current_Binders()
+            binder_list.append(
+                cls.__instance
+            ) if cls.__instance not in binder_list else None
         return cls.__instance
 
 
@@ -313,7 +331,7 @@ class FnHook(object):
         pass
 
     def __call__(self, func):
-        return self.binder("fn_bind", self.name, True)(func)
+        return self.binder("fn_bind", self.name)(func)
 
     def connect_binder(self, name, binder):
         """connect_binder automatically run by the binder setattr"""

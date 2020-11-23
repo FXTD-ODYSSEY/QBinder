@@ -57,8 +57,10 @@ class ButtonTest(QtWidgets.QWidget):
 
         button.clicked.connect(state.callback)
         
-    @state("fn_bind")
-    def callback(self):
+    # @state("fn_bind")
+    # @state.callback 
+    @state.callback
+    def callback(self,*args):
         print("callback",self)
         state.num += '1'
     
@@ -84,9 +86,7 @@ class ButtonTest2(QtWidgets.QWidget):
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    # SHOW_INFO_PANEL = True
-    # state.input_ui = ButtonTest()
-    # state.input_ui.show()
+
     widget = ButtonTest()
     widget.show()
     widget >> state["input_ui"]
@@ -94,3 +94,13 @@ if __name__ == "__main__":
     widget2 = ButtonTest2(widget)
     widget2.show()
     sys.exit(app.exec_())
+    
+# import sys
+# MODULE = r"G:\repo\QBinder\test"
+# sys.path.insert(0,MODULE) if MODULE not in sys.path else None
+# import BindFnTest
+# widget = BindFnTest.ButtonTest()
+# widget.show()
+# widget >> BindFnTest.state["input_ui"]
+# widget2 = BindFnTest.ButtonTest2(widget)
+# widget2.show()

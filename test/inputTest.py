@@ -26,10 +26,7 @@ from Qt import QtCore
 from Qt import QtGui
 
 class WidgetTest(QtWidgets.QWidget):
-    # with Binder("test") as state:
-    #     state.text = "aasdsd"
-    #     state.num = 1
-    #     state.val = 2.0
+
     state = Binder()
     state.text = "empty"
     state.num = 1
@@ -71,7 +68,7 @@ class WidgetTest(QtWidgets.QWidget):
     def change_text(self):
         self.state.text = "asd"
 
-def main():
+if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
     widget = WidgetTest()
@@ -80,5 +77,11 @@ def main():
     app.exec_()
 
 
-if __name__ == "__main__":
-    main()
+# import sys
+# MODULE = r"G:\repo\QBinder\test"
+# sys.path.insert(0,MODULE) if MODULE not in sys.path else None
+
+# import inputTest
+# # reload(inputTest)
+# widget = inputTest.WidgetTest()
+# widget.show()

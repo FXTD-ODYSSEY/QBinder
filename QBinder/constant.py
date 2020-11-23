@@ -11,4 +11,4 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-07 22:26:11"
 
-AUTO_DUMP_CONFIG = True
+AUTO_DUMP = True

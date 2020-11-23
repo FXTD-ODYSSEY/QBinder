@@ -19,6 +19,7 @@ except:
 
 import six
 import inspect
+from functools import partial
 
 from Qt import QtCore
 from Qt import QtWidgets
@@ -54,13 +55,20 @@ class QEventHook(QtCore.QObject):
         if data:
             callbacks = data.get(event.type(), [])
             for callback in callbacks:
-                length = len(inspect.getargspec(callback).args)
+                args = (receiver,)
+                keywords = {}
+                if isinstance(callback,partial):
+                    args = callback.args
+                    keywords = callback.keywords
+                    callback  = callback.func
+                    length = len(inspect.getargspec(callback).args)
+                else:
+                    length = len(inspect.getargspec(callback).args)
                 count = length - 1 if inspect.ismethod(callback) else length
-                args = (
-                    receiver,
+                args += (
                     event,
                 )
-                callback(*args[:count])
+                callback(*args[:count],**keywords)
 
         # NOTE invert event hook
         data = self.__invert_hook.get(receiver)
@@ -154,4 +162,4 @@ class QEventHook(QtCore.QObject):
         return self.__hook
 
     def set_hook(self, hook):
-        self.__hook = hook
+        self.__hook.update(hook) 

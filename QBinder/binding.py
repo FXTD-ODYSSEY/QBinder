@@ -231,7 +231,6 @@ class Binding(QtGui.QStandardItem, BindingBase):
 
     def __get__(self, instance, owner):
         self.__class__._inst_ = [self]
-        # setattr(self.__class__,"_inst_",self)
         self._trace_list_.append(self) if self.__trace else None
         return self.get()
 

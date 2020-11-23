@@ -93,14 +93,6 @@ for name, member in qt_dict.items():
 #             "getter": "currentIndex",
 #             "updater": "currentIndexChanged",
 #         },
-#         # "setCurrentText": {
-#         #     "type": str,
-#         #     "getter": "currentText",
-#         #     "updater": "currentTextChanged",
-#         # },
-#         # "addItem": {
-#         #     "type":str,
-#         # },
 #     },
 #     "QtWidgets.QLineEdit": {
 #         "setText": {
@@ -167,17 +159,15 @@ def binding_handler(func, options=None):
 
     def auto_dump(binding):
         """auto dump for two way binding"""
-        from .constant import AUTO_DUMP_CONFIG
+        from .constant import AUTO_DUMP
 
-        if not AUTO_DUMP_CONFIG:
-            return
         binder = binding.__binder__
-        if not binder:
+        if not AUTO_DUMP or not binder:
             return
         dumper = binder("dumper")
         for k, v in binder._var_dict_.items():
             if v is binding:
-                print("auto_dump", dumper.path, k)
+                # print("auto_dump", dumper.path, k)
                 dumper._filters_.add(k)
                 break
 

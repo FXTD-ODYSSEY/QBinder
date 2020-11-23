@@ -27,7 +27,7 @@ if MODULE not in sys.path:
 
 
 from QBinder import Binder,QEventHook
-
+from QBinder.handler import Set
 
 from Qt import QtWidgets
 from Qt import QtCore
@@ -36,7 +36,7 @@ from Qt import QtGui
 event_hook = QEventHook()
 
 class WidgetTest(QtWidgets.QWidget):
-    state = Binder("test")
+    state = Binder()
     state.text = "aasdsd"
     state.num = 1
     state.val = 2.0
@@ -59,13 +59,12 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.button)
 
-        self.button.clicked.connect(self.change_text)
+        self.button.clicked.connect(lambda:self.state.text >> Set("asd"))
         self.edit.setText(lambda: self.state.text)
         self.label.setText(lambda: "message is %s" % self.state.text)
         
-        # NOTE hook
-        event_hook.add_hook(self.edit,QtCore.QEvent.FocusIn,self.color_focus_in)
-        event_hook.add_hook(self.edit,QtCore.QEvent.FocusOut,self.color_focus_out)
+        event_hook.add_hook(self.edit,QtCore.QEvent.FocusIn,lambda:self.state.color >> Set("red"))
+        event_hook.add_hook(self.edit,QtCore.QEvent.FocusOut,lambda:self.state.color >> Set("black"))
         self.label.setStyleSheet(lambda:"color:%s" % self.state.color)
 
         self.spin = QtWidgets.QSpinBox(self)
@@ -75,8 +74,8 @@ class WidgetTest(QtWidgets.QWidget):
         self.spin.setValue(lambda: self.state.num)
         self.label.setText(lambda: "num is %s" % self.state.num)
         
-        self.spin >> event_hook("HoverEnter",self.hover_in_event)
-        self.spin >> event_hook("HoverLeave",self.hover_out_event)
+        self.spin >> event_hook("HoverEnter",lambda:self.state.spin_color >> Set("pink"))
+        self.spin >> event_hook("HoverLeave",lambda:self.state.spin_color >> Set("blue"))
         self.label.setStyleSheet(lambda:"color:%s" % self.state.spin_color)
         
         self.spin = QtWidgets.QDoubleSpinBox(self)
@@ -85,28 +84,10 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         self.spin.setValue(lambda: self.state.val)
         self.label.setText(lambda: "val is %s" % self.state.val)
-        
-    def change_text(self):
-        self.state.text = "asd"
-    
-    def color_focus_in(self):
-        self.state.color = "red"
-    
-    def color_focus_out(self):
-        self.state.color = "black"
-
-    def hover_in_event(self):
-        self.state.spin_color = "pink"
-
-    def hover_out_event(self):
-        self.state.spin_color = "blue"
-
-
 
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication([])
     widget = WidgetTest()
     widget.show()
-
     app.exec_()
