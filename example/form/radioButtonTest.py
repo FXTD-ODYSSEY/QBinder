@@ -58,11 +58,11 @@ class WidgetTest(QtWidgets.QWidget):
         self.label.setText(lambda: "CheckedNames %s" % self.state.picked)
 
         for rb in groupBox.findChildren(QtWidgets.QRadioButton):
-            rb.toggled.connect(partial(self.updateRB, rb))
+            rb.toggled.connect(self.updateRB)
 
-    def updateRB(self, rb, state):
-        if state:
-            self.state.picked = rb.text()
+    def updateRB(self, check):
+        rb = self.sender()
+        self.state.picked = rb.text()
 
 
 def main():

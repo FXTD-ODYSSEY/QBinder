@@ -124,3 +124,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# import sys
+# MODULE = r"G:\repo\QBinder\test"
+# sys.path.insert(0,MODULE) if MODULE not in sys.path else None
+# import counterTest
+# counter = counterTest.Counter()
+# counter.show()

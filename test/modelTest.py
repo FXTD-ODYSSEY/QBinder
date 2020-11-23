@@ -46,48 +46,49 @@ class InputTest(QtWidgets.QWidget):
 
 
 class WidgetTest(QtWidgets.QWidget):
-    # state = Binder()
-    # state.selected = ""
-    # state.option_A = 123.0
-    # state.option_B = "B"
-    # state.option_C = "C"
-    # state.item_list = [
-    #     state["selected"],
-    #     state["option_A"],
-    #     state["option_B"],
-    #     state["option_C"],
-    # ]
-    # state.item_model = Model(
-    #     [
-    #         [[state["option_A"], state["option_B"]], "1"],
-    #         [state["option_A"], state["option_B"]],
-    #         state["option_B"],
-    #         state["option_C"],
-    #         [None, "asd", None, 123],
-    #         ["asd", "1234"],
-    #     ]
-    # )
-    with Binder() as state:
-        state.selected = ""
-        state.option_A = 123.0
-        state.option_B = "B"
-        state.option_C = "C"
-        state.item_list = [
-            state.selected,
-            state.option_A,
-            state.option_B,
-            state.option_C,
+    state = Binder()
+    state.selected = ""
+    state.option_A = 123.0
+    state.option_B = "B"
+    state.option_C = "C"
+    state.item_list = [
+        state["selected"],
+        state["option_A"],
+    
+        state["option_B"],
+        state["option_C"],
+    ]
+    state.item_model = Model(
+        [
+            [[state["option_A"], state["option_B"]], "1"],
+            [state["option_A"], state["option_B"]],
+            state["option_B"],
+            state["option_C"],
+            [None, "asd", None, 123],
+            ["asd", "1234"],
         ]
-        state.item_model = Model(
-            [
-                [[state.option_A, state.option_B], "1"],
-                [state.option_A, state.option_B],
-                state.option_B,
-                state.option_C,
-                [None, "asd", None, 123],
-                ["asd", "1234"],
-            ]
-        )
+    )
+    # with Binder() as state:
+    #     state.selected = ""
+    #     state.option_A = 123.0
+    #     state.option_B = "B"
+    #     state.option_C = "C"
+    #     state.item_list = [
+    #         state.selected,
+    #         state.option_A,
+    #         state.option_B,
+    #         state.option_C,
+    #     ]
+    #     state.item_model = Model(
+    #         [
+    #             [[state.option_A, state.option_B], "1"],
+    #             [state.option_A, state.option_B],
+    #             state.option_B,
+    #             state.option_C,
+    #             [None, "asd", None, 123],
+    #             ["asd", "1234"],
+    #         ]
+    #     )
 
     def __init__(self):
         super(WidgetTest, self).__init__()

@@ -25,15 +25,16 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 sys.path.insert(0, repo) if repo not in sys.path else None
 
 from QBinder import Binder
+from QBinder import constant
 from Qt import QtGui, QtWidgets, QtCore
 
 from functools import partial
 
-
 class WidgetTest(QtWidgets.QWidget):
 
     state = Binder()
-    state.message = "asd"
+    with state('dumper'):
+        state.message = "asd"
 
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -63,3 +64,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# import sys
+# MODULE = r"G:\repo\QBinder\example\form"
+# sys.path.insert(0,MODULE) if MODULE not in sys.path else None
+# import lineEditTest
+# reload(lineEditTest)
+# widget = lineEditTest.WidgetTest()
+# widget.show()

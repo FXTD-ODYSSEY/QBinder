@@ -27,78 +27,66 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder
+# os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
+os.environ["QT_PREFERRED_BINDING"] = "PySide;PySide2"
+
+from QBinder import constant, Binder, GBinder, QEventHook, FnHook, BinderCollector
+from QBinder.handler import Set, Call, ItemConstructor, GroupBoxBind
+from QBinder.mixin import ItemMixin
+
+import Qt
+
+print(Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
+constant.AUTO_DUMP = False
 
+event_hook = QEventHook()
 gstate = GBinder()
-# TODO reconstruct large data very slow
-# gstate.todo_data = [
-#     {"text": "todo1", "completed": False},
-#     {"text": "todo2", "completed": True},
-# ]*10
-# gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
-gstate.todo_data = []
+
+with gstate("dumper"):
+    gstate.todo_data = []
+    gstate.selected = "All"
+    gstate.input = ""
+
 gstate.item_count = 0
 gstate.input_font = "italic"
 gstate.completed_color = "lightgray"
 gstate.footer_visible = False
 gstate.todolist_visible = False
 gstate.header_border = 0
-gstate.selected = "All"
 
-# TODO computed attr
-def update_count():
-    count = 0
-    for todo in gstate.todo_data:
-        count += 0 if todo["completed"] else 1
-    gstate.item_count = count
+
+gstate.update_count = FnHook()
+
+
+@gstate.update_count
+def _(state):
+    state.item_count = len([data for data in state.todo_data if not data["completed"]])
 
 
 class EditableLabel(QtWidgets.QLabel):
     def __init__(self, *args, **kwargs):
         super(EditableLabel, self).__init__(*args, **kwargs)
-        self.item = None
         self.editable = True
+        self.item = None
         self.edit = QtWidgets.QLineEdit()
         self.edit.setVisible(False)
         self.edit.editingFinished.connect(self.__complete__)
 
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        # self.edit.setSizePolicy(sizePolicy)
-        
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(self.edit)
 
-        app = QtWidgets.QApplication.instance()
-        app.installEventFilter(self)
-
-    def eventFilter(self, receiver, event):
-        # NOTE auto hide when click out of the lineedit 
-        if event.type() == 2 and self.editable and self.edit.isVisible():
-            if (
-                receiver.__class__.__name__ != "QWindow"
-                and receiver is not self.edit
-            ):
-                self.__complete__()
-        return False
-
     def __complete__(self):
         self.edit.setVisible(False)
-        self.setText(self.edit.text())
+        edit_text = self.edit.text()
+        self.setText(edit_text)
         if self.item:
             self.item.completedChanged()
-            text = gstate.todo_data[self.item.index]["text"]
-            edit_text = self.edit.text()
-            if text != edit_text:
-                gstate.todo_data[self.item.index]["text"] = edit_text
-
-    def mouseClickEvent(self, event):
-        if event.button() == 1 and self.editable:
-            self.__complete__()
+            gstate.todo_data[self.item.__index__]["text"] = edit_text
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == 1 and self.editable:
@@ -110,27 +98,92 @@ class EditableLabel(QtWidgets.QLabel):
                 state = self.item.state
                 state.text_style = "none"
                 state.text_color = "black"
-                
+
     def setEditable(self, editable):
         self.editable = bool(editable)
-        
-    def bind(self,item):
+
+    def bind(self, item):
         self.item = item
 
+class Ui_TodoItem(object):
+    def setupUi(self, TodoItem):
+        TodoItem.setObjectName("TodoItem")
+        TodoItem.resize(469, 95)
+        TodoItem.setStyleSheet("")
+        TodoItem.setWindowFilePath("")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(TodoItem)
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.TodoItemBorder = QtWidgets.QWidget(TodoItem)
+        self.TodoItemBorder.setStyleSheet("#TodoItemBorder{\n"
+"border-bottom:1px solid lightgray;\n"
+"}")
+        self.TodoItemBorder.setObjectName("TodoItemBorder")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.TodoItemBorder)
+        self.horizontalLayout_2.setContentsMargins(0, 9, 0, 9)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.horizontalWidget = QtWidgets.QWidget(self.TodoItemBorder)
+        self.horizontalWidget.setObjectName("horizontalWidget")
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.horizontalWidget)
+        self.horizontalLayout_3.setContentsMargins(-1, 0, -1, 0)
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.ItemCheck = QtWidgets.QCheckBox(self.horizontalWidget)
+        self.ItemCheck.setStyleSheet("")
+        self.ItemCheck.setText("")
+        self.ItemCheck.setObjectName("ItemCheck")
+        self.horizontalLayout_3.addWidget(self.ItemCheck)
+        self.ItemText = EditableLabel(self.horizontalWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ItemText.sizePolicy().hasHeightForWidth())
+        self.ItemText.setSizePolicy(sizePolicy)
+        self.ItemText.setObjectName("ItemText")
+        self.horizontalLayout_3.addWidget(self.ItemText)
+        self.ItemDelete = QtWidgets.QPushButton(self.horizontalWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ItemDelete.sizePolicy().hasHeightForWidth())
+        self.ItemDelete.setSizePolicy(sizePolicy)
+        self.ItemDelete.setMaximumSize(QtCore.QSize(15, 15))
+        font = QtGui.QFont()
+        font.setWeight(75)
+        font.setBold(True)
+        self.ItemDelete.setFont(font)
+        self.ItemDelete.setStyleSheet("color:#cc9a9a")
+        self.ItemDelete.setFlat(True)
+        self.ItemDelete.setObjectName("ItemDelete")
+        self.horizontalLayout_3.addWidget(self.ItemDelete)
+        self.horizontalLayout_2.addWidget(self.horizontalWidget)
+        self.horizontalLayout.addWidget(self.TodoItemBorder)
 
-class TodoItem(QtWidgets.QWidget):
-    def __init__(self, index):
+        self.retranslateUi(TodoItem)
+        QtCore.QMetaObject.connectSlotsByName(TodoItem)
+
+    def retranslateUi(self, TodoItem):
+        TodoItem.setWindowTitle(QtWidgets.QApplication.translate("TodoItem", "Form", None, -1))
+        self.ItemText.setText(QtWidgets.QApplication.translate("TodoItem", "TextLabel", None, -1))
+        self.ItemDelete.setText(QtWidgets.QApplication.translate("TodoItem", "X", None, -1))
+
+class TodoItem(QtWidgets.QWidget,Ui_TodoItem, ItemMixin):
+
+    state = Binder()
+
+    # @inject(state)
+    def __init__(self):
         super(TodoItem, self).__init__()
-        self.index = index
-        self.state = Binder()
-        self.state.text = ""
+
+        self.state.text = "a"
         self.state.completed = False
         self.state.visible = False
         self.state.text_style = "none"
         self.state.text_color = "black"
 
-        ui_file = os.path.join(__file__, "..", "item.ui")
-        loadUi(ui_file, self)
+        # ui_file = os.path.join(__file__, "..", "item.ui")
+        # loadUi(ui_file, self)
+        self.setupUi(self)
 
         self.ItemText.bind(self)
         self.ItemText.setText(lambda: self.state.text)
@@ -142,17 +195,16 @@ class TodoItem(QtWidgets.QWidget):
         self.ItemCheck.setChecked(lambda: self.state.completed)
 
         self.state["completed"].connect(self.completedChanged)
-        self.state["completed"].connect(update_count)
+        self.state["completed"].connect(gstate.update_count)
 
-        self.ItemDelete.clicked.connect(lambda: gstate.todo_data.pop(self.index))
+        self.ItemDelete.clicked.connect(lambda: gstate.todo_data.pop(self.__index__))
 
     def completedChanged(self):
         completed = self.state.completed
         self.state.text_style = "line-through" if completed else "none"
         self.state.text_color = "gray" if completed else "black"
-        check = gstate.todo_data[self.index]["completed"]
-        if check != completed:
-            gstate.todo_data[self.index]["completed"] = completed
+        if gstate.todo_data[self.__index__]["completed"] != completed:
+            gstate.todo_data[self.__index__]["completed"] = completed
 
     def setCompleted(self, completed):
         self.state.completed = completed
@@ -167,35 +219,33 @@ class TodoItem(QtWidgets.QWidget):
         self.state.visible = False
 
 
-class HoverLabel(QtWidgets.QLabel):
-    """
-    https://stackoverflow.com/a/57088301
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(HoverLabel, self).__init__(*args, **kwargs)
-        self.state = Binder()
-        self.state.clear_text_style = "none"
-
-    def enterEvent(self, event):
-        self.state.clear_text_style = "underline"
-
-    def leaveEvent(self, event):
-        self.state.clear_text_style = "none"
-
-
 class TodoWidget(QtWidgets.QWidget):
     item_list = []
 
+    __instance = None
+    def __new__(cls, *args, **kw):
+        if cls.__instance is None:
+            cls.__instance = super(TodoWidget, cls).__new__(cls)
+        return cls.__instance
+    
     def __init__(self):
-        super(TodoWidget, self).__init__()
+        try:
+            super(TodoWidget, self).__init__()
+        except:
+            self.show()
+            return
+
+        # self.setupUi(self)
         ui_file = os.path.join(__file__, "..", "todo.ui")
         loadUi(ui_file, self)
+        self.state = Binder()
+        self.state.clear_text_style = "none"
 
         self.TodoHeader.setStyleSheet(
             lambda: "#TodoHeader { border-bottom:%spx solid lightgray; }"
             % (gstate.header_border)
         )
+        self.TodoInput.setText(lambda: gstate.input)
         self.TodoInput.setStyleSheet(lambda: "font-style:%s" % (gstate.input_font))
         self.TodoInput.textChanged.connect(self.input_change)
         self.TodoInput.returnPressed.connect(self.add_item)
@@ -211,7 +261,13 @@ class TodoWidget(QtWidgets.QWidget):
         self.ItemClear.linkActivated.connect(self.clear_items)
         self.ItemClear.setText(
             lambda: '<html><head/><body><p><a href="clear" style="text-decoration: %s;color:gray">Clear completed</a></p></body></html>'
-            % self.ItemClear.state.clear_text_style
+            % self.state.clear_text_style
+        )
+        self.ItemClear >> event_hook(
+            "Enter", lambda: self.state.clear_text_style >> Set("underline")
+        )
+        self.ItemClear >> event_hook(
+            "Leave", lambda: self.state.clear_text_style >> Set("none")
         )
 
         self.ItemComplted.linkActivated.connect(self.complete_items)
@@ -223,18 +279,12 @@ class TodoWidget(QtWidgets.QWidget):
 
         self.ItemCount.setText(lambda: "%s item left" % gstate.item_count)
 
-        # NOTE filter radiobutton
-        for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
-            rb.toggled.connect(self.filter_state)
-
-        gstate["todo_data"].connect(self.load_item)
-        self.load_item()
-
-    def filter_state(self, filter):
-        for rb in self.StateGroup.findChildren(QtWidgets.QRadioButton):
-            if rb.isChecked():
-                gstate.selected = rb.text().strip()
-        self.load_item()
+        # NOTE filter radiobutton handler
+        gstate.selected >> GroupBoxBind(self.StateGroup)
+        
+        gstate["selected"].connect(self.update_item)
+        gstate["todo_data"].connect(self.update_item)
+        self.update_item()
 
     def change_completed_color(self):
         gstate.completed_color = "lightgray" if gstate.item_count else "black"
@@ -242,10 +292,9 @@ class TodoWidget(QtWidgets.QWidget):
     def complete_items(self):
         for todo in gstate.todo_data:
             todo["completed"] = True
-        self.load_item()
 
     def clear_items(self):
-        gstate.todo_data = [todo for todo in gstate.todo_data if not todo["completed"]]
+        gstate.todo_data = [data for data in gstate.todo_data if not data["completed"]]
 
     def add_item(self):
         gstate.todo_data.append(
@@ -256,31 +305,24 @@ class TodoWidget(QtWidgets.QWidget):
         )
         self.TodoInput.clear()
 
-    def load_item(self):
-        layout = self.TodoList.layout()
-        # NOTE clear item
-        [item.deleteLater() for item in self.item_list]
-        del self.item_list[:]
+    def update_item(self):
 
-        # TODO reconstruct item not optimized
+        filters = {
+            "All": lambda data: data,
+            "Active": lambda data: [d for d in data if not d["completed"]],
+            "Completed": lambda data: [d for d in data if d["completed"]],
+        }
+
+        TodoItem >> ItemConstructor(
+            __layout__=self.TodoList.layout(),
+            __binder__="state",
+            __data__=lambda: filters[gstate.selected](gstate.todo_data),
+        )
         if gstate.todo_data:
             gstate.header_border = 1
             gstate.footer_visible = True
             gstate.todolist_visible = True
-            for i, todo in enumerate(gstate.todo_data):
-                completed = todo["completed"]
-
-                if gstate.selected == "Active" and completed:
-                    continue
-                elif gstate.selected == "Completed" and not completed:
-                    continue
-
-                item = TodoItem(i)
-                item.setText(todo["text"])
-                item.setCompleted(completed)
-                self.item_list.append(item)
-                layout.addWidget(item)
-            update_count()
+            gstate.update_count()
         else:
             gstate.header_border = 0
             gstate.footer_visible = False
@@ -289,6 +331,9 @@ class TodoWidget(QtWidgets.QWidget):
     def input_change(self, text):
         gstate.input_font = "bold" if text else "italic"
 
+    def close(self):
+        self.deleteLater()
+        super(TodoWidget, self).close()
 
 if __name__ == "__main__":
 
@@ -296,3 +341,18 @@ if __name__ == "__main__":
     gstate.todo_app = TodoWidget()
     gstate.todo_app.show()
     sys.exit(app.exec_())
+    
+# import sys
+# MODULE = r"G:\repo\QBinder\example\todo_app"
+# sys.path.insert(0,MODULE) if MODULE not in sys.path else None
+# import todo
+# todo.gstate.todo_app = todo.TodoWidget()
+# todo.gstate.todo_app.show()
+# try:
+#     import todo
+#     todo_app = todo.TodoWidget()
+#     todo_app.show()
+# except:
+#     import traceback
+#     traceback.print_exc()
+# exec(open(r'G:\repo\QBinder\example\todo_app\todo.py','r').read())

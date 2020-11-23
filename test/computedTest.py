@@ -57,8 +57,8 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.button)
 
         self.button.clicked.connect(self.testComputed)
-        self.combo.currentTextChanged.connect(self.update)
         self.state.selected = self.combo.currentText()
+        self.combo.setCurrentText(lambda:self.state.selected)
 
         self.label.setText(
             lambda: "selected {selected}".format(selected=self.state.selected)
@@ -66,9 +66,6 @@ class WidgetTest(QtWidgets.QWidget):
 
     def testComputed(self):
         self.state.selected = "AAA"
-
-    def update(self, text):
-        self.state.selected = text
 
 
 def main():

@@ -10,17 +10,22 @@ __date__ = "2020-05-06 23:02:37"
 """
 
 
-import sys
 import six
+import sys
+import time
 import inspect
 from functools import partial, wraps
 from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
+from .eventhook import QEventHook
+
+event_hook = QEventHook()
 
 
 class BindingBase(object):
     pass
+
 
 class BindingProxy(BindingBase):
     def __init__(self, binder, attr):
@@ -40,8 +45,8 @@ class BindingProxy(BindingBase):
 class FnBinding(BindingBase):
     def __init__(self, binder, func):
         self.binder = binder
-        self.func = func if callable(func) else func.__func__
-        self.static = type(func) is staticmethod
+        self.func = func if six.callable(func) else func.__func__
+        self.static = isinstance(func, staticmethod)
         self.cls = None
 
     def __call__(self, *args, **kwargs):
@@ -50,23 +55,25 @@ class FnBinding(BindingBase):
             return self.func(*args, **kwargs)
         elif self.cls:
             # NOTE Try to Get A Default Instance from binder
-            # print("self.binder",self.binder)
-            # print(object.__bases__)
             for _, member in inspect.getmembers(self.binder, lambda f: not callable(f)):
                 if type(member) is self.cls:
                     arg = member
                     break
-        return self.func(arg, *args, **kwargs)
+        try:
+            return self.func(arg, *args, **kwargs)
+        except:
+            return self.func(arg)
 
     def __getitem__(self, attr):
         attr = getattr(self.binder, attr) if type(attr) is str else attr
 
-        @wraps(self.func)
+        @six.wraps(self.func)
         def wrapper(*args, **kw):
             if self.static:
                 return self.func(*args, **kw)
             else:
-                return self.func(attr, *args, **kw)
+                length = len(inspect.getargspec(self.func).args)
+                return self.func(attr, *args[: length - 1], **kw)
 
         return wrapper
 
@@ -112,7 +119,7 @@ class NotifyList(list):
 
     def __getitem__(self, item):
         if isinstance(item, slice):
-            return self.__class__(list.__getitem__(self, item))
+            return list(list.__getitem__(self, item))
         else:
             return list.__getitem__(self, item)
 
@@ -155,9 +162,10 @@ class NotifyDict(OrderedDict):
 
 class Binding(QtGui.QStandardItem, BindingBase):
 
-    TRACE = False
-    SET_FLAG = False
-    TRACE_LIST = []
+    __trace = False
+    __emit_flag = False
+    _trace_list_ = []
+    _inst_ = []
 
     __repr__ = lambda self: repr(self.val)
     __str__ = lambda self: str(self.val)
@@ -211,31 +219,36 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.overrideOperator(self.val)
         self.event_loop = []
         self.bind_widgets = []
+        self.__binder__ = None
 
     @classmethod
     @contextmanager
     def set_trace(cls):
-        del cls.TRACE_LIST[:]
-        cls.TRACE = True
+        del cls._trace_list_[:]
+        cls.__trace = True
         yield
-        cls.TRACE = False
+        cls.__trace = False
 
     def __get__(self, instance, owner):
-        self.TRACE_LIST.append(self) if self.TRACE else None
+        self.__class__._inst_ = [self]
+        self._trace_list_.append(self) if self.__trace else None
         return self.get()
-    
+
     def __rrshift__(self, d):
         self.set(d)
         return d
 
     def set(self, value):
+        # NOTE 如果值没有变化则不触发更新
+        if value == self.get():
+            return
         self.val = self.retrieve2Notify(value)
         self.overrideOperator(value)
         self.emitDataChanged()
         self.emit()
 
     def get(self):
-        return self.val() if callable(self.val) else self.val
+        return self.val
 
     @classmethod
     def overrideOperator(cls, val):
@@ -280,17 +293,24 @@ class Binding(QtGui.QStandardItem, BindingBase):
 
     def connect(self, callback):
         self.event_loop.append(callback)
+        return callback
 
     def disconnect(self, callback):
         self.event_loop.remove(callback)
 
     def emit(self, *args, **kwargs):
-        for callback in self.event_loop[:]:
-            if callable(callback):
-                try:
-                    callback(*args, **kwargs)
-                except:
-                    self.event_loop.remove(callback)
+        QtCore.QTimer.singleShot(0, lambda: self.run_event(*args, **kwargs))
+        self.__emit_flag = True
+
+    def run_event(self, *args, **kwargs):
+        if self.__emit_flag:
+            self.__emit_flag = False
+            for callback in self.event_loop[:]:
+                if six.callable(callback):
+                    try:
+                        callback(*args, **kwargs)
+                    except:
+                        self.event_loop.remove(callback)
 
 
 class Model(QtCore.QAbstractItemModel):

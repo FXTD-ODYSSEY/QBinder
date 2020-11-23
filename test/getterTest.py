@@ -8,9 +8,7 @@ __date__ = "2020-03-22 22:55:38"
 
 """
 
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
+
 
 import os
 import sys
@@ -22,8 +20,15 @@ MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
     sys.path.append(MODULE)
 
-from QBinder import Binder
+from QBinder import Binder , Binding
+from Qt import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
 
+class TestOP(object):
+    def __rrshift__(self,val):
+        print('__rrshift__',Binding._inst_)
+        return val
 
 class Counter(QtWidgets.QWidget):
 
@@ -46,6 +51,7 @@ class Counter(QtWidgets.QWidget):
 
         label.setText(lambda: "Label %s" % self.state.data)
         plus_button.clicked.connect(self.changeData)
+        self.state.data >> TestOP()
 
     def changeData(self):
         self.state.data.append(3)
