@@ -13,8 +13,9 @@ __date__ = "2020-11-02 23:47:53"
 
 import sys
 import six
+import types
 import inspect
-from functools import partial
+from functools import partial,wraps
 from collections import defaultdict
 
 import Qt
@@ -56,14 +57,19 @@ for name, member in qt_dict.items():
     if not hasattr(member, "staticMetaObject"):
         continue
     meta_obj = getattr(member, "staticMetaObject")
-
-    for i in range(meta_obj.methodCount()):
-        method = meta_obj.method(i)
-        method_name, count = get_method_name(method)
-        if count and method.methodType() != QtCore.QMetaMethod.Signal:
-            if hasattr(member, method_name):
-                HOOKS[name][method_name] = {}
-                _HOOKS_REL[name][method_name.lower()] = method_name
+    for method_name,method in inspect.getmembers(member,lambda m:callable(m)):
+        if not type(method).__name__ == "method_descriptor":
+            continue
+        HOOKS[name][method_name] = {}
+        _HOOKS_REL[name][method_name.lower()] = method_name
+        
+    # for i in range(meta_obj.methodCount()):
+    #     method = meta_obj.method(i)
+    #     method_name, count = get_method_name(method)
+    #     if count and method.methodType() != QtCore.QMetaMethod.Signal:
+    #         if hasattr(member, method_name):
+    #             HOOKS[name][method_name] = {}
+    #             _HOOKS_REL[name][method_name.lower()] = method_name
 
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)
@@ -77,72 +83,12 @@ for name, member in qt_dict.items():
             if updater:
                 data.update({"updater": updater, "property": property_name})
 
-# print(HOOKS)
-# HOOKS.update({
-#     "QtWidgets.QWidget": {
-#         "setStyleSheet": {
-#             "type": str,
-#         },
-#         "setVisible": {
-#             "type": bool,
-#         },
-#     },
-#     "QtWidgets.QComboBox": {
-#         "setCurrentIndex": {
-#             "type": int,
-#             "getter": "currentIndex",
-#             "updater": "currentIndexChanged",
-#         },
-#     },
-#     "QtWidgets.QLineEdit": {
-#         "setText": {
-#             "type": str,
-#             "getter": "text",
-#             "updater": "textChanged",
-#         },
-#     },
-#     "QtWidgets.QLabel": {
-#         "setText": {"type": str, "getter": "text"},
-#     },
-#     "QtWidgets.QCheckBox": {
-#         "setChecked": {
-#             "type": bool,
-#             "getter": "isChecked",
-#             "updater": "stateChanged",
-#         },
-#         "setText": {"type": str, "getter": "text"},
-#     },
-#     "QtWidgets.QRadioButton": {
-#         "setChecked": {
-#             "type": bool,
-#             "getter": "isChecked",
-#             "updater": "stateChanged",
-#         },
-#         "setText": {"type": str, "getter": "text"},
-#     },
-#     "QtWidgets.QSpinBox": {
-#         "setValue": {
-#             "type": int,
-#             "getter": "value",
-#             "updater": "valueChanged",
-#         },
-#     },
-#     "QtWidgets.QDoubleSpinBox": {
-#         "setValue": {
-#             "type": float,
-#             "getter": "value",
-#             "updater": "valueChanged",
-#         },
-#     },
-# })
-
 
 def binding_handler(func, options=None):
     """
     # NOTE initialize the Qt Widget setter
     """
     options = options if options is not None else {}
-    typ = options.get("type")
 
     def fix_cursor_position(func, widget):
         """maintain the Qt edit cusorPosition after setting a new value"""
@@ -170,34 +116,50 @@ def binding_handler(func, options=None):
                 # print("auto_dump", dumper.path, k)
                 dumper._filters_.add(k)
                 break
-
-    def wrapper(self, value, *args, **kwargs):
-        if six.callable(value):
+    
+    def combine_args(val,args):
+        if isinstance(val,tuple):
+            return val + args[1:]
+        else:
+            return (val,) + args[1:]
+    
+    
+    def wrapper(self, *args, **kwargs):
+        if len(args) == 0:
+            return func(self, *args, **kwargs)
+        
+        callback = args[0]
+        
+        if isinstance(callback, types.LambdaType):
 
             # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
             with Binding.set_trace():
-                val = value()
+                val = callback()
 
+            def connect_callback(callback,args):
+                val = callback()
+                args = combine_args(val,args)
+                func(self, *args, **kwargs)
+    
             # NOTE register auto update
-            callback = partial(
-                lambda c: func(self, typ(c()) if typ else c(), *args, **kwargs), value
-            )
+            _callback_ = partial(connect_callback,callback,args)
             for binding in Binding._trace_list_:
                 # binding.bind_widgets.append(
                 #     self
                 # ) if self not in binding.bind_widgets else None
-                binding.connect(callback)
+                binding.connect(_callback_)
 
+            args = combine_args(val,args)
+            
+            # NOTE Single binding connect to the updater
             updater = options.get("updater")
-
             prop = options.get("property")
             getter = options.get("getter")
             _getter_1 = getattr(self, getter) if getter else None
             _getter_2 = lambda: self.property(prop) if prop else None
             getter = _getter_1 if _getter_1 else _getter_2
-            code = value.__code__
+            code = callback.__code__
 
-            # NOTE Single binding connect to the updater
             if (
                 updater
                 and getter
@@ -211,11 +173,8 @@ def binding_handler(func, options=None):
                 )
                 binding = Binding._trace_list_[0]
                 QtCore.QTimer.singleShot(0, partial(auto_dump, binding))
-
-            value = typ(val) if typ else val
-
-        res = func(self, value, *args, **kwargs)
-        return res
+            
+        return func(self, *args, **kwargs)
 
     return wrapper
 

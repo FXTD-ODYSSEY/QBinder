@@ -1,16 +1,16 @@
 import os
 import sys
 
-# try:
-#     import Qt
-#     import six
-# except:
-DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR, "_vendor")
-if MODULE not in sys.path:
-    sys.path.insert(0,MODULE)
-import Qt
-import six
+try:
+    import Qt
+    import six
+except:
+    DIR = os.path.dirname(__file__)
+    MODULE = os.path.join(DIR, "_vendor")
+    if MODULE not in sys.path:
+        sys.path.insert(0,MODULE)
+    import Qt
+    import six
 
 
 from .util import ListGet

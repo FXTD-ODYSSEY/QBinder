@@ -69,17 +69,35 @@ def get_method_name(method):
         count = method.parameterNames()
     return byte2str(name),count
 
+
+# meta_obj = QtWidgets.QLineEdit.staticMetaObject
+# for i in range(meta_obj.propertyCount()):
+#     property = meta_obj.property(i)
+#     property_name = property.name()
+#     print(property_name)
+# for i in range(meta_obj.methodCount()):
+#     method = meta_obj.method(i)
+#     method_name,count = get_method_name(method)
+#     print(method_name)
+
+
 for name,member in qt_dict.items():
     if not hasattr(member,'staticMetaObject'):
         continue
     meta_obj = getattr(member,'staticMetaObject')
     
-    for i in range(meta_obj.methodCount()):
-        method = meta_obj.method(i)
-        method_name,count = get_method_name(method)
-        if count and method.methodType() != QtCore.QMetaMethod.Signal and hasattr(member,method_name):
-            HOOKS[name][method_name] = {}
-            _HOOKS[name][method_name.lower()] = method_name
+    for method_name,method in inspect.getmembers(member,lambda m:callable(m)):
+        if not type(method).__name__ == "instancemethod":
+            continue
+        # print(type(method).__name__)
+        HOOKS[name][method_name] = {}
+        _HOOKS[name][method_name.lower()] = method_name
+    # for i in range(meta_obj.methodCount()):
+    #     method = meta_obj.method(i)
+    #     method_name,count = get_method_name(method)
+    #     if count and method.methodType() != QtCore.QMetaMethod.Signal and hasattr(member,method_name):
+    #         HOOKS[name][method_name] = {}
+    #         _HOOKS[name][method_name.lower()] = method_name
 
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)
@@ -100,6 +118,4 @@ for name,member in qt_dict.items():
 path = "%s.json" % os.path.splitext(__file__)[0]
 with open(path,'w') as f:
     json.dump(HOOKS,f,indent=4,ensure_ascii=False)
-# print(json.dumps(method_dict))
-# print(method_dict)
 

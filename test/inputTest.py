@@ -31,6 +31,8 @@ class WidgetTest(QtWidgets.QWidget):
     state.text = "empty"
     state.num = 1
     state.val = 2.0
+    state.start = 1
+    state.end = 2
     
     def __init__(self):
         super(WidgetTest, self).__init__()
@@ -49,6 +51,7 @@ class WidgetTest(QtWidgets.QWidget):
 
         self.button.clicked.connect(self.change_text)
         self.edit.setText(lambda: self.state.text)
+        self.edit.setSelection(lambda: (self.state.start,self.state.end))
         self.label.setText(lambda: "message is %s" % self.state.text)
         
         self.spin = QtWidgets.QSpinBox(self)
@@ -57,7 +60,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         self.spin.setValue(lambda: self.state.num)
         self.label.setText(lambda: "num is %s" % self.state.num)
-        
+        print(self.label.text())
         self.spin = QtWidgets.QDoubleSpinBox(self)
         self.label = QtWidgets.QLabel()
         layout.addWidget(self.spin)
@@ -66,7 +69,10 @@ class WidgetTest(QtWidgets.QWidget):
         self.label.setText(lambda: "val is %s" % self.state.val)
         
     def change_text(self):
-        self.state.text = "asd"
+        # self.state.start =0
+        self.state.end += 1
+        # self.edit.setSelection(1,4)
+        # self.state.text = "asd"
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])

@@ -30,6 +30,7 @@
 - [x] 自动 bind QGroupBox RadioButton
 - [x] self.state = Binder() 如何自动绑定实例化的函数
 - [x] hook setStylesheet
+- [x] meta hook 改良 (目前没有 hook 到所有的方法)
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)    
