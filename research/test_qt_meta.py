@@ -27,14 +27,15 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-# os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
-os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
+# os.environ['QT_PREFERRED_BINDING'] = 'PySide;PySide2'
 
 import inspect
 
 import QBinder
 # from QBinder import Binder, GBinder, QEventHook
-import six
+import Qt
+print(Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
@@ -44,7 +45,7 @@ import json
 nested_dict = lambda: defaultdict(nested_dict)
 
 HOOKS = nested_dict()
-_HOOKS = nested_dict()
+_HOOKS_REL = nested_dict()
 method_dict = nested_dict()
 method_comp = defaultdict(list)
 qt_dict = {"QtWidgets.%s" % n:m for n,m in inspect.getmembers(QtWidgets)}
@@ -82,40 +83,57 @@ def get_method_name(method):
 
 
 for name,member in qt_dict.items():
-    if not hasattr(member,'staticMetaObject'):
-        continue
-    meta_obj = getattr(member,'staticMetaObject')
-    
-    for method_name,method in inspect.getmembers(member,lambda m:callable(m)):
-        if not type(method).__name__ == "instancemethod":
-            continue
-        # print(type(method).__name__)
-        HOOKS[name][method_name] = {}
-        _HOOKS[name][method_name.lower()] = method_name
-    # for i in range(meta_obj.methodCount()):
-    #     method = meta_obj.method(i)
-    #     method_name,count = get_method_name(method)
-    #     if count and method.methodType() != QtCore.QMetaMethod.Signal and hasattr(member,method_name):
-    #         HOOKS[name][method_name] = {}
-    #         _HOOKS[name][method_name.lower()] = method_name
+    for method_name,method in inspect.getmembers(member,inspect.isroutine):
+        if type(method).__name__ == 'method_descriptor':
+            HOOKS[name][method_name] = type(method).__name__
 
-    for i in range(meta_obj.propertyCount()):
-        property = meta_obj.property(i)
-        if not property.hasNotifySignal():
-            continue
-        property_name = property.name()
-        method_name = _HOOKS[name].get("set%s" % property_name.lower())
-        data = HOOKS[name].get(method_name)
-        if isinstance(data,dict):
-            updater,_ = get_method_name(property.notifySignal())
-            if updater:
-                data.update({
-                    "updater" : updater,
-                    "property" : property_name
-                })
+
+# for name,member in qt_dict.items():
+    
+#     if not hasattr(member,'staticMetaObject'):
+#         continue
+#     meta_obj = getattr(member,'staticMetaObject')
+
+#     for method_name,method in inspect.getmembers(member,inspect.isroutine):
+#         if not filter_method(method_name,method):
+#             continue
+#         HOOKS[name][method_name] = {}
+#         # HOOKS[name][method_name] = type(method).__name__
+#         _HOOKS_REL[method_name.lower()] = method_name
+    
+#     # for i in range(meta_obj.methodCount()):
+#     #     method = meta_obj.method(i)
+#     #     method_name,count = get_method_name(method)
+#     #     if count and method.methodType() != QtCore.QMetaMethod.Signal and hasattr(member,method_name):
+#     #         HOOKS[name][method_name] = {}
+#     #         _HOOKS_REL[name][method_name.lower()] = method_name
+
+#     for i in range(meta_obj.propertyCount()):
+#         property = meta_obj.property(i)
+#         if not property.hasNotifySignal():
+#             continue
+#         property_name = property.name()
+#         method_name = _HOOKS_REL.get("set%s" % property_name.lower())
+#         data = HOOKS[name].get(method_name)
+#         if isinstance(data,dict):
+#             updater,_ = get_method_name(property.notifySignal())
+#             if updater:
+#                 data.update({
+#                     "updater" : updater,
+#                     "property" : property_name
+#                 })
                 
 
 path = "%s.json" % os.path.splitext(__file__)[0]
+print(len(HOOKS["QtWidgets.QLineEdit"]))
+
+# with open(path,'r') as f:
+#     data = json.load(f,encoding='utf-8')
+#     for d in data["QtWidgets.QLineEdit"]:
+#         print(HOOKS["QtWidgets.QLineEdit"].get(d))
+        # if not HOOKS["QtWidgets.QLineEdit"].get(d):
+        #     print(d)
+
 with open(path,'w') as f:
     json.dump(HOOKS,f,indent=4,ensure_ascii=False)
 

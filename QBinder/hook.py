@@ -11,17 +11,16 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-02 23:47:53"
 
+import os
 import sys
 import six
+import json
 import types
 import inspect
 from functools import partial
-from collections import defaultdict
 
 import Qt
-from Qt import QtCore
-from Qt import QtWidgets
-from Qt import QtGui
+from Qt import QtCore, QtWidgets, QtGui
 
 from .binding import Binding
 from .util import nestdict, defaultdict
@@ -53,16 +52,18 @@ def get_method_name(method):
     return byte2str(name), count
 
 
+# NOTE read filter func list
+path = os.path.join(__file__, "..", "hook.json")
+with open(path, "r") as f:
+    filter_method = json.load(f, encoding="utf-8")
+
 for name, member in qt_dict.items():
-    if not hasattr(member, "staticMetaObject"):
-        continue
-    meta_obj = getattr(member, "staticMetaObject")
-    for method_name,method in inspect.getmembers(member,lambda m:callable(m)):
-        if not type(method).__name__ == "method_descriptor":
-            continue
-        HOOKS[name][method_name] = {}
-        _HOOKS_REL[name][method_name.lower()] = method_name
-        
+
+    for method_name, method in inspect.getmembers(member, inspect.isroutine):
+        if filter_method.get(name, {}).get(method_name):
+            HOOKS[name][method_name] = {}
+            _HOOKS_REL[name][method_name.lower()] = method_name
+
     # for i in range(meta_obj.methodCount()):
     #     method = meta_obj.method(i)
     #     method_name, count = get_method_name(method)
@@ -71,6 +72,10 @@ for name, member in qt_dict.items():
     #             HOOKS[name][method_name] = {}
     #             _HOOKS_REL[name][method_name.lower()] = method_name
 
+    if not hasattr(member, "staticMetaObject"):
+        continue
+    meta_obj = getattr(member, "staticMetaObject")
+    # NOTE auto bind updater
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)
         if not property.hasNotifySignal():
@@ -82,7 +87,6 @@ for name, member in qt_dict.items():
             updater, _ = get_method_name(property.notifySignal())
             if updater:
                 data.update({"updater": updater, "property": property_name})
-
 
 def binding_handler(func, options=None):
     """
@@ -116,42 +120,41 @@ def binding_handler(func, options=None):
                 # print("auto_dump", dumper.path, k)
                 dumper._filters_.add(k)
                 break
-    
-    def combine_args(val,args):
-        if isinstance(val,tuple):
+
+    def combine_args(val, args):
+        if isinstance(val, tuple):
             return val + args[1:]
         else:
             return (val,) + args[1:]
-    
-    
+
     @six.wraps(func)
     def wrapper(self, *args, **kwargs):
-        if len(args) != 1:
+        if len(args) == 0:
             return func(self, *args, **kwargs)
-        
+
         callback = args[0]
-        
+
         if isinstance(callback, types.LambdaType):
 
-            # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
+            # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
             with Binding.set_trace():
                 val = callback()
 
-            def connect_callback(callback,args):
+            def connect_callback(callback, args):
                 val = callback()
-                args = combine_args(val,args)
+                args = combine_args(val, args)
                 func(self, *args, **kwargs)
-    
+
             # NOTE register auto update
-            _callback_ = partial(connect_callback,callback,args)
+            _callback_ = partial(connect_callback, callback, args)
             for binding in Binding._trace_list_:
+                binding.connect(_callback_)
                 # binding.bind_widgets.append(
                 #     self
                 # ) if self not in binding.bind_widgets else None
-                binding.connect(_callback_)
 
-            args = combine_args(val,args)
-            
+            args = combine_args(val, args)
+
             # NOTE Single binding connect to the updater
             updater = options.get("updater")
             prop = options.get("property")
@@ -172,9 +175,9 @@ def binding_handler(func, options=None):
                 updater.connect(
                     fix_cursor_position(lambda *args: binding.set(getter()), self)
                 )
-                binding = Binding._trace_list_[0]
+                binding = Binding._trace_list_.pop()
                 QtCore.QTimer.singleShot(0, partial(auto_dump, binding))
-            
+
         return func(self, *args, **kwargs)
 
     return wrapper

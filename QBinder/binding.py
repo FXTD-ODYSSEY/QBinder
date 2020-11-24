@@ -218,7 +218,6 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.val = self.retrieve2Notify(val)
         self.overrideOperator(self.val)
         self.event_loop = []
-        self.bind_widgets = []
         self.__binder__ = None
 
     @classmethod

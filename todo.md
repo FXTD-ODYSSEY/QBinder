@@ -30,7 +30,10 @@
 - [x] 自动 bind QGroupBox RadioButton
 - [x] self.state = Binder() 如何自动绑定实例化的函数
 - [x] hook setStylesheet
-- [x] meta hook 改良 (目前没有 hook 到所有的方法)
+- [x] meta hook 改良 (目前没有 hook 到所有的方法) ~~使用 json 定义 hook 的方法~~
+- [ ] 改良 hook 兼容 C++ static method
+- [ ] 查 autodump 的 BUG
+- [ ] GState 单例模式使用类似 index 计数修复方法解决共享冲突。 (todo_app 在 DCC 端的冲突)
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)    
