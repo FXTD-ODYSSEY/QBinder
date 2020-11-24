@@ -15,7 +15,7 @@ import sys
 import six
 import types
 import inspect
-from functools import partial,wraps
+from functools import partial
 from collections import defaultdict
 
 import Qt
@@ -124,15 +124,16 @@ def binding_handler(func, options=None):
             return (val,) + args[1:]
     
     
+    @six.wraps(func)
     def wrapper(self, *args, **kwargs):
-        if len(args) == 0:
+        if len(args) != 1:
             return func(self, *args, **kwargs)
         
         callback = args[0]
         
         if isinstance(callback, types.LambdaType):
 
-            # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
+            # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
             with Binding.set_trace():
                 val = callback()
 

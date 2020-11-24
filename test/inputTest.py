@@ -31,7 +31,7 @@ class WidgetTest(QtWidgets.QWidget):
     state.text = "empty"
     state.num = 1
     state.val = 2.0
-    state.start = 1
+    state.start = 0
     state.end = 2
     
     def __init__(self):
@@ -44,7 +44,7 @@ class WidgetTest(QtWidgets.QWidget):
 
         self.edit = QtWidgets.QLineEdit()
         self.label = QtWidgets.QLabel()
-        self.button = QtWidgets.QPushButton("change Text")
+        self.button = QtWidgets.QPushButton("set selection")
         layout.addWidget(self.edit)
         layout.addWidget(self.label)
         layout.addWidget(self.button)
@@ -69,7 +69,7 @@ class WidgetTest(QtWidgets.QWidget):
         self.label.setText(lambda: "val is %s" % self.state.val)
         
     def change_text(self):
-        # self.state.start =0
+        self.state.start += 1
         self.state.end += 1
         # self.edit.setSelection(1,4)
         # self.state.text = "asd"
