@@ -32,7 +32,6 @@ from Qt import QtGui
 class WidgetTest(QtWidgets.QWidget):
 
     state = Binder()
-    # TODO load value bug
     with state('dumper') as dumper:
         state.text = "empty"
         state.num = 1
@@ -57,8 +56,7 @@ class WidgetTest(QtWidgets.QWidget):
 
         self.button.clicked.connect(self.change_selection)
         self.edit.setText(lambda: self.state.text)
-        print("end",self.state.end)
-        # self.edit.setSelection(lambda: (self.state.start,self.state.end))
+        self.edit.setSelection(lambda: (self.state.start,self.state.end))
         self.label.setText(lambda: "message is %s" % self.state.text)
         
         self.spin = QtWidgets.QSpinBox(self)

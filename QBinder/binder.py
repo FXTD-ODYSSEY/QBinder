@@ -91,12 +91,12 @@ class BinderDumper(QtCore.QObject):
             os.mkdir(folder)
         self.path = os.path.join(folder, "%s.json" % db_name)
 
-        self >> event_hook(QtCore.QEvent.User, self.__prepare__)
+        # NOTE using timer call the __prepare__ in the next evnet loop (for loading delay)
+        self >> event_hook(QtCore.QEvent.User, lambda:QtCore.QTimer.singleShot(0,self.__prepare__))
         event = QtCore.QEvent(QtCore.QEvent.User)
         QtWidgets.QApplication.postEvent(self, event)
 
     def __prepare__(self):
-        # NOTE value change
         for k, binding in self.binder._var_dict_.items():
             if k in self._filters_:
                 binding.connect(self.save)
@@ -135,7 +135,8 @@ class BinderDumper(QtCore.QObject):
             for k, v in data.items():
                 setattr(self.binder, k, v)
         except:
-            pass
+            # NOTE May be the file broken
+            os.remove(path)
 
 
 class BinderDispatcher(QtCore.QObject):
