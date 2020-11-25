@@ -238,7 +238,6 @@ class Binding(QtGui.QStandardItem, BindingBase):
         return d
 
     def set(self, value):
-        # # NOTE 如果值没有变化则不触发更新
         # if value == self.get():
         #     return
         self.val = self.retrieve2Notify(value)

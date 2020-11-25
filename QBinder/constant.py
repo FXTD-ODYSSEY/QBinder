@@ -12,8 +12,3 @@ __email__ = "820472580@qq.com"
 __date__ = "2020-11-07 22:26:11"
 
 AUTO_DUMP = True
-
-# NOTE while list for pyqt hook func
-PYQT_HOOK_FILTER = {
-    
-}

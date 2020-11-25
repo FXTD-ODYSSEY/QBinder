@@ -35,22 +35,14 @@ from QBinder.handler import Set, Call, ItemConstructor, GroupBoxBind
 from QBinder.mixin import ItemMixin
 
 import Qt
-
-print(Qt.__binding__)
+print("__binding__",Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
 event_hook = QEventHook()
-gstate = GBinder()
+gstate = Binder()
 
-
-# gstate.todo_data = [
-#     {"text": "todo1", "completed": False},
-#     {"text": "todo2", "completed": True},
-# ] * 5
-# gstate.todo_data = [{"text": "%s" % i, "completed": False} for i in range(10)]
-
-with gstate("dumper"):
+with gstate("dumper") as dumper:
     gstate.todo_data = []
     gstate.selected = "All"
     gstate.input = ""
@@ -111,7 +103,70 @@ class EditableLabel(QtWidgets.QLabel):
         self.item = item
 
 
-class TodoItem(QtWidgets.QWidget, ItemMixin):
+class Ui_TodoItem(object):
+    def setupUi(self, TodoItem):
+        TodoItem.setObjectName("TodoItem")
+        TodoItem.resize(489, 101)
+        TodoItem.setStyleSheet("")
+        TodoItem.setWindowFilePath("")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(TodoItem)
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.TodoItemBorder = QtWidgets.QWidget(TodoItem)
+        self.TodoItemBorder.setStyleSheet("#TodoItemBorder{\n"
+"border-bottom:1px solid lightgray;\n"
+"}")
+        self.TodoItemBorder.setObjectName("TodoItemBorder")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.TodoItemBorder)
+        self.horizontalLayout_2.setContentsMargins(0, 9, 0, 9)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.horizontalWidget = QtWidgets.QWidget(self.TodoItemBorder)
+        self.horizontalWidget.setObjectName("horizontalWidget")
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.horizontalWidget)
+        self.horizontalLayout_3.setContentsMargins(-1, 0, -1, 0)
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.ItemCheck = QtWidgets.QCheckBox(self.horizontalWidget)
+        self.ItemCheck.setStyleSheet("")
+        self.ItemCheck.setText("")
+        self.ItemCheck.setObjectName("ItemCheck")
+        self.horizontalLayout_3.addWidget(self.ItemCheck)
+        self.ItemText = EditableLabel(self.horizontalWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ItemText.sizePolicy().hasHeightForWidth())
+        self.ItemText.setSizePolicy(sizePolicy)
+        self.ItemText.setObjectName("ItemText")
+        self.horizontalLayout_3.addWidget(self.ItemText)
+        self.ItemDelete = QtWidgets.QPushButton(self.horizontalWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ItemDelete.sizePolicy().hasHeightForWidth())
+        self.ItemDelete.setSizePolicy(sizePolicy)
+        self.ItemDelete.setMaximumSize(QtCore.QSize(15, 15))
+        font = QtGui.QFont()
+        font.setWeight(75)
+        font.setBold(True)
+        self.ItemDelete.setFont(font)
+        self.ItemDelete.setStyleSheet("color:#cc9a9a")
+        self.ItemDelete.setFlat(True)
+        self.ItemDelete.setObjectName("ItemDelete")
+        self.horizontalLayout_3.addWidget(self.ItemDelete)
+        self.horizontalLayout_2.addWidget(self.horizontalWidget)
+        self.horizontalLayout.addWidget(self.TodoItemBorder)
+
+        self.retranslateUi(TodoItem)
+        QtCore.QMetaObject.connectSlotsByName(TodoItem)
+
+    def retranslateUi(self, TodoItem):
+        TodoItem.setWindowTitle(QtWidgets.QApplication.translate("TodoItem", "Form", None, -1))
+        self.ItemText.setText(QtWidgets.QApplication.translate("TodoItem", "TextLabel", None, -1))
+        self.ItemDelete.setText(QtWidgets.QApplication.translate("TodoItem", "X", None, -1))
+
+
+class TodoItem(QtWidgets.QWidget, Ui_TodoItem, ItemMixin):
 
     state = Binder()
 
@@ -119,14 +174,20 @@ class TodoItem(QtWidgets.QWidget, ItemMixin):
     def __init__(self):
         super(TodoItem, self).__init__()
 
+        # NOTE disable auto load feature
+        dumper = self.state('dumper')
+        dumper.set_auto_load(False)
         self.state.text = "a"
         self.state.completed = False
         self.state.visible = False
         self.state.text_style = "none"
         self.state.text_color = "black"
 
-        ui_file = os.path.join(__file__, "..", "item.ui")
-        loadUi(ui_file, self)
+        
+        # TODO uifile loading custom module not compatible in DCC
+        # ui_file = os.path.join(__file__, "..", "item.ui")
+        # loadUi(ui_file, self)
+        self.setupUi(self)
 
         self.ItemText.bind(self)
         self.ItemText.setText(lambda: self.state.text)
@@ -214,7 +275,8 @@ class TodoWidget(QtWidgets.QWidget):
         gstate.selected >> GroupBoxBind(self.StateGroup)
         
         gstate["selected"].connect(self.update_item)
-        gstate["todo_data"].connect(self.update_item) >> Call()
+        gstate["todo_data"].connect(self.update_item)
+        self.update_item()
 
     def change_completed_color(self):
         gstate.completed_color = "lightgray" if gstate.item_count else "black"
@@ -268,3 +330,12 @@ if __name__ == "__main__":
     gstate.todo_app = TodoWidget()
     gstate.todo_app.show()
     sys.exit(app.exec_())
+    
+# import sys
+# MODULE = r"G:\repo\QBinder\example\todo_app"
+# sys.path.insert(0,MODULE) if MODULE not in sys.path else None
+# import todo
+# reload(todo)
+# from todo import gstate,TodoWidget
+# gstate.todo_app = TodoWidget()
+# gstate.todo_app.show()

@@ -34,33 +34,31 @@ event_hook = QEventHook()
 
 class BinderCollector(QtCore.QObject):
     Binders = OrderedDict()
-    GBinder = None
-
     __flag__ = True
+
     def get_current_Binders(self):
-        curr = time.time()
+        uid = uuid.uuid4()
         if self.Binders:
-            last = list(self.Binders.keys())[-1]
+            last_uid = list(self.Binders.keys())[-1]
             if self.__flag__:
-                curr = last
-                self >> event_hook(QtCore.QEvent.User, lambda:self.set_flag(False))
+                uid = last_uid
+                self >> event_hook(QtCore.QEvent.User, lambda: self.set_flag(False))
                 event = QtCore.QEvent(QtCore.QEvent.User)
                 QtWidgets.QApplication.postEvent(self, event)
             else:
                 self.set_flag(True)
-                
-        BinderCollector.Binders.setdefault(curr, [self.GBinder])
-        return BinderCollector.Binders[curr]
+
+        BinderCollector.Binders.setdefault(uid, [])
+        return BinderCollector.Binders[uid]
+
+    @classmethod
+    def set_flag(cls, flag):
+        cls.__flag__ = flag
 
     @classmethod
     def get_last_key(cls):
-        curr = list(cls.Binders.keys())[-1]
-        return curr
-    
-    @classmethod
-    def set_flag(cls,flag):
-        cls.__flag__ = flag
-    
+        return list(cls.Binders.keys())[-1]
+
 class BinderDumper(QtCore.QObject):
     _dumper_dict_ = {}
     __init_flag = False
@@ -71,6 +69,7 @@ class BinderDumper(QtCore.QObject):
         if cls.__init_flag:
             instance = super(BinderDumper, cls).__new__(cls, binder, *args, **kwargs)
             cls._dumper_dict_[id(binder)] = instance
+        
         return instance
 
     def __init__(self, binder, db_name, filters=None):
@@ -92,15 +91,23 @@ class BinderDumper(QtCore.QObject):
         self.path = os.path.join(folder, "%s.json" % db_name)
 
         # NOTE using timer call the __prepare__ in the next evnet loop (for loading delay)
-        self >> event_hook(QtCore.QEvent.User, lambda:QtCore.QTimer.singleShot(0,self.__prepare__))
+        self >> event_hook(
+            QtCore.QEvent.User, lambda: QtCore.QTimer.singleShot(0, self.__prepare__)
+        )
         event = QtCore.QEvent(QtCore.QEvent.User)
         QtWidgets.QApplication.postEvent(self, event)
+        
+        self.auto_load = True
+
+    def set_auto_load(self,enabeld):
+        self.auto_load = enabeld
 
     def __prepare__(self):
-        for k, binding in self.binder._var_dict_.items():
-            if k in self._filters_:
-                binding.connect(self.save)
-        self.load()
+        if self.auto_load:
+            for k, binding in self.binder._var_dict_.items():
+                if k in self._filters_:
+                    binding.connect(self.save)
+            self.load()
 
     def __enter__(self):
         BinderBase._trace_flag_ = True
@@ -178,23 +185,18 @@ class BinderDispatcher(QtCore.QObject):
         return func(*args, **kwargs)
 
     def dumper(self, db_name=None, filters=None):
+        dumper = BinderDumper._dumper_dict_.get(id(self.binder))
+        db_name = dumper.db_name if dumper else db_name
         if not db_name:
-            dumper = BinderDumper._dumper_dict_.get(id(self.binder))
-            db_name = dumper.db_name if dumper else False
-            if not db_name:
-                path = inspect.stack()[-1][1]
-                curr = BinderCollector.get_last_key()
-                binder_list = BinderCollector.Binders[curr]
-                if self.binder == BinderCollector.GBinder:
-                    index = 0
-                else:
-                    index = binder_list.index(self.binder)
-                rd = random.Random()
-                rd.seed(index)
-                hex = uuid.UUID(int=rd.getrandbits(128)).hex
-                md5 = hashlib.md5("".join((path, hex)).encode("utf-8")).hexdigest()
-
-                db_name = md5
+            uid = BinderCollector.get_last_key()
+            binder_list = BinderCollector.Binders[uid]
+            index = binder_list.index(self.binder)
+            rd = random.Random()
+            rd.seed(index)
+            hex = uuid.UUID(int=rd.getrandbits(128)).hex
+            path = inspect.stack()[-1][1]
+            md5 = hashlib.md5("".join((path, hex)).encode("utf-8")).hexdigest()
+            db_name = md5
 
         return BinderDumper(self.binder, db_name, filters)
 
