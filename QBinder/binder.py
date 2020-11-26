@@ -24,7 +24,7 @@ import tempfile
 from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
-from .binding import Binding, FnBinding, BindingProxy
+from .binding import Binding,FnBinding, BindingProxy
 from .util import nestdict, defaultdict
 from collections import OrderedDict
 from .eventhook import QEventHook, Iterable
@@ -147,9 +147,9 @@ class BinderDumper(QtCore.QObject):
 
 
 class BinderDispatcher(QtCore.QObject):
+    _trace_dict_ = nestdict()
     __instance = None
     __init_flag = False
-    __trace_dict = nestdict()
 
     def __new__(cls, binder):
         cls.binder = binder
@@ -168,13 +168,13 @@ class BinderDispatcher(QtCore.QObject):
         QtWidgets.QApplication.postEvent(self, event)
 
     def __bind_cls__(self):
-        for module, data in self.__trace_dict.items():
+        for module, data in self._trace_dict_.items():
             for cls_name, _data in data.items():
                 if hasattr(module, cls_name):
                     cls = getattr(module, cls_name)
                     for _, binding in _data.items():
                         binding.cls = cls
-        self.__trace_dict.clear()
+        self._trace_dict_.clear()
 
     def dispatch(self, command, *args, **kwargs):
         method_dict = OrderedDict(inspect.getmembers(self, predicate=inspect.ismethod))
@@ -216,7 +216,7 @@ class BinderDispatcher(QtCore.QObject):
             frame = stack[0]
             module = inspect.getmodule(frame)
 
-            self.__trace_dict[module][cls_name][fn_name] = binding
+            self._trace_dict_[module][cls_name][fn_name] = binding
 
             return func
 
@@ -273,7 +273,7 @@ class BinderBase(object):
             binding.__binder__ = self
             self._var_dict_[key] = binding
             setattr(self.__class__, key, binding)
-            if isinstance(value, FnHook):
+            if isinstance(value, FnBinding):
                 value.connect_binder(key, self)
 
     def __call__(self, *args):
@@ -326,17 +326,3 @@ class GBinder(BinderBase):
                 cls.__instance
             ) if cls.__instance not in binder_list else None
         return cls.__instance
-
-
-class FnHook(object):
-    def __getitem__(self, key):
-        """avoid pylint error"""
-        pass
-
-    def __call__(self, func):
-        return self.binder("fn_bind", self.name)(func)
-
-    def connect_binder(self, name, binder):
-        """connect_binder automatically run by the binder setattr"""
-        self.name = name
-        self.binder = binder

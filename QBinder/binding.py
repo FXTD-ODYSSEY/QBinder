@@ -20,6 +20,7 @@ from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 from .eventhook import QEventHook
 
+
 event_hook = QEventHook()
 
 
@@ -43,13 +44,40 @@ class BindingProxy(BindingBase):
 
 
 class FnBinding(BindingBase):
-    def __init__(self, binder, func):
-        self.binder = binder
-        self.func = func if six.callable(func) else func.__func__
-        self.static = isinstance(func, staticmethod)
+    
+    def __init__(self, binder=None, func=None):
+        from .binder import Binder
         self.cls = None
+        self.binder = binder
+        self.binded = isinstance(binder,Binder)
+        if self.binded:
+            self.func = func if six.callable(func) else func.__func__
+            self.static = isinstance(func, staticmethod)
+    
+    def connect_binder(self, name, binder):
+        """connect_binder automatically run by the binder setattr"""
+        self.name = name
+        self.binder = binder
 
     def __call__(self, *args, **kwargs):
+        
+        from .binder import Binder
+        if not self.binded:
+            self.binded = True
+            func = args[0]
+            self.func = func if six.callable(func) else func.__func__
+            self.static = isinstance(func, staticmethod)
+            
+            stack = inspect.stack()[-2]
+            cls_name = stack[3]
+            frame = stack[0]
+            module = inspect.getmodule(frame)
+            dispatcher = self.binder('dispatcher')
+            dispatcher._trace_dict_[module][cls_name][self.name] = self
+
+            return self.func
+
+
         arg = self.binder
         if self.static:
             return self.func(*args, **kwargs)

@@ -29,7 +29,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder,FnHook
+from QBinder import Binder, GBinder,FnBinding
 from Qt import QtGui, QtWidgets, QtCore
 
 import Qt
@@ -39,7 +39,7 @@ state = GBinder()
 state.msg = "msg"
 state.num = "1"
 state.input_ui = 1
-state.callback = FnHook()
+state.callback = FnBinding()
 
 class ButtonTest(QtWidgets.QWidget):
     count = 1

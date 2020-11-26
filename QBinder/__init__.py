@@ -15,8 +15,8 @@ import six
 
 from .util import ListGet
 from .hook import HOOKS, hook_initialize
-from .binding import Model, Binding
-from .binder import GBinder, Binder, FnHook, BinderCollector
+from .binding import Model, Binding, FnBinding
+from .binder import GBinder, Binder, BinderCollector
 from .eventhook import QEventHook
 from .decorator import inject
 
