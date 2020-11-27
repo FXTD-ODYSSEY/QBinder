@@ -31,7 +31,7 @@ from Qt import QtGui, QtWidgets, QtCore
 from collections import OrderedDict
 
 
-class WidgetTest(QtWidgets.QWidget):
+class ComboBoxWidget_2(QtWidgets.QWidget):
 
     state = Binder()
     state.selected = ""
@@ -42,7 +42,7 @@ class WidgetTest(QtWidgets.QWidget):
     ]
 
     def __init__(self):
-        super(WidgetTest, self).__init__()
+        super(ComboBoxWidget_2, self).__init__()
         self.initialize()
         # print(self.state.options[0].text)
 
@@ -70,7 +70,7 @@ class WidgetTest(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication([])
 
-    widget = WidgetTest()
+    widget = ComboBoxWidget_2()
     widget.show()
 
     app.exec_()

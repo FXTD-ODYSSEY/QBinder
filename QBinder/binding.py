@@ -20,6 +20,7 @@ from contextlib import contextmanager
 from Qt import QtCore, QtGui, QtWidgets
 from .eventhook import QEventHook
 
+
 event_hook = QEventHook()
 
 
@@ -43,28 +44,57 @@ class BindingProxy(BindingBase):
 
 
 class FnBinding(BindingBase):
-    def __init__(self, binder, func):
-        self.binder = binder
-        self.func = func if six.callable(func) else func.__func__
-        self.static = isinstance(func, staticmethod)
+    
+    def __init__(self, binder=None, func=None):
+        from .binder import Binder
         self.cls = None
+        self.binder = binder
+        self.binded = isinstance(binder,Binder)
+        if self.binded:
+            self.func = func if six.callable(func) else func.__func__
+            self.static = isinstance(self.func, staticmethod)
+    
+    def connect_binder(self, name, binder):
+        """
+        connect_binder automatically run by the BinderBase __setattr__
+        """
+        self.name = name
+        self.binder = binder
 
     def __call__(self, *args, **kwargs):
-        arg = self.binder
+        
+        # NOTE if not initialize binded should bind func
+        if not self.binded:
+            self.binded = True
+            func = args[0]
+            self.func = func if six.callable(func) else func.__func__
+            self.static = isinstance(self.func, staticmethod)
+            
+            stack = inspect.stack()[-2]
+            cls_name = stack[3]
+            frame = stack[0]
+            module = inspect.getmodule(frame)
+            dispatcher = self.binder('dispatcher')
+            dispatcher._trace_dict_[module][cls_name][self.func.__name__] = self
+
+            return self.func
+        
+        
         if self.static:
             return self.func(*args, **kwargs)
-        elif self.cls:
+        if self.cls:
+            # TODO not very good solution | may be try __subclasshook__
             # NOTE Try to Get A Default Instance from binder
+            arg = self.binder
             for _, member in inspect.getmembers(self.binder, lambda f: not callable(f)):
                 if type(member) is self.cls:
                     arg = member
-                    break
-        try:
-            return self.func(arg, *args, **kwargs)
-        except:
-            return self.func(arg)
+                    return self.func(arg, *args, **kwargs)
+        
+        return self.func(*args, **kwargs)
 
     def __getitem__(self, attr):
+        # NOTE special bind 
         attr = getattr(self.binder, attr) if type(attr) is str else attr
 
         @six.wraps(self.func)
@@ -218,7 +248,6 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.val = self.retrieve2Notify(val)
         self.overrideOperator(self.val)
         self.event_loop = []
-        self.bind_widgets = []
         self.__binder__ = None
 
     @classmethod
@@ -239,9 +268,8 @@ class Binding(QtGui.QStandardItem, BindingBase):
         return d
 
     def set(self, value):
-        # NOTE 如果值没有变化则不触发更新
-        if value == self.get():
-            return
+        # if value == self.get():
+        #     return
         self.val = self.retrieve2Notify(value)
         self.overrideOperator(value)
         self.emitDataChanged()

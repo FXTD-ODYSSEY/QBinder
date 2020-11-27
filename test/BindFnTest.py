@@ -11,6 +11,8 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-03 15:55:15"
 
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import sys
 os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
@@ -29,7 +31,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder,FnHook
+from QBinder import Binder, GBinder,FnBinding
 from Qt import QtGui, QtWidgets, QtCore
 
 import Qt
@@ -39,7 +41,12 @@ state = GBinder()
 state.msg = "msg"
 state.num = "1"
 state.input_ui = 1
-state.callback = FnHook()
+state.callback = FnBinding()
+state.func = FnBinding()
+
+@state.func
+def func(test):
+    print('func',test)
 
 class ButtonTest(QtWidgets.QWidget):
     count = 1
@@ -57,8 +64,11 @@ class ButtonTest(QtWidgets.QWidget):
 
         button.clicked.connect(state.callback)
         
+        button = QtWidgets.QPushButton("call func")
+        layout.addWidget(button)
+        button.clicked.connect(state.func)
+        
     # @state("fn_bind")
-    # @state.callback 
     @state.callback
     def callback(self,*args):
         print("callback",self)

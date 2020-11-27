@@ -27,25 +27,22 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-# os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
-os.environ["QT_PREFERRED_BINDING"] = "PySide;PySide2"
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
+# os.environ["QT_PREFERRED_BINDING"] = "PySide;PySide2"
 
-from QBinder import constant, Binder, GBinder, QEventHook, FnHook, BinderCollector
+from QBinder import Binder, GBinder, QEventHook, FnBinding
 from QBinder.handler import Set, Call, ItemConstructor, GroupBoxBind
 from QBinder.mixin import ItemMixin
 
 import Qt
-
-print(Qt.__binding__)
+print("__binding__",Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
-constant.AUTO_DUMP = False
-
 event_hook = QEventHook()
-gstate = GBinder()
+gstate = Binder()
 
-with gstate("dumper"):
+with gstate("dumper") as dumper:
     gstate.todo_data = []
     gstate.selected = "All"
     gstate.input = ""
@@ -58,12 +55,12 @@ gstate.todolist_visible = False
 gstate.header_border = 0
 
 
-gstate.update_count = FnHook()
+gstate.update_count = FnBinding()
 
 
 @gstate.update_count
 def _(state):
-    state.item_count = len([data for data in state.todo_data if not data["completed"]])
+    state.item_count = len([todo for todo in state.todo_data if not todo["completed"]])
 
 
 class EditableLabel(QtWidgets.QLabel):
@@ -105,10 +102,11 @@ class EditableLabel(QtWidgets.QLabel):
     def bind(self, item):
         self.item = item
 
+
 class Ui_TodoItem(object):
     def setupUi(self, TodoItem):
         TodoItem.setObjectName("TodoItem")
-        TodoItem.resize(469, 95)
+        TodoItem.resize(489, 101)
         TodoItem.setStyleSheet("")
         TodoItem.setWindowFilePath("")
         self.horizontalLayout = QtWidgets.QHBoxLayout(TodoItem)
@@ -167,7 +165,8 @@ class Ui_TodoItem(object):
         self.ItemText.setText(QtWidgets.QApplication.translate("TodoItem", "TextLabel", None, -1))
         self.ItemDelete.setText(QtWidgets.QApplication.translate("TodoItem", "X", None, -1))
 
-class TodoItem(QtWidgets.QWidget,Ui_TodoItem, ItemMixin):
+
+class TodoItem(QtWidgets.QWidget, Ui_TodoItem, ItemMixin):
 
     state = Binder()
 
@@ -175,12 +174,17 @@ class TodoItem(QtWidgets.QWidget,Ui_TodoItem, ItemMixin):
     def __init__(self):
         super(TodoItem, self).__init__()
 
+        # NOTE disable auto load feature
+        dumper = self.state('dumper')
+        dumper.set_auto_load(False)
         self.state.text = "a"
         self.state.completed = False
         self.state.visible = False
         self.state.text_style = "none"
         self.state.text_color = "black"
 
+        
+        # TODO uifile loading custom module not compatible in DCC
         # ui_file = os.path.join(__file__, "..", "item.ui")
         # loadUi(ui_file, self)
         self.setupUi(self)
@@ -222,20 +226,8 @@ class TodoItem(QtWidgets.QWidget,Ui_TodoItem, ItemMixin):
 class TodoWidget(QtWidgets.QWidget):
     item_list = []
 
-    __instance = None
-    def __new__(cls, *args, **kw):
-        if cls.__instance is None:
-            cls.__instance = super(TodoWidget, cls).__new__(cls)
-        return cls.__instance
-    
     def __init__(self):
-        try:
-            super(TodoWidget, self).__init__()
-        except:
-            self.show()
-            return
-
-        # self.setupUi(self)
+        super(TodoWidget, self).__init__()
         ui_file = os.path.join(__file__, "..", "todo.ui")
         loadUi(ui_file, self)
         self.state = Binder()
@@ -294,7 +286,7 @@ class TodoWidget(QtWidgets.QWidget):
             todo["completed"] = True
 
     def clear_items(self):
-        gstate.todo_data = [data for data in gstate.todo_data if not data["completed"]]
+        gstate.todo_data = [todo for todo in gstate.todo_data if not todo["completed"]]
 
     def add_item(self):
         gstate.todo_data.append(
@@ -313,6 +305,13 @@ class TodoWidget(QtWidgets.QWidget):
             "Completed": lambda data: [d for d in data if d["completed"]],
         }
 
+        # TODO unify handler 
+        gstate.todo_data >> ItemConstructor(
+            __layout__=self.TodoList.layout(),
+            __binder__="state",
+            __filter__=lambda data: filters[gstate.selected](data),
+            __item__=TodoItem,
+        )
         TodoItem >> ItemConstructor(
             __layout__=self.TodoList.layout(),
             __binder__="state",
@@ -331,9 +330,6 @@ class TodoWidget(QtWidgets.QWidget):
     def input_change(self, text):
         gstate.input_font = "bold" if text else "italic"
 
-    def close(self):
-        self.deleteLater()
-        super(TodoWidget, self).close()
 
 if __name__ == "__main__":
 
@@ -346,13 +342,7 @@ if __name__ == "__main__":
 # MODULE = r"G:\repo\QBinder\example\todo_app"
 # sys.path.insert(0,MODULE) if MODULE not in sys.path else None
 # import todo
-# todo.gstate.todo_app = todo.TodoWidget()
-# todo.gstate.todo_app.show()
-# try:
-#     import todo
-#     todo_app = todo.TodoWidget()
-#     todo_app.show()
-# except:
-#     import traceback
-#     traceback.print_exc()
-# exec(open(r'G:\repo\QBinder\example\todo_app\todo.py','r').read())
+# reload(todo)
+# from todo import gstate,TodoWidget
+# gstate.todo_app = TodoWidget()
+# gstate.todo_app.show()

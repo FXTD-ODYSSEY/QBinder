@@ -24,7 +24,7 @@ import tempfile
 from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
-from .binding import Binding, FnBinding, BindingProxy
+from .binding import Binding,FnBinding, BindingProxy
 from .util import nestdict, defaultdict
 from collections import OrderedDict
 from .eventhook import QEventHook, Iterable
@@ -34,33 +34,31 @@ event_hook = QEventHook()
 
 class BinderCollector(QtCore.QObject):
     Binders = OrderedDict()
-    GBinder = None
-
     __flag__ = True
+
     def get_current_Binders(self):
-        curr = time.time()
+        uid = uuid.uuid4()
         if self.Binders:
-            last = list(self.Binders.keys())[-1]
+            last_uid = list(self.Binders.keys())[-1]
             if self.__flag__:
-                curr = last
-                self >> event_hook(QtCore.QEvent.User, lambda:self.set_flag(False))
+                uid = last_uid
+                self >> event_hook(QtCore.QEvent.User, lambda: self.set_flag(False))
                 event = QtCore.QEvent(QtCore.QEvent.User)
                 QtWidgets.QApplication.postEvent(self, event)
             else:
                 self.set_flag(True)
-                
-        BinderCollector.Binders.setdefault(curr, [self.GBinder])
-        return BinderCollector.Binders[curr]
+
+        BinderCollector.Binders.setdefault(uid, [])
+        return BinderCollector.Binders[uid]
+
+    @classmethod
+    def set_flag(cls, flag):
+        cls.__flag__ = flag
 
     @classmethod
     def get_last_key(cls):
-        curr = list(cls.Binders.keys())[-1]
-        return curr
-    
-    @classmethod
-    def set_flag(cls,flag):
-        cls.__flag__ = flag
-    
+        return list(cls.Binders.keys())[-1]
+
 class BinderDumper(QtCore.QObject):
     _dumper_dict_ = {}
     __init_flag = False
@@ -71,6 +69,7 @@ class BinderDumper(QtCore.QObject):
         if cls.__init_flag:
             instance = super(BinderDumper, cls).__new__(cls, binder, *args, **kwargs)
             cls._dumper_dict_[id(binder)] = instance
+        
         return instance
 
     def __init__(self, binder, db_name, filters=None):
@@ -91,16 +90,24 @@ class BinderDumper(QtCore.QObject):
             os.mkdir(folder)
         self.path = os.path.join(folder, "%s.json" % db_name)
 
-        self >> event_hook(QtCore.QEvent.User, self.__prepare__)
+        # NOTE using timer call the __prepare__ in the next evnet loop (for loading delay)
+        self >> event_hook(
+            QtCore.QEvent.User, lambda: QtCore.QTimer.singleShot(0, self.__prepare__)
+        )
         event = QtCore.QEvent(QtCore.QEvent.User)
         QtWidgets.QApplication.postEvent(self, event)
+        
+        self.auto_load = True
+
+    def set_auto_load(self,enabeld):
+        self.auto_load = enabeld
 
     def __prepare__(self):
-        # NOTE value change
-        for k, binding in self.binder._var_dict_.items():
-            if k in self._filters_:
-                binding.connect(self.save)
-        self.load()
+        if self.auto_load:
+            for k, binding in self.binder._var_dict_.items():
+                if k in self._filters_:
+                    binding.connect(self.save)
+            self.load()
 
     def __enter__(self):
         BinderBase._trace_flag_ = True
@@ -135,13 +142,14 @@ class BinderDumper(QtCore.QObject):
             for k, v in data.items():
                 setattr(self.binder, k, v)
         except:
-            pass
+            # NOTE May be the file broken
+            os.remove(path)
 
 
 class BinderDispatcher(QtCore.QObject):
+    _trace_dict_ = nestdict()
     __instance = None
     __init_flag = False
-    __trace_dict = nestdict()
 
     def __new__(cls, binder):
         cls.binder = binder
@@ -160,13 +168,13 @@ class BinderDispatcher(QtCore.QObject):
         QtWidgets.QApplication.postEvent(self, event)
 
     def __bind_cls__(self):
-        for module, data in self.__trace_dict.items():
+        for module, data in self._trace_dict_.items():
             for cls_name, _data in data.items():
                 if hasattr(module, cls_name):
                     cls = getattr(module, cls_name)
                     for _, binding in _data.items():
                         binding.cls = cls
-        self.__trace_dict.clear()
+        self._trace_dict_.clear()
 
     def dispatch(self, command, *args, **kwargs):
         method_dict = OrderedDict(inspect.getmembers(self, predicate=inspect.ismethod))
@@ -177,23 +185,18 @@ class BinderDispatcher(QtCore.QObject):
         return func(*args, **kwargs)
 
     def dumper(self, db_name=None, filters=None):
+        dumper = BinderDumper._dumper_dict_.get(id(self.binder))
+        db_name = dumper.db_name if dumper else db_name
         if not db_name:
-            dumper = BinderDumper._dumper_dict_.get(id(self.binder))
-            db_name = dumper.db_name if dumper else False
-            if not db_name:
-                path = inspect.stack()[-1][1]
-                curr = BinderCollector.get_last_key()
-                binder_list = BinderCollector.Binders[curr]
-                if self.binder == BinderCollector.GBinder:
-                    index = 0
-                else:
-                    index = binder_list.index(self.binder)
-                rd = random.Random()
-                rd.seed(index)
-                hex = uuid.UUID(int=rd.getrandbits(128)).hex
-                md5 = hashlib.md5("".join((path, hex)).encode("utf-8")).hexdigest()
-
-                db_name = md5
+            uid = BinderCollector.get_last_key()
+            binder_list = BinderCollector.Binders[uid]
+            index = binder_list.index(self.binder)
+            rd = random.Random()
+            rd.seed(index)
+            hex = uuid.UUID(int=rd.getrandbits(128)).hex
+            path = inspect.stack()[-1][1]
+            md5 = hashlib.md5("".join((path, hex)).encode("utf-8")).hexdigest()
+            db_name = md5
 
         return BinderDumper(self.binder, db_name, filters)
 
@@ -213,7 +216,7 @@ class BinderDispatcher(QtCore.QObject):
             frame = stack[0]
             module = inspect.getmodule(frame)
 
-            self.__trace_dict[module][cls_name][fn_name] = binding
+            self._trace_dict_[module][cls_name][fn_name] = binding
 
             return func
 
@@ -270,7 +273,7 @@ class BinderBase(object):
             binding.__binder__ = self
             self._var_dict_[key] = binding
             setattr(self.__class__, key, binding)
-            if isinstance(value, FnHook):
+            if isinstance(value, FnBinding):
                 value.connect_binder(key, self)
 
     def __call__(self, *args):
@@ -323,17 +326,3 @@ class GBinder(BinderBase):
                 cls.__instance
             ) if cls.__instance not in binder_list else None
         return cls.__instance
-
-
-class FnHook(object):
-    def __getitem__(self, key):
-        """avoid pylint error"""
-        pass
-
-    def __call__(self, func):
-        return self.binder("fn_bind", self.name)(func)
-
-    def connect_binder(self, name, binder):
-        """connect_binder automatically run by the binder setattr"""
-        self.name = name
-        self.binder = binder

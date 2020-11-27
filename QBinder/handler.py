@@ -37,40 +37,42 @@ class ItemConstructor(HandlerBase):
                 data = data()
             for binding in Binding._trace_list_:
                 val = binding.val
-                if not isinstance(val, list):
-                    continue
-                item.__data__ = val
-                compare = {id(d): i for i, d in enumerate(item.__data__)}
-                __filter__ = [compare.get(id(d), -1) for d in data]
-                break
+                # NOTE make sure handle list data
+                if isinstance(val, list):
+                    item.__data__ = val
+                    compare = {id(d): i for i, d in enumerate(item.__data__)}
+                    __filter__ = [compare.get(id(d), -1) for d in data]
+                    break
         else:
             item.__data__ = data
             __filter__ = [i for i in range(len(data))]
 
-        item.__layout__ = self.kwargs.pop("__layout__", item.__layout__)
-        item.__binder__ = self.kwargs.pop("__binder__", item.__binder__)
-
+        layout = self.kwargs.pop("__layout__", item.__layout__)
+        binder_name = self.kwargs.pop("__binder__", item.__binder__)
+        if not hasattr(layout,'__items__'):
+            layout.__items__ = []
+            
         for i, data in enumerate(item.__data__):
-            widget = item.__items__ >> ListGet(i)
+            widget = layout.__items__ >> ListGet(i)
             if not widget:
                 widget = item(*self.args, **self.kwargs)
-                item.__layout__.addWidget(widget)
-                item.__items__.append(widget)
+                layout.addWidget(widget)
+                layout.__items__.append(widget)
                 widget.__index__ = i
 
             widget.setVisible(i in __filter__)
 
-            if hasattr(widget, item.__binder__):
-                binder = getattr(widget, item.__binder__)
+            if hasattr(widget, binder_name):
+                binder = getattr(widget, binder_name)
                 for k, v in data.items():
                     val = getattr(binder, k)
                     if val != v:
                         setattr(binder, k, v)
 
-        for i in range(len(item.__data__), len(item.__items__)):
-            widget = item.__items__[i]
+        for i in range(len(item.__data__), len(layout.__items__)):
+            widget = layout.__items__[i]
             widget.deleteLater()
-        item.__items__ = item.__items__[: len(item.__data__)]
+        layout.__items__ = layout.__items__[: len(item.__data__)]
 
 
 class GroupBoxBind(HandlerBase):

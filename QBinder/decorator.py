@@ -27,6 +27,7 @@ def inject(binder):
         @six.wraps(func)
         def wrapper(self, *args, **kwargs):
             # NOTE inject class binder to self binder
+            # TODO FnBinding point to self
             _binder = Binder()
             for k, v in binder._var_dict_.items():
                 setattr(_binder, k, v)

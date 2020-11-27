@@ -30,13 +30,13 @@ from Qt import QtGui, QtWidgets, QtCore
 from functools import partial
 
 
-class WidgetTest(QtWidgets.QWidget):
+class ListWidgetTest(QtWidgets.QWidget):
 
     state = Binder()
     state.selected = []
 
     def __init__(self):
-        super(WidgetTest, self).__init__()
+        super(ListWidgetTest, self).__init__()
         self.initialize()
 
     def initialize(self):
@@ -62,7 +62,7 @@ class WidgetTest(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication([])
 
-    widget = WidgetTest()
+    widget = ListWidgetTest()
     widget.show()
 
     app.exec_()

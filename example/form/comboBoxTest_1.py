@@ -29,14 +29,14 @@ from QBinder.handler import Set
 from Qt import QtGui, QtWidgets, QtCore
 
 
-class WidgetTest(QtWidgets.QWidget):
+class ComboBoxWidget_1(QtWidgets.QWidget):
 
     state = Binder()
     with state('dumper','combo_test1'):
         state.selected = ""
 
     def __init__(self):
-        super(WidgetTest, self).__init__()
+        super(ComboBoxWidget_1, self).__init__()
         self.initialize()
 
     def initialize(self):
@@ -58,7 +58,7 @@ class WidgetTest(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication([])
 
-    widget = WidgetTest()
+    widget = ComboBoxWidget_1()
     widget.show()
 
     app.exec_()

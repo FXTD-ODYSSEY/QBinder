@@ -6,21 +6,22 @@
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
+from types import BuiltinMethodType
 
 __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-02 23:47:53"
 
+import os
 import sys
 import six
+import json
+import types
 import inspect
 from functools import partial
-from collections import defaultdict
 
 import Qt
-from Qt import QtCore
-from Qt import QtWidgets
-from Qt import QtGui
+from Qt import QtCore, QtWidgets, QtGui
 
 from .binding import Binding
 from .util import nestdict, defaultdict
@@ -52,99 +53,40 @@ def get_method_name(method):
     return byte2str(name), count
 
 
+# NOTE read filter func list
+path = os.path.join(__file__, "..", "hook.json")
+with open(path, "r") as f:
+    filter_method = json.load(f, encoding="utf-8")
+
 for name, member in qt_dict.items():
+    # NOTE filter qt related func
     if not hasattr(member, "staticMetaObject"):
         continue
     meta_obj = getattr(member, "staticMetaObject")
+    data = filter_method.get(name, {})
+    for method_name, method in inspect.getmembers(member, inspect.isroutine):
+        if data.get(method_name):
+            HOOKS[name][method_name] = {}
+            if method_name.startswith("set"):
+                _HOOKS_REL[method_name.lower()] = method_name
 
-    for i in range(meta_obj.methodCount()):
-        method = meta_obj.method(i)
-        method_name, count = get_method_name(method)
-        if count and method.methodType() != QtCore.QMetaMethod.Signal:
-            if hasattr(member, method_name):
-                HOOKS[name][method_name] = {}
-                _HOOKS_REL[name][method_name.lower()] = method_name
-
+    # NOTE auto bind updater
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)
         if not property.hasNotifySignal():
             continue
         property_name = property.name()
-        method_name = _HOOKS_REL[name].get("set%s" % property_name.lower())
+        method_name = _HOOKS_REL.get("set%s" % property_name.lower())
         data = HOOKS[name].get(method_name)
         if isinstance(data, dict):
             updater, _ = get_method_name(property.notifySignal())
             if updater:
                 data.update({"updater": updater, "property": property_name})
 
-# print(HOOKS)
-# HOOKS.update({
-#     "QtWidgets.QWidget": {
-#         "setStyleSheet": {
-#             "type": str,
-#         },
-#         "setVisible": {
-#             "type": bool,
-#         },
-#     },
-#     "QtWidgets.QComboBox": {
-#         "setCurrentIndex": {
-#             "type": int,
-#             "getter": "currentIndex",
-#             "updater": "currentIndexChanged",
-#         },
-#     },
-#     "QtWidgets.QLineEdit": {
-#         "setText": {
-#             "type": str,
-#             "getter": "text",
-#             "updater": "textChanged",
-#         },
-#     },
-#     "QtWidgets.QLabel": {
-#         "setText": {"type": str, "getter": "text"},
-#     },
-#     "QtWidgets.QCheckBox": {
-#         "setChecked": {
-#             "type": bool,
-#             "getter": "isChecked",
-#             "updater": "stateChanged",
-#         },
-#         "setText": {"type": str, "getter": "text"},
-#     },
-#     "QtWidgets.QRadioButton": {
-#         "setChecked": {
-#             "type": bool,
-#             "getter": "isChecked",
-#             "updater": "stateChanged",
-#         },
-#         "setText": {"type": str, "getter": "text"},
-#     },
-#     "QtWidgets.QSpinBox": {
-#         "setValue": {
-#             "type": int,
-#             "getter": "value",
-#             "updater": "valueChanged",
-#         },
-#     },
-#     "QtWidgets.QDoubleSpinBox": {
-#         "setValue": {
-#             "type": float,
-#             "getter": "value",
-#             "updater": "valueChanged",
-#         },
-#     },
-# })
 
-
-def binding_handler(func, options=None):
-    """
-    # NOTE initialize the Qt Widget setter
-    """
-    options = options if options is not None else {}
-    typ = options.get("type")
-
-    def fix_cursor_position(func, widget):
+class FuncHook(object):
+    @classmethod
+    def fix_cursor_position(cls, func, widget):
         """maintain the Qt edit cusorPosition after setting a new value"""
 
         def wrapper(*args, **kwargs):
@@ -157,8 +99,10 @@ def binding_handler(func, options=None):
 
         return wrapper
 
-    def auto_dump(binding):
+    @classmethod
+    def auto_dump(cls, binding):
         """auto dump for two way binding"""
+        
         from .constant import AUTO_DUMP
 
         binder = binding.__binder__
@@ -167,57 +111,71 @@ def binding_handler(func, options=None):
         dumper = binder("dumper")
         for k, v in binder._var_dict_.items():
             if v is binding:
-                # print("auto_dump", dumper.path, k)
                 dumper._filters_.add(k)
                 break
 
-    def wrapper(self, value, *args, **kwargs):
-        if six.callable(value):
+    @classmethod
+    def combine_args(cls, val, args):
+        if isinstance(val, tuple):
+            return val + args[1:]
+        else:
+            return (val,) + args[1:]
+    
+    def __init__(self, options):
+        self.options = options
 
-            # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
-            with Binding.set_trace():
-                val = value()
+    def __call__(cls, func):
+        @six.wraps(func)
+        def wrapper(self,*args, **kwargs):
+            if len(args) != 1:
+                return func(self, *args, **kwargs)
 
-            # NOTE register auto update
-            callback = partial(
-                lambda c: func(self, typ(c()) if typ else c(), *args, **kwargs), value
-            )
-            for binding in Binding._trace_list_:
-                # binding.bind_widgets.append(
-                #     self
-                # ) if self not in binding.bind_widgets else None
-                binding.connect(callback)
+            callback = args[0]
 
-            updater = options.get("updater")
+            if isinstance(callback, types.LambdaType):
 
-            prop = options.get("property")
-            getter = options.get("getter")
-            _getter_1 = getattr(self, getter) if getter else None
-            _getter_2 = lambda: self.property(prop) if prop else None
-            getter = _getter_1 if _getter_1 else _getter_2
-            code = value.__code__
+                # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
+                with Binding.set_trace():
+                    val = callback()
 
-            # NOTE Single binding connect to the updater
-            if (
-                updater
-                and getter
-                and len(Binding._trace_list_)
-                == 1  # NOTE only bind one response variable
-                and len(code.co_consts) == 1  # NOTE only bind directly variable
-            ):
-                updater = getattr(self, updater)
-                updater.connect(
-                    fix_cursor_position(lambda *args: binding.set(getter()), self)
-                )
-                binding = Binding._trace_list_[0]
-                QtCore.QTimer.singleShot(0, partial(auto_dump, binding))
+                def connect_callback(callback, args):
+                    val = callback()
+                    args = cls.combine_args(val, args)
+                    func(self, *args, **kwargs)
 
-            value = typ(val) if typ else val
+                # NOTE register auto update
+                _callback_ = partial(connect_callback, callback, args)
+                for binding in Binding._trace_list_:
+                    binding.connect(_callback_)
 
-        res = func(self, value, *args, **kwargs)
-        return res
+                args = cls.combine_args(val, args)
 
-    return wrapper
+                # NOTE Single binding connect to the updater
+                updater = cls.options.get("updater")
+                prop = cls.options.get("property")
+                getter = cls.options.get("getter")
+                _getter_1 = getattr(self, getter) if getter else None
+                _getter_2 = lambda: self.property(prop) if prop else None
+                getter = _getter_1 if _getter_1 else _getter_2
+                code = callback.__code__
+
+                if (
+                    updater
+                    and getter
+                    and len(Binding._trace_list_)
+                    == 1  # NOTE only bind one response variable
+                    and len(code.co_consts) == 1  # NOTE only bind directly variable
+                ):
+                    updater = getattr(self, updater)
+                    updater.connect(
+                        cls.fix_cursor_position(lambda *args: binding.set(getter()), self)
+                    )
+                    binding = Binding._trace_list_.pop()
+                    QtCore.QTimer.singleShot(0, partial(cls.auto_dump, binding))
+
+            return func(self, *args, **kwargs)
+
+        return wrapper
 
 
 def hook_initialize(hooks):
@@ -228,5 +186,6 @@ def hook_initialize(hooks):
         lib, widget = widget.split(".")
         widget = getattr(getattr(Qt, lib), widget)
         for setter, options in setters.items():
-            wrapper = binding_handler(getattr(widget, setter), options)
-            setattr(widget, setter, wrapper)
+            func = getattr(widget, setter)
+            setattr(widget, setter, FuncHook(options)(func))
+            

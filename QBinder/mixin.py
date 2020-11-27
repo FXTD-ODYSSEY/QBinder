@@ -37,6 +37,7 @@ class ItemMeta(type(QtCore.QObject)):
         @six.wraps(func)
         def wrapper(self, *args, **kwargs):
             # NOTE inject class binder to self binder
+            # TODO FnBinding point to self
             cls = self.__class__
             name = ""
             for name, binder in binder_dict.items():

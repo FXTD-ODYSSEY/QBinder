@@ -27,14 +27,10 @@ if MODULE not in sys.path:
 
 
 from QBinder import Binder,QEventHook
+from Qt import QtWidgets,QtCore,QtGui
 from QBinder.handler import Set
 
-from Qt import QtWidgets
-from Qt import QtCore
-from Qt import QtGui
-
 event_hook = QEventHook()
-
 class WidgetTest(QtWidgets.QWidget):
     state = Binder()
     state.text = "aasdsd"
