@@ -13,6 +13,7 @@ __date__ = "2020-11-15 20:11:41"
 
 from functools import partial
 
+import six
 from .binding import Binding
 from .util import ListGet
 from Qt import QtWidgets
@@ -21,46 +22,42 @@ from Qt import QtWidgets
 class HandlerBase(object):
     pass
 
-
-class ItemConstructor(HandlerBase):
+class ItemMeta(type):
+    
+    def __getitem__(cls,item):
+        cls.item = item
+        return cls
+class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
+    
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
-
-    def __rrshift__(self, item):
-
-        __filter__ = []
-        data = self.kwargs.pop("__data__", item.__data__)
+    
+    def __rrshift__(self, item_data):
+        # binding = Binding._inst_.pop()
+        
         # NOTE trace lamda function
-        if callable(data):
-            with Binding.set_trace():
-                data = data()
-            for binding in Binding._trace_list_:
-                val = binding.val
-                # NOTE make sure handle list data
-                if isinstance(val, list):
-                    item.__data__ = val
-                    compare = {id(d): i for i, d in enumerate(item.__data__)}
-                    __filter__ = [compare.get(id(d), -1) for d in data]
-                    break
-        else:
-            item.__data__ = data
-            __filter__ = [i for i in range(len(data))]
+        filters = self.kwargs.pop("__filters__", [i for i in range(len(item_data))])
+        if callable(filters):
+            # NOTE make sure handle list data
+            data = filters(item_data)
+            compare = {id(d): i for i, d in enumerate(data)}
+            filters = [compare.get(id(d), -1) for d in data]
 
-        layout = self.kwargs.pop("__layout__", item.__layout__)
-        binder_name = self.kwargs.pop("__binder__", item.__binder__)
+        layout = self.kwargs.pop("__layout__", self.item.__layout__)
+        binder_name = self.kwargs.pop("__binder__", self.item.__binder__)
         if not hasattr(layout,'__items__'):
             layout.__items__ = []
             
-        for i, data in enumerate(item.__data__):
+        for i, data in enumerate(item_data):
             widget = layout.__items__ >> ListGet(i)
             if not widget:
-                widget = item(*self.args, **self.kwargs)
+                widget = self.item(*self.args, **self.kwargs)
                 layout.addWidget(widget)
                 layout.__items__.append(widget)
                 widget.__index__ = i
 
-            widget.setVisible(i in __filter__)
+            widget.setVisible(i in filters)
 
             if hasattr(widget, binder_name):
                 binder = getattr(widget, binder_name)
@@ -69,10 +66,10 @@ class ItemConstructor(HandlerBase):
                     if val != v:
                         setattr(binder, k, v)
 
-        for i in range(len(item.__data__), len(layout.__items__)):
+        for i in range(len(item_data), len(layout.__items__)):
             widget = layout.__items__[i]
             widget.deleteLater()
-        layout.__items__ = layout.__items__[: len(item.__data__)]
+        layout.__items__ = layout.__items__[: len(item_data)]
 
 
 class GroupBoxBind(HandlerBase):

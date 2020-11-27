@@ -38,9 +38,7 @@
    <item>
     <widget class="QWidget" name="TodoItemBorder" native="true">
      <property name="styleSheet">
-      <string notr="true">#TodoItemBorder{
-border-bottom:1px solid lightgray;
-}</string>
+      <string notr="true">#TodoItemBorder{border-bottom:1px solid lightgray;}</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="leftMargin">

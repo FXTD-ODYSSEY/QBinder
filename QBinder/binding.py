@@ -68,7 +68,6 @@ class FnBinding(BindingBase):
             self.binded = True
             func = args[0]
             self.func = func if six.callable(func) else func.__func__
-            self.static = isinstance(self.func, staticmethod)
             
             stack = inspect.stack()[-2]
             cls_name = stack[3]
@@ -79,13 +78,10 @@ class FnBinding(BindingBase):
 
             return self.func
         
-        
-        if self.static:
-            return self.func(*args, **kwargs)
+        arg = self.binder
         if self.cls:
             # TODO not very good solution | may be try __subclasshook__
             # NOTE Try to Get A Default Instance from binder
-            arg = self.binder
             for _, member in inspect.getmembers(self.binder, lambda f: not callable(f)):
                 if type(member) is self.cls:
                     arg = member

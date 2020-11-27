@@ -59,8 +59,8 @@ gstate.update_count = FnBinding()
 
 
 @gstate.update_count
-def _(state):
-    state.item_count = len([todo for todo in state.todo_data if not todo["completed"]])
+def _():
+    gstate.item_count = len([todo for todo in gstate.todo_data if not todo["completed"]])
 
 
 class EditableLabel(QtWidgets.QLabel):
@@ -102,7 +102,6 @@ class EditableLabel(QtWidgets.QLabel):
     def bind(self, item):
         self.item = item
 
-
 class Ui_TodoItem(object):
     def setupUi(self, TodoItem):
         TodoItem.setObjectName("TodoItem")
@@ -114,9 +113,7 @@ class Ui_TodoItem(object):
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.TodoItemBorder = QtWidgets.QWidget(TodoItem)
-        self.TodoItemBorder.setStyleSheet("#TodoItemBorder{\n"
-"border-bottom:1px solid lightgray;\n"
-"}")
+        self.TodoItemBorder.setStyleSheet("#TodoItemBorder{border-bottom:1px solid lightgray;}")
         self.TodoItemBorder.setObjectName("TodoItemBorder")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.TodoItemBorder)
         self.horizontalLayout_2.setContentsMargins(0, 9, 0, 9)
@@ -164,7 +161,6 @@ class Ui_TodoItem(object):
         TodoItem.setWindowTitle(QtWidgets.QApplication.translate("TodoItem", "Form", None, -1))
         self.ItemText.setText(QtWidgets.QApplication.translate("TodoItem", "TextLabel", None, -1))
         self.ItemDelete.setText(QtWidgets.QApplication.translate("TodoItem", "X", None, -1))
-
 
 class TodoItem(QtWidgets.QWidget, Ui_TodoItem, ItemMixin):
 
@@ -306,16 +302,10 @@ class TodoWidget(QtWidgets.QWidget):
         }
 
         # TODO unify handler 
-        gstate.todo_data >> ItemConstructor(
+        gstate.todo_data >> ItemConstructor[TodoItem](
             __layout__=self.TodoList.layout(),
             __binder__="state",
-            __filter__=lambda data: filters[gstate.selected](data),
-            __item__=TodoItem,
-        )
-        TodoItem >> ItemConstructor(
-            __layout__=self.TodoList.layout(),
-            __binder__="state",
-            __data__=lambda: filters[gstate.selected](gstate.todo_data),
+            __filters__=lambda data: filters[gstate.selected](data),
         )
         if gstate.todo_data:
             gstate.header_border = 1
