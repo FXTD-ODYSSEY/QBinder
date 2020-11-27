@@ -30,14 +30,14 @@ from Qt import QtGui, QtWidgets, QtCore
 
 from functools import partial
 
-class WidgetTest(QtWidgets.QWidget):
+class LineEditWidget(QtWidgets.QWidget):
 
     state = Binder()
     with state('dumper'):
         state.message = "asd"
 
     def __init__(self):
-        super(WidgetTest, self).__init__()
+        super(LineEditWidget, self).__init__()
         self.initialize()
 
     def initialize(self):
@@ -56,7 +56,7 @@ class WidgetTest(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication([])
 
-    widget = WidgetTest()
+    widget = LineEditWidget()
     widget.show()
 
     app.exec_()

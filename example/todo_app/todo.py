@@ -305,6 +305,13 @@ class TodoWidget(QtWidgets.QWidget):
             "Completed": lambda data: [d for d in data if d["completed"]],
         }
 
+        # TODO unify handler 
+        gstate.todo_data >> ItemConstructor(
+            __layout__=self.TodoList.layout(),
+            __binder__="state",
+            __filter__=lambda data: filters[gstate.selected](data),
+            __item__=TodoItem,
+        )
         TodoItem >> ItemConstructor(
             __layout__=self.TodoList.layout(),
             __binder__="state",

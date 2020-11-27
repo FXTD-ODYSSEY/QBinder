@@ -29,13 +29,13 @@ from Qt import QtGui, QtWidgets, QtCore
 from functools import partial
 
 
-class WidgetTest(QtWidgets.QWidget):
+class CheckBoxWidget(QtWidgets.QWidget):
 
     state = Binder()
     state.checkedNames = []
 
     def __init__(self):
-        super(WidgetTest, self).__init__()
+        super(CheckBoxWidget, self).__init__()
         self.initialize()
 
     def initialize(self):
@@ -72,7 +72,7 @@ class WidgetTest(QtWidgets.QWidget):
 def main():
     app = QtWidgets.QApplication([])
 
-    widget = WidgetTest()
+    widget = CheckBoxWidget()
     widget.show()
 
     app.exec_()
