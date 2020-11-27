@@ -8,14 +8,14 @@
 ## 概述
 
 
-![todo 案例](//cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/01_example.gif)
+![todo 案例](https://cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/01_example.gif)
 
 > &emsp;&emsp;参考前端框架 Vue 的数据绑定概念，针对 Python Qt 框架实现更灵活的数据绑定和数据同步。     
 > &emsp;&emsp;数据绑定对于样式更新、组件数据同步的使用情况非常方便，使用者只需要关注数据的变化，降低开发成本。    
 
 ## 使用概要
 
-![edit 案例](//cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/02_edit.gif)
+![edit 案例](https://cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/02_edit.gif)
 
 ```py
 import sys
@@ -56,19 +56,19 @@ app.exec_()
 
 ## 应用场景
 
-![remember 案例](//cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/03_remember.gif)
+![remember 案例](https://cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/03_remember.gif)
 
 > &emsp;&emsp;自动存储和加载上次组件填写的数据。    
  
 ---
 
-![slider 案例](//cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/04_slider.gif)
+![slider 案例](https://cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/04_slider.gif)
 
 > &emsp;&emsp;slider 最大值最小值同步检测。    
 
 ---
 
-![todo 案例](//cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/05_todo.gif)
+![todo 案例](https://cdn.jsdelivr.net/gh/FXTD-ODYSSEY/CG_wiki@gh-pages/Python/QBinder/_img/05_todo.gif)
 
 [案例代码](https://github.com/FXTD-ODYSSEY/QBinder/blob/master/example/todo_app/todo.py)
 
