@@ -40,9 +40,7 @@ class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
         filters = self.kwargs.pop("__filters__", [i for i in range(len(item_data))])
         if callable(filters):
             # NOTE make sure handle list data
-            data = filters(item_data)
-            compare = {id(d): i for i, d in enumerate(data)}
-            filters = [compare.get(id(d), -1) for d in data]
+            filters = [item_data.index(d) for d in filters(item_data)]
 
         layout = self.kwargs.pop("__layout__", self.item.__layout__)
         binder_name = self.kwargs.pop("__binder__", self.item.__binder__)
@@ -63,8 +61,7 @@ class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
                 binder = getattr(widget, binder_name)
                 for k, v in data.items():
                     val = getattr(binder, k)
-                    if val != v:
-                        setattr(binder, k, v)
+                    setattr(binder, k, v)
 
         for i in range(len(item_data), len(layout.__items__)):
             widget = layout.__items__[i]
