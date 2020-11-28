@@ -25,6 +25,7 @@ from Qt import QtCore, QtWidgets, QtGui
 
 from .binding import Binding
 from .util import nestdict, defaultdict
+from .hookconfig import CONFIG
 
 HOOKS = nestdict()
 _HOOKS_REL = nestdict()
@@ -52,18 +53,12 @@ def get_method_name(method):
         count = method.parameterNames()
     return byte2str(name), count
 
-
-# NOTE read filter func list
-path = os.path.join(__file__, "..", "hook.json")
-with open(path, "r") as f:
-    filter_method = json.load(f, encoding="utf-8")
-
 for name, member in qt_dict.items():
     # NOTE filter qt related func
-    if not hasattr(member, "staticMetaObject"):
+    if name == "QtGui.QMatrix" or not hasattr(member, "staticMetaObject"):
         continue
     meta_obj = getattr(member, "staticMetaObject")
-    data = filter_method.get(name, {})
+    data = CONFIG.get(name, {})
     for method_name, method in inspect.getmembers(member, inspect.isroutine):
         if data.get(method_name):
             HOOKS[name][method_name] = {}
