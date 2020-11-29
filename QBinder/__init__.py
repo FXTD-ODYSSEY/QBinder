@@ -16,7 +16,7 @@ except:
 from .util import ListGet
 from .hook import HOOKS, hook_initialize
 from .binding import Model, Binding, FnBinding
-from .binder import GBinder, Binder, BinderCollector
+from .binder import GBinder, Binder, BinderCollector, BinderTemplate
 from .eventhook import QEventHook
 from .decorator import inject
 

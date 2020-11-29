@@ -25,7 +25,7 @@ from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
 from .binding import Binding,FnBinding, BindingProxy
-from .util import nestdict, defaultdict
+from .util import nestdict
 from collections import OrderedDict
 from .eventhook import QEventHook, Iterable
 
@@ -326,3 +326,20 @@ class GBinder(BinderBase):
                 cls.__instance
             ) if cls.__instance not in binder_list else None
         return cls.__instance
+
+class BinderTemplate(object):
+    
+    def __new__(cls,*args,**kwargs):
+        binder = Binder()
+        cls.__init__(binder,*args,**kwargs)
+        for name,member in inspect.getmembers(cls):
+            if name.startswith("__"):
+                continue
+            if inspect.isroutine(member):
+                setattr(binder,name,partial(member,binder))
+            else:
+                setattr(binder,name,member)
+        return binder
+
+    def __init__(self,*args, **kwargs):
+        super(BinderTemplate, self).__init__(*args,**kwargs)

@@ -15,7 +15,7 @@ import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import sys
-os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
+# os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
 
 
 repo = (lambda f: lambda p=__file__: f(f, p))(
@@ -31,22 +31,26 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder,FnBinding
+from QBinder import Binder, GBinder,FnBinding,BinderTemplate
 from Qt import QtGui, QtWidgets, QtCore
 
 import Qt
 print(Qt.__binding__)
 
-state = GBinder()
-state.msg = "msg"
-state.num = "1"
-state.input_ui = 1
-state.callback = FnBinding()
-state.func = FnBinding()
+class Config(BinderTemplate):
+    input_ui = None
+    callback = FnBinding()
+    msg = "msg"
+    
+    def __init__(self):
+        self.num = "1"
+        
+    def func(self,*arg):
+        self.num = "2"
+        print('func',self,*arg)
 
-@state.func
-def func(test):
-    print('func',test)
+state = Config()
+state.text = "text"
 
 class ButtonTest(QtWidgets.QWidget):
     count = 1
