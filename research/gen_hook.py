@@ -83,8 +83,7 @@ for name, member in pyside_dict.items():
             and len(param) > 1
             and PYQT_DICT[name].get(method_name)
             and not method_name.startswith("__")
-            and not param.get('event')
-            and not param.get('e')
+            and "event" not in method_name.lower()
         ):
             # if type(method).__name__ == "method_descriptor":
             result_dict[name][method_name] = True

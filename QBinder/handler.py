@@ -27,6 +27,7 @@ class ItemMeta(type):
     def __getitem__(cls,item):
         cls.item = item
         return cls
+    
 class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
     
     def __init__(self, *args, **kwargs):
@@ -42,8 +43,9 @@ class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
             # NOTE make sure handle list data
             filters = [item_data.index(d) for d in filters(item_data)]
 
-        layout = self.kwargs.pop("__layout__", self.item.__layout__)
-        binder_name = self.kwargs.pop("__binder__", self.item.__binder__)
+        layout = self.kwargs.pop("__layout__")
+        binder_name = self.kwargs.pop("__binder__")
+
         if not hasattr(layout,'__items__'):
             layout.__items__ = []
             

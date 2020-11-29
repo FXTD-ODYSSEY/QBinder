@@ -33,6 +33,7 @@ os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 from QBinder import Binder, GBinder, QEventHook, FnBinding
 from QBinder.handler import Set, Call, ItemConstructor, GroupBoxBind
 from QBinder.mixin import ItemMixin
+from QBinder.decorator import inject
 
 import Qt
 print("__binding__",Qt.__binding__)
@@ -162,11 +163,11 @@ class Ui_TodoItem(object):
         self.ItemText.setText(QtWidgets.QApplication.translate("TodoItem", "TextLabel", None, -1))
         self.ItemDelete.setText(QtWidgets.QApplication.translate("TodoItem", "X", None, -1))
 
-class TodoItem(QtWidgets.QWidget, Ui_TodoItem, ItemMixin):
+class TodoItem(QtWidgets.QWidget, Ui_TodoItem):
 
     state = Binder()
 
-    # @inject(state)
+    @inject(state)
     def __init__(self):
         super(TodoItem, self).__init__()
 

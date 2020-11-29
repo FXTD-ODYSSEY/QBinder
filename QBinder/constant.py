@@ -11,5 +11,5 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-07 22:26:11"
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 AUTO_DUMP = True
