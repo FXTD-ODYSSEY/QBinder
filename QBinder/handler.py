@@ -27,6 +27,7 @@ class ItemMeta(type):
     def __getitem__(cls,item):
         cls.item = item
         return cls
+    
 class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
     
     def __init__(self, *args, **kwargs):

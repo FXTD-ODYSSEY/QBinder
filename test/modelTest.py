@@ -11,6 +11,7 @@ __date__ = "2020-04-29 17:07:57"
 
 import os
 import sys
+os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5;PySide;PySide2'
 
 from functools import wraps, partial
 from collections import OrderedDict
@@ -18,9 +19,11 @@ from collections import OrderedDict
 DIR = os.path.dirname(__file__)
 MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
-    sys.path.append(MODULE)
+    sys.path.insert(0, MODULE)
 
 from QBinder import Binder, Model
+import Qt
+print(Qt.__binding__)
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
@@ -54,7 +57,6 @@ class WidgetTest(QtWidgets.QWidget):
     state.item_list = [
         state["selected"],
         state["option_A"],
-    
         state["option_B"],
         state["option_C"],
     ]
@@ -62,12 +64,11 @@ class WidgetTest(QtWidgets.QWidget):
         [
             [[state["option_A"], state["option_B"]], "1"],
             [state["option_A"], state["option_B"]],
-            state["option_B"],
-            state["option_C"],
             [None, "asd", None, 123],
             ["asd", "1234"],
         ]
     )
+    
     # with Binder() as state:
     #     state.selected = ""
     #     state.option_A = 123.0
@@ -135,11 +136,16 @@ class WidgetTest(QtWidgets.QWidget):
         # print (self.state.item_list)
 
         # print ("item_model",self.state.item_model)
+        model = self.state.item_model
 
-        listView.setModel(self.state.item_model)
-        comboBox.setModel(self.state.item_model)
-        tableView.setModel(self.state.item_model)
-        treeView.setModel(self.state.item_model)
+        # model = QtGui.QStandardItemModel()
+        # model.appendRow(QtGui.QStandardItem("A"))
+        # model.appendRow(QtGui.QStandardItem("B"))
+        
+        listView.setModel(model)
+        comboBox.setModel(model)
+        tableView.setModel(model)
+        treeView.setModel(model)
 
         button = QtWidgets.QPushButton("change")
         button.clicked.connect(self.changeOrder)
@@ -154,10 +160,9 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
 
     def addComboBox(self):
-        print(self.state.item_list)
-        self.state.option_B = 123
-        val = self.state.item_list[2]
-        print(val + "1")
+        self.state.option_B = "123"
+        # val = self.state.item_list[2]
+        # print(val)
 
     def changeOrder(self):
         self.text = "asd"

@@ -17,7 +17,6 @@
 - [x] 使用 application eventFilter Hook 事件队列 
 - [x] 数组 | 字典 update 更新视图，性能优化问题~
 
-> 细化 Todo
 
 - [x] QBinding emit 将事件触发统一到 set 里面，最后通过 timer 实现 idle 触发
 - [ ] combobox update delay
@@ -36,7 +35,8 @@
 - [x] GState 单例模式使用类似 index 计数修复方法解决共享冲突。 (todo_app 在 DCC 端的冲突)
 - [x] FnHook 和 FnBinding 合并
 - [ ] 用户任意扩展 handler
-- [ ] pip 发布
+- [x] PyQt Model 不支持 BUG (event 相关的函数去掉 hook)
+- [x] pip 发布
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)    

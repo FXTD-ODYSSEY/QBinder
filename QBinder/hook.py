@@ -65,6 +65,14 @@ for name, member in qt_dict.items():
             if method_name.startswith("set"):
                 _HOOKS_REL[method_name.lower()] = method_name
 
+    # for i in range(meta_obj.methodCount()):
+    #     method = meta_obj.method(i)
+    #     method_name, count = get_method_name(method)
+    #     if count and method.methodType() != QtCore.QMetaMethod.Signal:
+    #         if hasattr(member, method_name):
+    #             HOOKS[name][method_name] = {}
+    #             _HOOKS_REL[name][method_name.lower()] = method_name
+                
     # NOTE auto bind updater
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)

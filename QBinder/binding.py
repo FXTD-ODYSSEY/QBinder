@@ -337,7 +337,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
                         self.event_loop.remove(callback)
 
 
-class Model(QtCore.QAbstractItemModel):
+class Model(QtGui.QStandardItemModel):
     def __init__(self, source=None):
         super(Model, self).__init__()
         self.setSource(source)
@@ -365,6 +365,9 @@ class Model(QtCore.QAbstractItemModel):
             else []
         )
 
+        self.setRowCount(len(self._source))
+        self.setColumnCount(max([len(row) for row in self._source]))
+        
         # NOTE add data update callback
         for row in self._source:
             for item in row:
@@ -378,17 +381,18 @@ class Model(QtCore.QAbstractItemModel):
             if rowCount < columnCount:
                 row.extend([None for i in range(columnCount - rowCount)])
 
-    def index(self, row, column, parent=QtCore.QModelIndex()):
-        return self.createIndex(row, column)
+    # def index(self, row, column, parent=QtCore.QModelIndex()):
+    #     return self.createIndex(row, column)
 
-    def parent(self, index):
-        return QtCore.QModelIndex()
+    # def parent(self, index):
+    #     return QtCore.QModelIndex()
 
-    def rowCount(self, parent):
-        return len(self._source) if parent.row() == -1 else 0
+    # def rowCount(self, parent):
+    #     return len(self._source) if parent.row() == -1 else 0
 
-    def columnCount(self, parent):
-        return max([len(row) for row in self._source])
+    # def columnCount(self, parent):
+    #     return 10
+    #     return max([len(row) for row in self._source])
 
     def item(self, row, column):
         row_list = next(iter(self._source[row:]), None)

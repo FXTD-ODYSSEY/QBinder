@@ -10,12 +10,24 @@ __date__ = '2020-04-29 13:34:11'
 
 import os
 import sys
-DIR = os.path.dirname(__file__)
-MODULE = os.path.join(DIR,"..","..","QBinding","_vender")
-if MODULE not in sys.path:
-    sys.path.insert(0,MODULE)
+repo = (lambda f: lambda p=__file__: f(f, p))(
+    lambda f, p: p
+    if [
+        d
+        for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p))
+        if d == ".git"
+    ]
+    else None
+    if os.path.dirname(p) == p
+    else f(f, os.path.dirname(p))
+)()
+sys.path.insert(0, repo) if repo not in sys.path else None
 
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
+
+import QBinder
 import Qt
+print(Qt.__binding__)
 from Qt import QtGui,QtWidgets, QtCore
 from functools import partial
 
@@ -210,7 +222,7 @@ class WidgetTest(QtWidgets.QWidget):
         # colors = self.model.getColors()
         # colors.insert(0,QtGui.QColor(0,233,255))
         # self.model.setColors(colors)
-        self.model.setData([])
+        # self.model.setData([])
         self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         
 if __name__ == '__main__':
