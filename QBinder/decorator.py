@@ -33,7 +33,6 @@ def inject(binder):
                 setattr(_binder, k, v)
             setattr(self, name, _binder)
             res = func(self, *args, **kwargs)
-
             return res
 
         return wrapper

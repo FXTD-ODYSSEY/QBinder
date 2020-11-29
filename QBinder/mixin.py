@@ -38,16 +38,12 @@ class ItemMeta(type(QtCore.QObject)):
         def wrapper(self, *args, **kwargs):
             # NOTE inject class binder to self binder
             # TODO FnBinding point to self
-            cls = self.__class__
             name = ""
             for name, binder in binder_dict.items():
                 _binder = Binder()
                 for k, v in binder._var_dict_.items():
                     setattr(_binder, k, v)
                 setattr(self, name, _binder)
-
-            if not cls.__binder__:
-                cls.__binder__ = name
 
             return func(self, *args, **kwargs)
 

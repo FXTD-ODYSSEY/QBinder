@@ -341,5 +341,3 @@ class BinderTemplate(object):
                 setattr(binder,name,member)
         return binder
 
-    def __init__(self,*args, **kwargs):
-        super(BinderTemplate, self).__init__(*args,**kwargs)

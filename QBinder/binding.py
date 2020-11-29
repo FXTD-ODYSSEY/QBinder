@@ -68,6 +68,7 @@ class FnBinding(BindingBase):
             self.binded = True
             func = args[0]
             self.func = func if six.callable(func) else func.__func__
+            self.static = isinstance(func, staticmethod)
             
             stack = inspect.stack()[-2]
             cls_name = stack[3]
