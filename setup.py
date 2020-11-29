@@ -20,23 +20,20 @@ from QBinder.constant import VERSION
 if sys.version_info[0] < 3:
     from codecs import open
 
-# NOTE 将markdown格式转换为rst格式
-def md_to_rst(from_file, to_file):
-    r = requests.post(url='http://c.docverter.com/convert',
-                      data={'to':'rst','from':'markdown'},
-                      files={'input_files[]':open(from_file,'rb')})
-    if r.ok:
-        with open(to_file, "wb") as f:
-            f.write(r.content)
+# # NOTE 将markdown格式转换为rst格式
+# def md_to_rst(from_file, to_file):
+#     r = requests.post(url='http://c.docverter.com/convert',
+#                       data={'to':'rst','from':'markdown'},
+#                       files={'input_files[]':open(from_file,'rb')})
+#     if r.ok:
+#         with open(to_file, "wb") as f:
+#             f.write(r.content)
 
-
-md_to_rst("README.md", "README.rst")
-
-
-if os.path.exists('README.rst'):
-    long_description = open('README.rst', encoding="utf-8").read()
-else:
-	long_description = 'Global Data Binding for Python Qt framework'
+# md_to_rst("README.md", "README.rst")
+# if os.path.exists('README.rst'):
+#     long_description = open('README.rst', encoding="utf-8").read()
+# else:
+# 	long_description = 'Global Data Binding for Python Qt framework'
 
 long_description = "Global Data Binding for Python Qt framework"
 
@@ -54,6 +51,7 @@ setup(
     include_package_data=True,
     platforms="any",
     install_requires=[
+        "PySide2",
         "six",
         "Qt.py",
     ],
