@@ -77,13 +77,15 @@ for name, member in pyside_dict.items():
         except:
             continue
         param = sig.parameters
-        # count =  1 if type(method).__name__ == "method_descriptor" else 0
+        lower_name = name.lower()
         if (
             type(method).__name__ == "method_descriptor"
             and len(param) > 1
             and PYQT_DICT[name].get(method_name)
             and not method_name.startswith("__")
             and "event" not in method_name.lower()
+            # NOTE filter readData avoid DataStream Error #issue5
+            and "readData" not in method_name 
         ):
             # if type(method).__name__ == "method_descriptor":
             result_dict[name][method_name] = True

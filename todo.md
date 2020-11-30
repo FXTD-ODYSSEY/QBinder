@@ -22,9 +22,9 @@
 - [ ] combobox update delay
 - [x] 实例化的时候记录所有的 binder 方便后续进行 dump 统一存储
 - [ ] Model 实现可扩展
-- [ ] 实现 QCombobox addItem 扩展支持
+- [ ] ~~实现 QCombobox addItem 扩展支持~~
 - [x] 解决 DCC 环境导致的 binders 数组叠加问题
-- [ ] ~~尝试用 lambda 来实现函数绑定~~
+- [x] 尝试用 lambda 来实现函数绑定
 - [x] 指定 binder 取消 autodump
 - [x] 自动 bind QGroupBox RadioButton
 - [x] self.state = Binder() 如何自动绑定实例化的函数
@@ -34,9 +34,12 @@
 - [x] 查 autodump 的 BUG
 - [x] GState 单例模式使用类似 index 计数修复方法解决共享冲突。 (todo_app 在 DCC 端的冲突)
 - [x] FnHook 和 FnBinding 合并
-- [ ] 用户任意扩展 handler
 - [x] PyQt Model 不支持 BUG (event 相关的函数去掉 hook)
 - [x] pip 发布
+- [ ] 用户任意扩展 handler
+- [ ] doc string 补充 | 生成 sphinx 
+- [x] 修复 six 版本问题 #issue4
+- [x] 修复 DataStream 错误 #issue5
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)    
