@@ -4,17 +4,18 @@ import sys
 try:
     import Qt
     import six
+
     # NOTE fix six version #issue4
-    num = six.__version__.split('.')[1]
+    num = six.__version__.split(".")[1]
     if int(num) < 15:
         del six
-        del sys.modules['six']
+        del sys.modules["six"]
         raise ImportError
 except ImportError:
     DIR = os.path.dirname(__file__)
     MODULE = os.path.join(DIR, "_vendor")
     if MODULE not in sys.path:
-        sys.path.insert(0,MODULE)
+        sys.path.insert(0, MODULE)
     import Qt
     import six
 

@@ -53,6 +53,7 @@ def get_method_name(method):
         count = method.parameterNames()
     return byte2str(name), count
 
+
 for name, member in qt_dict.items():
     # NOTE filter qt related func
     if name == "QtGui.QMatrix" or not hasattr(member, "staticMetaObject"):
@@ -72,7 +73,7 @@ for name, member in qt_dict.items():
     #         if hasattr(member, method_name):
     #             HOOKS[name][method_name] = {}
     #             _HOOKS_REL[name][method_name.lower()] = method_name
-                
+
     # NOTE auto bind updater
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)
@@ -105,7 +106,7 @@ class FuncHook(object):
     @classmethod
     def auto_dump(cls, binding):
         """auto dump for two way binding"""
-        
+
         from .constant import AUTO_DUMP
 
         binder = binding.__binder__
@@ -123,13 +124,13 @@ class FuncHook(object):
             return val + args[1:]
         else:
             return (val,) + args[1:]
-    
+
     def __init__(self, options):
         self.options = options
 
     def __call__(cls, func):
         @six.wraps(func)
-        def wrapper(self,*args, **kwargs):
+        def wrapper(self, *args, **kwargs):
             if len(args) != 1:
                 return func(self, *args, **kwargs)
 
@@ -171,7 +172,9 @@ class FuncHook(object):
                 ):
                     updater = getattr(self, updater)
                     updater.connect(
-                        cls.fix_cursor_position(lambda *args: binding.set(getter()), self)
+                        cls.fix_cursor_position(
+                            lambda *args: binding.set(getter()), self
+                        )
                     )
                     binding = Binding._trace_list_.pop()
                     QtCore.QTimer.singleShot(0, partial(cls.auto_dump, binding))
@@ -191,4 +194,3 @@ def hook_initialize(hooks):
         for setter, options in setters.items():
             func = getattr(widget, setter)
             setattr(widget, setter, FuncHook(options)(func))
-            

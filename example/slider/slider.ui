@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>333</width>
-    <height>136</height>
+    <width>323</width>
+    <height>165</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>最小值</string>
+        <string>Max Value</string>
        </property>
       </widget>
      </item>
@@ -53,7 +53,7 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>最大值</string>
+        <string>Min Value</string>
        </property>
       </widget>
      </item>
@@ -88,7 +88,7 @@
    <item>
     <widget class="QPushButton" name="Vis_BTN">
      <property name="text">
-      <string>显示最大值最小值</string>
+      <string>Toggle Display</string>
      </property>
     </widget>
    </item>

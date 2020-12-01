@@ -44,16 +44,16 @@ class BindingProxy(BindingBase):
 
 
 class FnBinding(BindingBase):
-    
     def __init__(self, binder=None, func=None):
         from .binder import Binder
+
         self.cls = None
         self.binder = binder
-        self.binded = isinstance(binder,Binder)
+        self.binded = isinstance(binder, Binder)
         if self.binded:
             self.func = func if six.callable(func) else func.__func__
             self.static = isinstance(self.func, staticmethod)
-    
+
     def connect_binder(self, name, binder):
         """
         connect_binder automatically run by the BinderBase __setattr__
@@ -62,23 +62,23 @@ class FnBinding(BindingBase):
         self.binder = binder
 
     def __call__(self, *args, **kwargs):
-        
+
         # NOTE if not initialize binded should bind func
         if not self.binded:
             self.binded = True
             func = args[0]
             self.func = func if six.callable(func) else func.__func__
             self.static = isinstance(func, staticmethod)
-            
+
             stack = inspect.stack()[-2]
             cls_name = stack[3]
             frame = stack[0]
             module = inspect.getmodule(frame)
-            dispatcher = self.binder('dispatcher')
+            dispatcher = self.binder("dispatcher")
             dispatcher._trace_dict_[module][cls_name][self.func.__name__] = self
 
             return self.func
-        
+
         arg = self.binder
         if self.cls:
             # TODO not very good solution | may be try __subclasshook__
@@ -87,11 +87,11 @@ class FnBinding(BindingBase):
                 if type(member) is self.cls:
                     arg = member
                     return self.func(arg, *args, **kwargs)
-        
+
         return self.func(*args, **kwargs)
 
     def __getitem__(self, attr):
-        # NOTE special bind 
+        # NOTE special bind
         attr = getattr(self.binder, attr) if type(attr) is str else attr
 
         @six.wraps(self.func)
@@ -368,7 +368,7 @@ class Model(QtGui.QStandardItemModel):
 
         self.setRowCount(len(self._source))
         self.setColumnCount(max([len(row) for row in self._source]))
-        
+
         # NOTE add data update callback
         for row in self._source:
             for item in row:

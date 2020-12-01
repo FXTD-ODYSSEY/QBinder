@@ -5,6 +5,7 @@
 
 from __future__ import division
 from __future__ import print_function
+from __future__ import absolute_import
 
 __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
@@ -26,13 +27,15 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-# os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 
-from QBinder import BinderTemplate
+from QBinder import BinderTemplate, Binder
 from QBinder.handler import Set
 import Qt
-print("__binding__",Qt.__binding__)
+
+print("__binding__", Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
+from Qt.QtCompat import loadUi, translate
 
 
 class SliderBinder(BinderTemplate):
@@ -57,10 +60,11 @@ class SliderBinder(BinderTemplate):
         if v < self.min_value:
             self.min_value = v
 
+
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(333, 136)
+        Form.resize(323, 165)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -109,20 +113,21 @@ class Ui_Form(object):
         self.Max_Label.setAlignment(QtCore.Qt.AlignCenter)
         self.Max_Label.setObjectName("Max_Label")
         self.verticalLayout.addWidget(self.Max_Label)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout.addItem(spacerItem)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
-        Form.setWindowTitle(QtWidgets.QApplication.translate("Form", "SliderExample", None, -1))
-        self.label.setText(QtWidgets.QApplication.translate("Form", "最小值", None, -1))
-        self.label_2.setText(QtWidgets.QApplication.translate("Form", "最大值", None, -1))
-        self.Vis_BTN.setText(QtWidgets.QApplication.translate("Form", "显示最大值最小值", None, -1))
-        self.Min_Label.setText(QtWidgets.QApplication.translate("Form", "Min_Label", None, -1))
-        self.Max_Label.setText(QtWidgets.QApplication.translate("Form", "Max_Label", None, -1))
-
+        Form.setWindowTitle(translate("Form", "SliderExample", None, -1))
+        self.label.setText(translate("Form", "Max Value", None, -1))
+        self.label_2.setText(translate("Form", "Min Value", None, -1))
+        self.Vis_BTN.setText(translate("Form", "Toggle Display", None, -1))
+        self.Min_Label.setText(translate("Form", "Min_Label", None, -1))
+        self.Max_Label.setText(translate("Form", "Max_Label", None, -1))
 
 
 class SliderWidget(QtWidgets.QWidget, Ui_Form):
@@ -132,6 +137,9 @@ class SliderWidget(QtWidgets.QWidget, Ui_Form):
     def __init__(self, parent=None):
         super(SliderWidget, self).__init__(parent)
         self.setupUi(self)
+
+        # ui_file = os.path.join(__file__,"..","slider.ui")
+        # loadUi(ui_file,self)
 
         # NOTE 使用运算符 禁用双向绑定
         self.Min_SP.setValue(lambda: self.state.min_value * 1)
@@ -151,8 +159,8 @@ class SliderWidget(QtWidgets.QWidget, Ui_Form):
         self.Vis_BTN.clicked.connect(self.state.toggle_visible)
         self.Min_Label.setVisible(lambda: self.state.visible)
         self.Max_Label.setVisible(lambda: self.state.visible)
-        self.Min_Label.setText(lambda: "最小值: %s" % self.state.min_value)
-        self.Max_Label.setText(lambda: "最大值: %s" % self.state.max_value)
+        self.Min_Label.setText(lambda: "Max Value: %s" % self.state.min_value)
+        self.Max_Label.setText(lambda: "Min Value: %s" % self.state.max_value)
 
 
 if __name__ == "__main__":

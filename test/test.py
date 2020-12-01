@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+
+__author__ = 'timmyliang'
+__email__ = '820472580@qq.com'
+__date__ = '2020-11-30 22:20:47'
+
+
 import os
 import sys
 
@@ -14,57 +25,25 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
+import inspect
+from QBinder import Binder , QEventHook
 
-from QBinder import Binder,QEventHook
-from QBinder.handler import Set
-
+import Qt
+print("__binding__",Qt.__binding__)
 from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
 
-# NOTE event_hook 使用单例模式
 event_hook = QEventHook()
 
-class WidgetTest(QtWidgets.QWidget):
-    state = Binder()
-    state.text = "text"
-    state.num = 1
-    state.color = "black"
-    state.spin_color = "black"
+app = QtWidgets.QApplication([])
 
-    def __init__(self):
-        super(WidgetTest, self).__init__()
-        self.initialize()
+label = QtWidgets.QLabel("display")
+label.show()
 
-    def initialize(self):
-        layout = QtWidgets.QVBoxLayout()
-        self.setLayout(layout)
+# NOTE 扩展 label 为可点击组件
 
-        self.edit = QtWidgets.QLineEdit()
-        self.label = QtWidgets.QLabel()
-        layout.addWidget(self.edit)
-        layout.addWidget(self.label)
+# NOTE 可不接受参数或者接受 event 参数
+label >> event_hook("MouseButtonPress", lambda:sys.exit())
 
-        self.edit.setText(lambda: self.state.text)
-        self.label.setText(lambda: "message is %s" % self.state.text)
-        
-        event_hook.add_hook(self.edit,QtCore.QEvent.FocusIn,lambda:self.state.color >> Set("red"))
-        event_hook.add_hook(self.edit,QtCore.QEvent.FocusOut,lambda:self.state.color >> Set("black"))
-        self.label.setStyleSheet(lambda:"color:%s" % self.state.color)
-
-        self.spin = QtWidgets.QSpinBox(self)
-        self.label = QtWidgets.QLabel()
-        layout.addWidget(self.spin)
-        layout.addWidget(self.label)
-        self.spin.setValue(lambda: self.state.num)
-        self.label.setText(lambda: "num is %s" % self.state.num)
-        
-        self.spin >> event_hook("HoverEnter",lambda:self.state.spin_color >> Set("pink"))
-        self.spin >> event_hook("HoverLeave",lambda:self.state.spin_color >> Set("blue"))
-        self.label.setStyleSheet(lambda:"color:%s" % self.state.spin_color)
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    widget = WidgetTest()
-    widget.show()
-    app.exec_()
+app.exec_()
