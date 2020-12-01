@@ -40,6 +40,7 @@
 - [ ] doc string 补充 | 生成 sphinx 
 - [x] 修复 six 版本问题 #issue4
 - [x] 修复 DataStream 错误 #issue5
+- [ ] 修复 BinderTemplate Python 2 & 3 兼容问题
 
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)    

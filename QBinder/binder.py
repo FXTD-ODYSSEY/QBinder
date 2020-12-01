@@ -24,7 +24,7 @@ import tempfile
 from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
-from .binding import Binding,FnBinding, BindingProxy
+from .binding import Binding, FnBinding, BindingProxy
 from .util import nestdict
 from collections import OrderedDict
 from .eventhook import QEventHook, Iterable
@@ -59,6 +59,7 @@ class BinderCollector(QtCore.QObject):
     def get_last_key(cls):
         return list(cls.Binders.keys())[-1]
 
+
 class BinderDumper(QtCore.QObject):
     _dumper_dict_ = {}
     __init_flag = False
@@ -69,7 +70,7 @@ class BinderDumper(QtCore.QObject):
         if cls.__init_flag:
             instance = super(BinderDumper, cls).__new__(cls, binder, *args, **kwargs)
             cls._dumper_dict_[id(binder)] = instance
-        
+
         return instance
 
     def __init__(self, binder, db_name, filters=None):
@@ -96,10 +97,10 @@ class BinderDumper(QtCore.QObject):
         )
         event = QtCore.QEvent(QtCore.QEvent.User)
         QtWidgets.QApplication.postEvent(self, event)
-        
+
         self.auto_load = True
 
-    def set_auto_load(self,enabeld):
+    def set_auto_load(self, enabeld):
         self.auto_load = enabeld
 
     def __prepare__(self):
@@ -327,17 +328,25 @@ class GBinder(BinderBase):
             ) if cls.__instance not in binder_list else None
         return cls.__instance
 
-class BinderTemplate(object):
-    
-    def __new__(cls,*args,**kwargs):
+
+class BinderTemplateMeta(type):
+    def __new__(cls, name, bases, attrs):
+        # NOTE wrap all method into staticmethod
+        for name, member in attrs.items():
+            if inspect.isroutine(member):
+                attrs[name] = staticmethod(member)
+        return type.__new__(cls, name, bases, attrs)
+
+
+class BinderTemplate(object, six.with_metaclass(BinderTemplateMeta)):
+    def __new__(cls, *args, **kwargs):
         binder = Binder()
-        cls.__init__(binder,*args,**kwargs)
-        for name,member in inspect.getmembers(cls):
+        cls.__init__(binder)
+        for name, member in inspect.getmembers(cls):
             if name.startswith("__"):
                 continue
             if inspect.isroutine(member):
-                setattr(binder,name,partial(member,binder))
+                setattr(binder, name, partial(member, binder))
             else:
-                setattr(binder,name,member)
+                setattr(binder, name, member)
         return binder
-

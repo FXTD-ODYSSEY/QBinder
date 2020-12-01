@@ -57,22 +57,20 @@ class QEventHook(QtCore.QObject):
             for callback in callbacks:
                 args = (receiver,)
                 keywords = {}
-                if isinstance(callback,partial):
+                if isinstance(callback, partial):
                     args = callback.args
                     keywords = callback.keywords
-                    callback  = callback.func
+                    callback = callback.func
                     length = len(inspect.getargspec(callback).args)
                 else:
                     length = len(inspect.getargspec(callback).args)
                 count = length - 1 if inspect.ismethod(callback) else length
-                args += (
-                    event,
-                )
-                callback(*args[:count],**keywords)
+                args += (event,)
+                callback(*args[:count], **keywords)
 
         # NOTE invert event hook
         data = self.__invert_hook.get(receiver)
-        if data is None:
+        if data is None and type(receiver).__name__ != "QWindow":
             callbacks = self.__invert_hook.get(event.type(), [])
             for callback in callbacks:
                 length = len(inspect.getargspec(callback).args)
@@ -124,6 +122,12 @@ class QEventHook(QtCore.QObject):
         self.__callbacks = callbacks
         return self
 
+    def check_callback(self, callback):
+        if inspect.ismethod(callback):
+            callback = callback.__func__
+        if not inspect.isfunction(callback):
+            raise TypeError("{!r} is not a Python function".format(callback))
+
     def add_hook(self, receiver, event, callbacks):
         """add_hook global hook
 
@@ -141,25 +145,31 @@ class QEventHook(QtCore.QObject):
             return
         self.__hook.setdefault(receiver, {})
         self.__hook[receiver].setdefault(event, [])
-        self.__hook[receiver][event].extend(
+        callbacks = (
             [c for c in callbacks if six.callable(c)]
             if isinstance(callbacks, list)
             else [callbacks]
         )
+        for callback in callbacks:
+            self.check_callback(callback)
+        self.__hook[receiver][event].extend(callbacks)
 
     def add_invert_hook(self, receiver, event, callbacks):
         if not event or not callbacks:
             return
         self.__invert_hook.setdefault(receiver, True)
         self.__invert_hook.setdefault(event, [])
-        self.__invert_hook[event].extend(
+        callbacks = (
             [c for c in callbacks if six.callable(c)]
             if isinstance(callbacks, list)
             else [callbacks]
         )
+        for callback in callbacks:
+            self.check_callback(callback)
+        self.__invert_hook[event].extend(callbacks)
 
     def get_hook(self):
         return self.__hook
 
     def set_hook(self, hook):
-        self.__hook.update(hook) 
+        self.__hook.update(hook)

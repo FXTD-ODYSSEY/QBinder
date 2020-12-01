@@ -27,8 +27,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
-# os.environ["QT_PREFERRED_BINDING"] = "PySide;PySide2"
+# os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 
 from QBinder import Binder, GBinder, QEventHook, FnBinding
 from QBinder.handler import Set, Call, ItemConstructor, GroupBoxBind
@@ -102,68 +101,7 @@ class EditableLabel(QtWidgets.QLabel):
 
     def bind(self, item):
         self.item = item
-
-class Ui_TodoItem(object):
-    def setupUi(self, TodoItem):
-        TodoItem.setObjectName("TodoItem")
-        TodoItem.resize(489, 101)
-        TodoItem.setStyleSheet("")
-        TodoItem.setWindowFilePath("")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(TodoItem)
-        self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.TodoItemBorder = QtWidgets.QWidget(TodoItem)
-        self.TodoItemBorder.setStyleSheet("#TodoItemBorder{border-bottom:1px solid lightgray;}")
-        self.TodoItemBorder.setObjectName("TodoItemBorder")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.TodoItemBorder)
-        self.horizontalLayout_2.setContentsMargins(0, 9, 0, 9)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.horizontalWidget = QtWidgets.QWidget(self.TodoItemBorder)
-        self.horizontalWidget.setObjectName("horizontalWidget")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.horizontalWidget)
-        self.horizontalLayout_3.setContentsMargins(-1, 0, -1, 0)
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.ItemCheck = QtWidgets.QCheckBox(self.horizontalWidget)
-        self.ItemCheck.setStyleSheet("")
-        self.ItemCheck.setText("")
-        self.ItemCheck.setObjectName("ItemCheck")
-        self.horizontalLayout_3.addWidget(self.ItemCheck)
-        self.ItemText = EditableLabel(self.horizontalWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ItemText.sizePolicy().hasHeightForWidth())
-        self.ItemText.setSizePolicy(sizePolicy)
-        self.ItemText.setObjectName("ItemText")
-        self.horizontalLayout_3.addWidget(self.ItemText)
-        self.ItemDelete = QtWidgets.QPushButton(self.horizontalWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ItemDelete.sizePolicy().hasHeightForWidth())
-        self.ItemDelete.setSizePolicy(sizePolicy)
-        self.ItemDelete.setMaximumSize(QtCore.QSize(15, 15))
-        font = QtGui.QFont()
-        font.setWeight(75)
-        font.setBold(True)
-        self.ItemDelete.setFont(font)
-        self.ItemDelete.setStyleSheet("color:#cc9a9a")
-        self.ItemDelete.setFlat(True)
-        self.ItemDelete.setObjectName("ItemDelete")
-        self.horizontalLayout_3.addWidget(self.ItemDelete)
-        self.horizontalLayout_2.addWidget(self.horizontalWidget)
-        self.horizontalLayout.addWidget(self.TodoItemBorder)
-
-        self.retranslateUi(TodoItem)
-        QtCore.QMetaObject.connectSlotsByName(TodoItem)
-
-    def retranslateUi(self, TodoItem):
-        TodoItem.setWindowTitle(QtWidgets.QApplication.translate("TodoItem", "Form", None, -1))
-        self.ItemText.setText(QtWidgets.QApplication.translate("TodoItem", "TextLabel", None, -1))
-        self.ItemDelete.setText(QtWidgets.QApplication.translate("TodoItem", "X", None, -1))
-
-class TodoItem(QtWidgets.QWidget, Ui_TodoItem):
+class TodoItem(QtWidgets.QWidget):
 
     state = Binder()
 
@@ -182,9 +120,9 @@ class TodoItem(QtWidgets.QWidget, Ui_TodoItem):
 
         
         # TODO uifile loading custom module not compatible in DCC
-        # ui_file = os.path.join(__file__, "..", "item.ui")
-        # loadUi(ui_file, self)
-        self.setupUi(self)
+        ui_file = os.path.join(__file__, "..", "item.ui")
+        loadUi(ui_file, self)
+        # self.setupUi(self)
 
         self.ItemText.bind(self)
         self.ItemText.setText(lambda: self.state.text)

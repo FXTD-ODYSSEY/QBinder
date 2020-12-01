@@ -128,7 +128,7 @@
   <customwidget>
    <class>EditableLabel</class>
    <extends>QLabel</extends>
-   <header>__main__.h</header>
+   <header>todo.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

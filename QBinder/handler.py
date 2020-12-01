@@ -22,21 +22,21 @@ from Qt import QtWidgets
 class HandlerBase(object):
     pass
 
+
 class ItemMeta(type):
-    
-    def __getitem__(cls,item):
+    def __getitem__(cls, item):
         cls.item = item
         return cls
-    
-class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
-    
+
+
+class ItemConstructor(HandlerBase, six.with_metaclass(ItemMeta)):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
-    
+
     def __rrshift__(self, item_data):
         # binding = Binding._inst_.pop()
-        
+
         # NOTE trace lamda function
         filters = self.kwargs.pop("__filters__", [i for i in range(len(item_data))])
         if callable(filters):
@@ -46,9 +46,9 @@ class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
         layout = self.kwargs.pop("__layout__")
         binder_name = self.kwargs.pop("__binder__")
 
-        if not hasattr(layout,'__items__'):
+        if not hasattr(layout, "__items__"):
             layout.__items__ = []
-            
+
         for i, data in enumerate(item_data):
             widget = layout.__items__ >> ListGet(i)
             if not widget:
