@@ -19,7 +19,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
     if [
         d
         for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p))
-        if d == ".git"
+        if d == ".github"
     ]
     else None
     if os.path.dirname(p) == p
@@ -27,7 +27,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-from QBinder import Binder, GBinder , InfoPanel
+from QBinder import Binder, GBinder, InfoPanel
 from Qt import QtGui, QtWidgets, QtCore
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 # coding:utf-8
 
-__author__ =  'timmyliang'
-__email__ =  '820472580@qq.com'
-__date__ = '2020-04-29 13:34:11'
+__author__ = "timmyliang"
+__email__ = "820472580@qq.com"
+__date__ = "2020-04-29 13:34:11"
 
 """
 
@@ -10,12 +10,13 @@ __date__ = '2020-04-29 13:34:11'
 
 import os
 import sys
+
 repo = (lambda f: lambda p=__file__: f(f, p))(
     lambda f, p: p
     if [
         d
         for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p))
-        if d == ".git"
+        if d == ".github"
     ]
     else None
     if os.path.dirname(p) == p
@@ -27,22 +28,21 @@ os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 
 import QBinder
 import Qt
+
 print(Qt.__binding__)
-from Qt import QtGui,QtWidgets, QtCore
+from Qt import QtGui, QtWidgets, QtCore
 from functools import partial
 
+
 class PaletteListModel(QtCore.QAbstractListModel):
-    
-    def __init__(self, colors = [], parent = None):
+    def __init__(self, colors=[], parent=None):
         QtCore.QAbstractListModel.__init__(self, parent)
         self.__colors = colors
 
-
-
     # def headerData(self, section, orientation, role):
-        
+
     #     if role == QtCore.Qt.DisplayRole:
-            
+
     #         if orientation == QtCore.Qt.Horizontal:
     #             return"Palette"
     #         else:
@@ -51,83 +51,79 @@ class PaletteListModel(QtCore.QAbstractListModel):
     def rowCount(self, parent):
         return len(self.__colors)
 
-
     def data(self, index, role):
-        
-        
+
         if role == QtCore.Qt.EditRole:
             return self.__colors[index.row()].name()
-        
-        
+
         if role == QtCore.Qt.ToolTipRole:
             return "Hex code: " + self.__colors[index.row()].name()
-        
 
         if role == QtCore.Qt.DecorationRole:
-            
+
             row = index.row()
             value = self.__colors[row]
-            
+
             pixmap = QtGui.QPixmap(26, 26)
             pixmap.fill(value)
-            
+
             icon = QtGui.QIcon(pixmap)
-            
+
             return icon
 
-              
         if role == QtCore.Qt.DisplayRole:
-            
+
             row = index.row()
             value = self.__colors[row]
-            
+
             return value.name()
 
     def flags(self, index):
-        return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-        
-    def setData(self, index, value, role = QtCore.Qt.EditRole):
+        return (
+            QtCore.Qt.ItemIsEditable
+            | QtCore.Qt.ItemIsEnabled
+            | QtCore.Qt.ItemIsSelectable
+        )
+
+    def setData(self, index, value, role=QtCore.Qt.EditRole):
         if role == QtCore.Qt.EditRole:
-            
+
             row = index.row()
             color = QtGui.QColor(value)
-            
+
             if color.isValid():
                 self.__colors[row] = color
                 self.dataChanged.emit(index, index)
                 return True
         return False
 
-
-    #=====================================================#
-    #INSERTING & REMOVING
-    #=====================================================#
-    def insertRows(self, position, rows,parent = QtCore.QModelIndex()):
+    # =====================================================#
+    # INSERTING & REMOVING
+    # =====================================================#
+    def insertRows(self, position, rows, parent=QtCore.QModelIndex()):
         self.beginInsertRows(parent, position, position + rows - 1)
-        
+
         for i in range(rows):
             self.__colors.insert(position, QtGui.QColor("#000000"))
-        
+
         self.endInsertRows()
-        
+
         return True
 
-
-    
-    def removeRows(self, position, rows, parent = QtCore.QModelIndex()):
+    def removeRows(self, position, rows, parent=QtCore.QModelIndex()):
         self.beginRemoveRows(parent, position, position + rows - 1)
-        
+
         for i in range(rows):
             value = self.__colors[position]
             self.__colors.remove(value)
-             
+
         self.endRemoveRows()
         return True
-    
-class TestModel (QtCore.QAbstractListModel):
 
-    def __init__(self, data = None, parent = None):
-        super(TestModel,self).__init__( parent)
+
+class TestModel(QtCore.QAbstractListModel):
+    def __init__(self, data=None, parent=None):
+        super(TestModel, self).__init__(parent)
         self._data = data if data else []
 
     def rowCount(self, index):
@@ -135,21 +131,28 @@ class TestModel (QtCore.QAbstractListModel):
 
     def data(self, index, role):
         # NOTE https://stackoverflow.com/questions/5125619/why-doesnt-list-have-safe-get-method-like-dictionary
-        val = self._data[index.row()] if len(self._data) > index.row() else next(iter(self._data), '')
+        val = (
+            self._data[index.row()]
+            if len(self._data) > index.row()
+            else next(iter(self._data), "")
+        )
 
         if role == QtCore.Qt.DisplayRole:
             return val
 
-    def setData(self,data):
+    def setData(self, data):
         self._data = data
 
     def getData(self):
         return self._data
 
+
 class State(object):
     __repr__ = lambda self: self.val.__repr__()
-    def __init__(self,val):
+
+    def __init__(self, val):
         self.val = val
+
 
 class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
@@ -157,7 +160,7 @@ class WidgetTest(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
 
-        #ALL OF OUR VIEWS
+        # ALL OF OUR VIEWS
         listView = QtWidgets.QListView()
         layout.addWidget(listView)
 
@@ -175,9 +178,9 @@ class WidgetTest(QtWidgets.QWidget):
         tableView = QtWidgets.QTableView()
         layout.addWidget(tableView)
 
-        red   = QtGui.QColor(255,0,0)
-        green = QtGui.QColor(0,255,0)
-        blue  = QtGui.QColor(0,0,255)
+        red = QtGui.QColor(255, 0, 0)
+        green = QtGui.QColor(0, 255, 0)
+        blue = QtGui.QColor(0, 0, 255)
 
         rowCount = 4
         columnCount = 6
@@ -187,7 +190,7 @@ class WidgetTest(QtWidgets.QWidget):
         # item_list = [red, "green", "blue"]
         # print(item_list)
         # self.model = TestModel(item_list)
-        
+
         listView.setModel(self.model)
         comboBox.setModel(self.model)
         tableView.setModel(self.model)
@@ -197,12 +200,12 @@ class WidgetTest(QtWidgets.QWidget):
         button.clicked.connect(self.changeOrder)
         layout.addWidget(button)
         button = QtWidgets.QPushButton("change2")
-        button.clicked.connect(partial(self.addComboBox,comboBox))
+        button.clicked.connect(partial(self.addComboBox, comboBox))
         layout.addWidget(button)
 
         self.model.dataChanged.connect(self.modifyData)
 
-    def modifyData(self,topLeft,bottomRight,roles):
+    def modifyData(self, topLeft, bottomRight, roles):
         pass
         # self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         # print ("modifyData",topLeft,bottomRight,roles)
@@ -210,11 +213,11 @@ class WidgetTest(QtWidgets.QWidget):
         # print ("bottomRight",bottomRight.row())
         # model = topLeft.model()
         # print (model.stringList())
-        
-    def addComboBox(self,comboBox):
-        print ("add")
+
+    def addComboBox(self, comboBox):
+        print("add")
         comboBox.addItem("asd")
-        
+
     def changeOrder(self):
         # index = self.model.index(2,0)
         # self.model.setData(index,QtGui.QColor(100,233,255))
@@ -224,14 +227,14 @@ class WidgetTest(QtWidgets.QWidget):
         # self.model.setColors(colors)
         # self.model.setData([])
         self.model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
-        
-if __name__ == '__main__':
-    
+
+
+if __name__ == "__main__":
+
     app = QtWidgets.QApplication(sys.argv)
 
     widget = WidgetTest()
 
-
     widget.show()
-    
+
     sys.exit(app.exec_())

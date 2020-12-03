@@ -16,7 +16,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
     if [
         d
         for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p))
-        if d == ".git"
+        if d == ".github"
     ]
     else None
     if os.path.dirname(p) == p
@@ -58,7 +58,7 @@ class WidgetTest(QtWidgets.QWidget):
 
         self.button.clicked.connect(self.testComputed)
         self.state.selected = self.combo.currentText()
-        self.combo.setCurrentText(lambda:self.state.selected)
+        self.combo.setCurrentText(lambda: self.state.selected)
 
         self.label.setText(
             lambda: "selected {selected}".format(selected=self.state.selected)

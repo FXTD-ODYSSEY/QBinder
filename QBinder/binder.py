@@ -341,7 +341,6 @@ class BinderTemplateMeta(type):
 class BinderTemplate(object, six.with_metaclass(BinderTemplateMeta)):
     def __new__(cls, *args, **kwargs):
         binder = Binder()
-        cls.__init__(binder)
         for name, member in inspect.getmembers(cls):
             if name.startswith("__"):
                 continue
@@ -349,4 +348,5 @@ class BinderTemplate(object, six.with_metaclass(BinderTemplateMeta)):
                 setattr(binder, name, partial(member, binder))
             else:
                 setattr(binder, name, member)
+        cls.__init__(binder)
         return binder

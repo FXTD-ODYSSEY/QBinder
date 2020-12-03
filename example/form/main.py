@@ -6,9 +6,9 @@
 from __future__ import division
 from __future__ import print_function
 
-__author__ = 'timmyliang'
-__email__ = '820472580@qq.com'
-__date__ = '2020-11-27 16:18:54'
+__author__ = "timmyliang"
+__email__ = "820472580@qq.com"
+__date__ = "2020-11-27 16:18:54"
 
 import os
 import sys
@@ -18,7 +18,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
     if [
         d
         for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p))
-        if d == ".git"
+        if d == ".github"
     ]
     else None
     if os.path.dirname(p) == p
@@ -35,7 +35,6 @@ from radioButtonTest import RadioButtonWidget
 from comboBoxTest_1 import ComboBoxWidget_1
 from listWidgetTest import ListWidgetTest
 from comboBoxTest_2 import ComboBoxWidget_2
-
 
 
 if __name__ == "__main__":
@@ -63,7 +62,7 @@ if __name__ == "__main__":
 
     widget = ComboBoxWidget_2()
     layout.addWidget(widget)
-    
+
     container.show()
 
     app.exec_()

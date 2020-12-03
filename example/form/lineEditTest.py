@@ -16,7 +16,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
     if [
         d
         for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p))
-        if d == ".git"
+        if d == ".github"
     ]
     else None
     if os.path.dirname(p) == p
@@ -30,10 +30,11 @@ from Qt import QtGui, QtWidgets, QtCore
 
 from functools import partial
 
+
 class LineEditWidget(QtWidgets.QWidget):
 
     state = Binder()
-    with state('dumper'):
+    with state("dumper"):
         state.message = "asd"
 
     def __init__(self):

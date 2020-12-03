@@ -1,4 +1,3 @@
-
 import os
 import sys
 
@@ -7,7 +6,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
     if [
         d
         for d in os.listdir(p if os.path.isdir(p) else os.path.dirname(p))
-        if d == ".git"
+        if d == ".github"
     ]
     else None
     if os.path.dirname(p) == p
@@ -24,6 +23,7 @@ from collections import defaultdict
 import QBinder
 
 import Qt
+
 print(Qt.__binding__)
 from Qt import QtWidgets
 
@@ -43,10 +43,10 @@ func = app.setStyleSheet
 func = app.wheelScrollLines
 print(func.__name__)
 # print (dir(func))
-print (type(func))
+print(type(func))
 
 data = {}
-for name,member in inspect.getmembers(app):
+for name, member in inspect.getmembers(app):
     # text += "%s %s \n" % ( name , type(member).__name__ )
     # print(name,type(member))
     # data[name] = type(member).__name__
@@ -54,9 +54,8 @@ for name,member in inspect.getmembers(app):
 
 path = "%s.json" % os.path.splitext(__file__)[0]
 
-with open(path,'w') as f:
-    json.dump(data,f,indent=4,ensure_ascii=False)
-
+with open(path, "w") as f:
+    json.dump(data, f, indent=4, ensure_ascii=False)
 
 
 # setStyleSheet
