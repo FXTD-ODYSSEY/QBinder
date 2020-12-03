@@ -19,6 +19,7 @@ except ImportError:
     import Qt
     import six
 
+__version__ = "1.0.5"
 
 from .util import ListGet
 from .hook import HOOKS, hook_initialize
@@ -26,7 +27,6 @@ from .binding import Model, Binding, FnBinding
 from .binder import GBinder, Binder, BinderCollector, BinderTemplate
 from .eventhook import QEventHook
 from .decorator import inject
-
 
 # NOTE hook Qt caller to accept lambda argument
 hook_initialize(HOOKS)

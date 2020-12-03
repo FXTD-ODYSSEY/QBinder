@@ -16,7 +16,7 @@ import os
 import sys
 import requests
 from setuptools import setup, find_packages
-from QBinder.constant import VERSION
+from QBinder import __version__
 if sys.version_info[0] < 3:
     from codecs import open
 
@@ -39,7 +39,7 @@ long_description = "Global Data Binding for Python Qt framework"
 
 setup(
     name="QBinder",
-    version=VERSION,
+    version=__version__,
     keywords=("pip", "PyQt", "PySide", "Qt", "DataBinding", "Binding", "Binder"),
     description="Global Data Binding for Python Qt framework",
     long_description=long_description,
