@@ -16,7 +16,7 @@ from functools import partial
 import six
 from .binding import Binding
 from .util import ListGet
-from Qt import QtWidgets
+from Qt import QtWidgets, QtCore
 
 
 class HandlerBase(object):
@@ -25,6 +25,7 @@ class HandlerBase(object):
 
 class ItemMeta(type):
     def __getitem__(cls, item):
+        # NOTE support cls[item]
         cls.item = item
         return cls
 
@@ -113,10 +114,29 @@ class Set(HandlerBase):
 
 
 class Anim(HandlerBase):
-    # TODO support anim value change
-    def __init__(self, val):
-        self.val = val
+    # NOTE support anim value change
+    def __init__(self, value, duration=1000, valueChanged=None, finished=None):
+        self.value = value
+        self.duration = duration
+        self.valueChanged = valueChanged
+        self.finished = finished
 
     def __rrshift__(self, binding):
-        Binding._inst_
-        return binding
+        binding = Binding._inst_.pop()
+        # NOTE avoid gc
+        parent = QtWidgets.QApplication.activeWindow()
+        anim = QtCore.QVariantAnimation(parent)
+        anim.setDuration(self.duration)
+        anim.valueChanged.connect(lambda v: binding.set(v))
+        anim.finished.connect(anim.deleteLater)
+
+        anim.setStartValue(binding.get())
+        anim.setEndValue(self.value)
+        anim.start()
+
+        if callable(self.finished):
+            anim.finished.connect(self.finished)
+        if callable(self.valueChanged):
+            anim.valueChanged.connect(self.valueChanged)
+
+        return anim

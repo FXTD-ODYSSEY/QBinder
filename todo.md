@@ -5,9 +5,14 @@
 - [ ] 参考 Vue & Velocity 动画管理
 - [ ] 使用 Qt State Machine 管理状态变化
 - [ ] 用户任意扩展 handler
-- [ ] doc string 补充 | 生成 sphinx 
 - [ ] Model 实现可扩展
+- [ ] combobox update delay
 
+- [ ] doc string 补充 | 生成 sphinx 
+- [ ] english readme
+
+- [x] drap drop test
+- [x] dict load order
 
 - [x] 单例模式 - 数据全局共享
 - [x] 数据 dump 输入输出
@@ -24,7 +29,6 @@
 
 
 - [x] QBinding emit 将事件触发统一到 set 里面，最后通过 timer 实现 idle 触发
-- [ ] combobox update delay
 - [x] 实例化的时候记录所有的 binder 方便后续进行 dump 统一存储
 - [x] 解决 DCC 环境导致的 binders 数组叠加问题
 - [x] 尝试用 lambda 来实现函数绑定

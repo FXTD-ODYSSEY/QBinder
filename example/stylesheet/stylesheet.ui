@@ -195,6 +195,40 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_14">
+     <item>
+      <widget class="QPushButton" name="Red_BTN">
+       <property name="styleSheet">
+        <string notr="true">color:red</string>
+       </property>
+       <property name="text">
+        <string>Red</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="Green_BTN">
+       <property name="styleSheet">
+        <string notr="true">color:green</string>
+       </property>
+       <property name="text">
+        <string>Green</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="Blue_BTN">
+       <property name="styleSheet">
+        <string notr="true">color:blue</string>
+       </property>
+       <property name="text">
+        <string>Blue</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -486,6 +520,9 @@
        </item>
        <item>
         <widget class="QSpinBox" name="Font_Size_SP">
+         <property name="maximum">
+          <number>999</number>
+         </property>
          <property name="value">
           <number>15</number>
          </property>
@@ -591,198 +628,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>R_Slider</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>R_SP</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>150</x>
-     <y>44</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>110</x>
-     <y>45</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>G_Slider</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>G_SP</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>185</x>
-     <y>84</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>109</x>
-     <y>77</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>B_Slider</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>B_SP</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>234</x>
-     <y>114</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>119</x>
-     <y>117</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>R_SP</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>R_Slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>84</x>
-     <y>33</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>165</x>
-     <y>35</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>G_SP</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>G_Slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>117</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>159</x>
-     <y>83</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>B_SP</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>B_Slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>104</x>
-     <y>104</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>169</x>
-     <y>110</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>H_SP</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>H_Slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>96</x>
-     <y>150</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>174</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>S_SP</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>S_Slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>89</x>
-     <y>194</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>166</x>
-     <y>194</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>V_SP</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>V_Slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>81</x>
-     <y>224</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>164</x>
-     <y>224</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>H_Slider</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>H_SP</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>282</x>
-     <y>161</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>78</x>
-     <y>163</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>S_Slider</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>S_SP</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>277</x>
-     <y>193</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>98</x>
-     <y>188</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>V_Slider</sender>
-   <signal>sliderMoved(int)</signal>
-   <receiver>V_SP</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>270</x>
-     <y>230</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>90</x>
-     <y>228</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

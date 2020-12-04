@@ -26,7 +26,6 @@ from collections import OrderedDict
 from Qt import QtCore, QtWidgets
 from .binding import Binding, FnBinding, BindingProxy
 from .util import nestdict
-from collections import OrderedDict
 from .eventhook import QEventHook, Iterable
 
 event_hook = QEventHook()
@@ -139,7 +138,7 @@ class BinderDumper(QtCore.QObject):
     def read(self, path):
         try:
             with open(path, "r") as f:
-                data = json.load(f, encoding="utf-8")
+                data = json.load(f, object_pairs_hook =OrderedDict,encoding="utf-8")
             for k, v in data.items():
                 setattr(self.binder, k, v)
         except:

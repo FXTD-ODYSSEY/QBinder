@@ -21,9 +21,7 @@ import six
 import inspect
 from functools import partial
 
-from Qt import QtCore
-from Qt import QtWidgets
-from Qt import QtGui
+from Qt import QtCore,QtWidgets,QtGui
 
 
 class QEventHook(QtCore.QObject):
@@ -55,30 +53,21 @@ class QEventHook(QtCore.QObject):
         if data:
             callbacks = data.get(event.type(), [])
             for callback in callbacks:
-                args = (receiver,)
-                keywords = {}
-                if isinstance(callback, partial):
-                    args = callback.args
-                    keywords = callback.keywords
-                    callback = callback.func
-                    length = len(inspect.getargspec(callback).args)
-                else:
-                    length = len(inspect.getargspec(callback).args)
+                callback = callback.func if isinstance(callback, partial) else callback
+                length = len(inspect.getargspec(callback).args)
                 count = length - 1 if inspect.ismethod(callback) else length
-                args += (event,)
-                callback(*args[:count], **keywords)
+                args = (event,)
+                callback(*args[:count])
 
         # NOTE invert event hook
         data = self.__invert_hook.get(receiver)
         if data is None and type(receiver).__name__ != "QWindow":
             callbacks = self.__invert_hook.get(event.type(), [])
             for callback in callbacks:
+                callback = callback.func if isinstance(callback, partial) else callback
                 length = len(inspect.getargspec(callback).args)
                 count = length - 1 if inspect.ismethod(callback) else length
-                args = (
-                    receiver,
-                    event,
-                )
+                args = (receiver, event)
                 callback(*args[:count])
 
         if receiver is self and event.type() == QtCore.QEvent.User:

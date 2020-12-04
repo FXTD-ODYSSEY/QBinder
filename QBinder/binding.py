@@ -256,8 +256,6 @@ class Binding(QtGui.QStandardItem, BindingBase):
         cls.__trace = False
 
     def __get__(self, instance, owner):
-        self.__class__._inst_ = [self]
-        self._trace_list_.append(self) if self.__trace else None
         return self.get()
 
     def __rrshift__(self, d):
@@ -273,6 +271,8 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.emit()
 
     def get(self):
+        self.__class__._inst_ = [self]
+        self._trace_list_.append(self) if self.__trace else None
         return self.val
 
     @classmethod
