@@ -16,6 +16,7 @@ from functools import partial
 import six
 from .binding import Binding
 from .util import ListGet
+from .eventhook import Iterable
 from Qt import QtWidgets, QtCore
 
 
@@ -113,30 +114,62 @@ class Set(HandlerBase):
         return binding
 
 
+class QAnim(QtCore.QVariantAnimation):
+    def __init__(self, parent=None):
+        # NOTE avoid gc
+        parent = parent if parent else QtWidgets.QApplication.activeWindow()
+        super(QAnim, self).__init__(parent)
+
+    def updateCurrentValue(self, v):
+        return super(QAnim, self).updateCurrentValue(v)
+
+
 class Anim(HandlerBase):
     # NOTE support anim value change
-    def __init__(self, value, duration=1000, valueChanged=None, finished=None):
-        self.value = value
+    def __init__(
+        self,
+        value,
+        duration=1000,
+        easing=QtCore.QEasingCurve.Linear,
+        valueChanged=None,
+        finished=None,
+    ):
+        self.value_list = value if isinstance(value, Iterable) else [value]
         self.duration = duration
         self.valueChanged = valueChanged
         self.finished = finished
+        self.easing = easing
 
     def __rrshift__(self, binding):
         binding = Binding._inst_.pop()
-        # NOTE avoid gc
-        parent = QtWidgets.QApplication.activeWindow()
-        anim = QtCore.QVariantAnimation(parent)
-        anim.setDuration(self.duration)
-        anim.valueChanged.connect(lambda v: binding.set(v))
-        anim.finished.connect(anim.deleteLater)
+        data = binding.get()
+        data_list = data if isinstance(data, Iterable) else [data]
 
-        anim.setStartValue(binding.get())
-        anim.setEndValue(self.value)
-        anim.start()
+        anim_list = []
+        for i, (start,value) in enumerate(zip(data_list,self.value_list)):
+            anim = QAnim()
+            anim_list.append(anim)
+            anim.setDuration(self.duration)
+            
+            def value_change(i,v):
+                value = binding.get()
+                if not isinstance(value, Iterable):
+                    binding.set(v)
+                else:
+                    value[i] = v
+                    binding.set(value)
 
-        if callable(self.finished):
-            anim.finished.connect(self.finished)
-        if callable(self.valueChanged):
-            anim.valueChanged.connect(self.valueChanged)
+            anim.valueChanged.connect(partial(value_change,i))
+            anim.finished.connect(anim.deleteLater)
+            anim.setEasingCurve(self.easing)
 
-        return anim
+            anim.setStartValue(start)
+            anim.setEndValue(value)
+            anim.start()
+
+            if callable(self.finished):
+                anim.finished.connect(self.finished)
+            if callable(self.valueChanged):
+                anim.valueChanged.connect(self.valueChanged)
+
+        return anim_list

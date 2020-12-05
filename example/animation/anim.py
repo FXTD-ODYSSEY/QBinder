@@ -13,6 +13,7 @@ __date__ = "2020-12-03 19:10:10"
 
 import os
 import sys
+import random
 
 repo = (lambda f: lambda p=__file__: f(f, p))(
     lambda f, p: p
@@ -51,57 +52,38 @@ class AnimBinder(BinderTemplate):
             (255, 0, 255),
             (255, 0, 0),
         ]
-        with self("dumper"):
+        with self("dumper") as dumper:
             self.rainbow_index = 0
-            self.c0_r = 255
-            self.c0_g = 0
-            self.c0_b = 0
+            self.c0 = [255, 0, 0]
+            self.c1 = [255, 255, 0]
+            self.c2 = [0, 255, 0]
+            self.c3 = [0, 255, 255]
+            self.c4 = [0, 0, 255]
+            self.c5 = [255, 0, 255]
+            self.c6 = [255, 0, 0]
 
-            self.c1_r = 255
-            self.c1_g = 255
-            self.c1_b = 0
-
-            self.c2_r = 0
-            self.c2_g = 255
-            self.c2_b = 0
-
-            self.c3_r = 0
-            self.c3_g = 255
-            self.c3_b = 255
-
-            self.c4_r = 0
-            self.c4_g = 0
-            self.c4_b = 255
-
-            self.c5_r = 255
-            self.c5_g = 0
-            self.c5_b = 255
-
-            self.c6_r = 255
-            self.c6_g = 0
-            self.c6_b = 0
+        self["rainbow_index"].connect(self.rainbow_change)
 
     def rainbow_change(self):
+
         idx_list = (
             self.idx_list[self.rainbow_index :] + self.idx_list[: self.rainbow_index]
         )
-        for i,idx in enumerate(idx_list):
+        for i, idx in enumerate(idx_list):
             color = self.rainbow_color[idx]
-            self["c%s_r" % i].get() >> Anim(color[0])
-            self["c%s_g" % i].get() >> Anim(color[1])
-            self["c%s_b" % i].get() >> Anim(color[2])
+            self["c%s" % i].get() >> Anim(color)
+            # TODO
+            # self["c%s" % i] >> Anim(self.rainbow_color[idx])
 
     def rainbow_increment(self):
         self.rainbow_index += 1
         if self.rainbow_index >= 7:
             self.rainbow_index = 0
-        self.rainbow_change()
-        
+
     def rainbow_decrement(self):
         self.rainbow_index -= 1
         if self.rainbow_index <= 0:
             self.rainbow_index = 6
-        self.rainbow_change()
 
 
 class AnimWidget(QtWidgets.QWidget):
@@ -121,41 +103,33 @@ class AnimWidget(QtWidgets.QWidget):
                 y1: 0,
                 x2: 1,
                 y2: 0,
-                stop: 0.000 rgb({c0_r}, {c0_g}, {c0_b}),
-                stop: 0.166 rgb({c1_r}, {c1_g}, {c1_b}),
-                stop: 0.333 rgb({c2_r}, {c2_g}, {c2_b}),
-                stop: 0.500 rgb({c3_r}, {c3_g}, {c3_b}),
-                stop: 0.666 rgb({c4_r}, {c4_g}, {c4_b}),
-                stop: 0.833 rgb({c5_r}, {c5_g}, {c5_b}),
-                stop: 1.000 rgb({c6_r}, {c6_g}, {c6_b})
+                stop: 0.000 rgb{c0},
+                stop: 0.166 rgb{c1},
+                stop: 0.333 rgb{c2},
+                stop: 0.500 rgb{c3},
+                stop: 0.666 rgb{c4},
+                stop: 0.833 rgb{c5},
+                stop: 1.000 rgb{c6}
             );
         """.format(
-                c0_r=self.state.c0_r,
-                c1_r=self.state.c1_r,
-                c2_r=self.state.c2_r,
-                c3_r=self.state.c3_r,
-                c4_r=self.state.c4_r,
-                c5_r=self.state.c5_r,
-                c6_r=self.state.c6_r,
-                c0_g=self.state.c0_g,
-                c1_g=self.state.c1_g,
-                c2_g=self.state.c2_g,
-                c3_g=self.state.c3_g,
-                c4_g=self.state.c4_g,
-                c5_g=self.state.c5_g,
-                c6_g=self.state.c6_g,
-                c0_b=self.state.c0_b,
-                c1_b=self.state.c1_b,
-                c2_b=self.state.c2_b,
-                c3_b=self.state.c3_b,
-                c4_b=self.state.c4_b,
-                c5_b=self.state.c5_b,
-                c6_b=self.state.c6_b,
+                c0=tuple(self.state.c0),
+                c1=tuple(self.state.c1),
+                c2=tuple(self.state.c2),
+                c3=tuple(self.state.c3),
+                c4=tuple(self.state.c4),
+                c5=tuple(self.state.c5),
+                c6=tuple(self.state.c6),
             )
         )
+        
 
         self.ColorIncrement_BTN.clicked.connect(lambda: self.state.rainbow_increment())
         self.ColorDecrement_BTN.clicked.connect(lambda: self.state.rainbow_decrement())
+
+        timer = QtCore.QTimer(self)
+        timer.timeout.connect(self.state.rainbow_increment)
+        self.AnimStart_BTN.clicked.connect(lambda: timer.start(1000))
+        self.AnimStop_BTN.clicked.connect(lambda: timer.stop())
 
 
 if __name__ == "__main__":

@@ -139,9 +139,6 @@ class NotifyList(list):
         __setslice__ = notify(list.__setslice__)
         __delslice__ = notify(list.__delslice__)
 
-        def __getslice__(self, *args):
-            return self.__class__(list.__getslice__(self, *args))
-
     __delitem__ = notify(list.__delitem__)
 
     def __getitem__(self, item):

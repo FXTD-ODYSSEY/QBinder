@@ -37,7 +37,6 @@ print("__binding__", Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi, translate
 
-
 class StyleSheetBinder(BinderTemplate):
     def __init__(self):
         with self("dumper") as dumper:
@@ -61,7 +60,7 @@ class StyleSheetBinder(BinderTemplate):
             self.through = False
 
             self.decoration = "none"
-        print(dumper.path)
+            
         self["underline"].connect(self.decoration_change)
         self["through"].connect(self.decoration_change)
 
@@ -128,7 +127,7 @@ class StyleWidget(QtWidgets.QWidget):
         self.V_Slider.setValue(lambda: self.state.v)
 
         self.Font_Label.setStyleSheet(
-            lambda: """
+            lambda: u"""
             font-family: {family};
             font-size: {size}pt;
             font-style: {style};
@@ -138,8 +137,8 @@ class StyleWidget(QtWidgets.QWidget):
                 family=self.state.family,
                 size=self.state.font_size,
                 decoration=self.state.decoration,
-                style="italic" if self.state.italic else "none",
-                weight="bold" if self.state.bold else "none",
+                style=u"italic" if self.state.italic else u"none",
+                weight=u"bold" if self.state.bold else u"none",
             )
         )
         self.Font_Label.setText(lambda: self.state.text)

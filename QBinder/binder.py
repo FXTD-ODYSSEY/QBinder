@@ -142,9 +142,12 @@ class BinderDumper(QtCore.QObject):
             for k, v in data.items():
                 setattr(self.binder, k, v)
         except:
-            # NOTE May be the file broken
+            # NOTE May be the file broken for some reason.
             os.remove(path)
-
+    
+    def clear(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
 
 class BinderDispatcher(QtCore.QObject):
     _trace_dict_ = nestdict()

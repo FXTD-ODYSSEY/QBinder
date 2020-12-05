@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>552</width>
-    <height>463</height>
+    <width>451</width>
+    <height>465</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -482,18 +482,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFontComboBox" name="Font_Combo">
-         <property name="currentFont">
-          <font>
-           <family>宋体</family>
-           <weight>50</weight>
-           <italic>false</italic>
-           <bold>false</bold>
-           <underline>false</underline>
-           <kerning>false</kerning>
-          </font>
-         </property>
-        </widget>
+        <widget class="QFontComboBox" name="Font_Combo"/>
        </item>
       </layout>
      </item>
