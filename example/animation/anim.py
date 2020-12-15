@@ -39,7 +39,7 @@ from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi, translate
 
 
-class AnimBinder(BinderTemplate):
+class RainbowBinder(BinderTemplate):
     def __init__(self):
         self.color_list = []
         self.idx_list = [i for i in range(7)]
@@ -72,7 +72,7 @@ class AnimBinder(BinderTemplate):
         for i, idx in enumerate(idx_list):
             color = self.rainbow_color[idx]
             self["c%s" % i].get() >> Anim(color)
-            # TODO
+            # TODO Binding Handler getter
             # self["c%s" % i] >> Anim(self.rainbow_color[idx])
 
     def rainbow_increment(self):
@@ -86,16 +86,33 @@ class AnimBinder(BinderTemplate):
             self.rainbow_index = 6
 
 
+class ProgressBinder(BinderTemplate):
+    def __init__(self):
+        with self("dumper") as dumper:
+            self.progress = 0
+            self.timeout = 200
+            self.step = 1
+
+    def progress_increment(self):
+        self.progress += self.step
+        if self.progress >= 100:
+            self.progress -= 100
+
+
 class AnimWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(AnimWidget, self).__init__(parent)
 
-        self.state = AnimBinder()
         # self.setupUi(self)
 
         ui_file = os.path.join(__file__, "..", "anim.ui")
         loadUi(ui_file, self)
 
+        self.rainbow_initialize()
+        self.progress_initialize()
+
+    def rainbow_initialize(self):
+        rainbow_binder = RainbowBinder()
         self.Rainbow_Label.setStyleSheet(
             lambda: """
             background: qlineargradient(spread: pad,
@@ -112,24 +129,53 @@ class AnimWidget(QtWidgets.QWidget):
                 stop: 1.000 rgb{c6}
             );
         """.format(
-                c0=tuple(self.state.c0),
-                c1=tuple(self.state.c1),
-                c2=tuple(self.state.c2),
-                c3=tuple(self.state.c3),
-                c4=tuple(self.state.c4),
-                c5=tuple(self.state.c5),
-                c6=tuple(self.state.c6),
+                c0=tuple(rainbow_binder.c0),
+                c1=tuple(rainbow_binder.c1),
+                c2=tuple(rainbow_binder.c2),
+                c3=tuple(rainbow_binder.c3),
+                c4=tuple(rainbow_binder.c4),
+                c5=tuple(rainbow_binder.c5),
+                c6=tuple(rainbow_binder.c6),
             )
         )
-        
 
-        self.ColorIncrement_BTN.clicked.connect(lambda: self.state.rainbow_increment())
-        self.ColorDecrement_BTN.clicked.connect(lambda: self.state.rainbow_decrement())
+        self.ColorIncrement_BTN.clicked.connect(rainbow_binder.rainbow_increment)
+        self.ColorDecrement_BTN.clicked.connect(rainbow_binder.rainbow_decrement)
 
         timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.state.rainbow_increment)
-        self.AnimStart_BTN.clicked.connect(lambda: timer.start(1000))
-        self.AnimStop_BTN.clicked.connect(lambda: timer.stop())
+        timer.setInterval(1000)
+        timer.timeout.connect(rainbow_binder.rainbow_increment)
+        self.AnimStart_BTN.clicked.connect(rainbow_binder.rainbow_increment)
+        self.AnimStart_BTN.clicked.connect(timer.start)
+        self.AnimStop_BTN.clicked.connect(timer.stop)
+        timer.start()
+
+    def progress_initialize(self):
+        progress_binder = ProgressBinder()
+
+        self.Progress_SB.setValue(lambda: progress_binder.progress * 1)
+        self.Progress_SB.editingFinished.connect(
+            lambda: progress_binder.progress >> Set(self.Progress_SB.value())
+        )
+        self.Progress_Slider.setValue(lambda: progress_binder.progress)
+        self.ProgressBar.setValue(lambda: progress_binder.progress)
+
+        timer = QtCore.QTimer(self)
+        timer.setInterval(lambda: progress_binder.timeout)
+        timer.timeout.connect(progress_binder.progress_increment)
+        self.ProgressStart_BTN.clicked.connect(progress_binder.progress_increment)
+        self.ProgressStart_BTN.clicked.connect(timer.start)
+        self.ProgressStop_BTN.clicked.connect(timer.stop)
+
+        self.Time_SB.setValue(lambda: progress_binder.timeout * 1)
+        self.Time_SB.editingFinished.connect(
+            lambda: progress_binder.timeout >> Set(self.Time_SB.value())
+        )
+        self.Step_SB.setValue(lambda: progress_binder.step * 1)
+        self.Step_SB.editingFinished.connect(
+            lambda: progress_binder.step >> Set(self.Step_SB.value())
+        )
+        timer.start()
 
 
 if __name__ == "__main__":
