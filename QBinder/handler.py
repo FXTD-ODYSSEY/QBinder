@@ -121,7 +121,8 @@ class QAnim(QtCore.QVariantAnimation):
         super(QAnim, self).__init__(parent)
 
     def updateCurrentValue(self, v):
-        return super(QAnim, self).updateCurrentValue(v)
+        pass
+        # return super(QAnim, self).updateCurrentValue(v)
 
 
 class Anim(HandlerBase):

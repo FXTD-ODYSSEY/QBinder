@@ -13,7 +13,7 @@ __date__ = "2020-12-03 19:10:10"
 
 import os
 import sys
-import random
+from functools import partial
 
 repo = (lambda f: lambda p=__file__: f(f, p))(
     lambda f, p: p
@@ -28,7 +28,7 @@ repo = (lambda f: lambda p=__file__: f(f, p))(
 )()
 sys.path.insert(0, repo) if repo not in sys.path else None
 
-# os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 
 from QBinder import BinderTemplate, Binder
 from QBinder.handler import Set, Anim
@@ -52,7 +52,10 @@ class RainbowBinder(BinderTemplate):
             (255, 0, 255),
             (255, 0, 0),
         ]
+
         with self("dumper") as dumper:
+            self.start_flag = True
+            self.height = 0
             self.rainbow_index = 0
             self.c0 = [255, 0, 0]
             self.c1 = [255, 255, 0]
@@ -89,6 +92,7 @@ class RainbowBinder(BinderTemplate):
 class ProgressBinder(BinderTemplate):
     def __init__(self):
         with self("dumper") as dumper:
+            self.start_flag = True
             self.progress = 0
             self.timeout = 200
             self.step = 1
@@ -139,6 +143,55 @@ class AnimWidget(QtWidgets.QWidget):
             )
         )
 
+        def anim_color_channel(i):
+            R_SB = getattr(self, "C%sR_SB" % i)
+            R_SB.setValue(lambda: getattr(rainbow_binder, "c%s" % i)[0] * 1)
+            R_SB.editingFinished.connect(
+                lambda: getattr(rainbow_binder, "c%s" % i)
+                >> Anim(
+                    [
+                        R_SB.value(),
+                        getattr(rainbow_binder, "c%s" % i)[1],
+                        getattr(rainbow_binder, "c%s" % i)[2],
+                    ]
+                )
+            )
+            G_SB = getattr(self, "C%sG_SB" % i)
+            G_SB.setValue(lambda: getattr(rainbow_binder, "c%s" % i)[1] * 1)
+            G_SB.editingFinished.connect(
+                lambda: getattr(rainbow_binder, "c%s" % i)
+                >> Anim(
+                    [
+                        getattr(rainbow_binder, "c%s" % i)[0],
+                        G_SB.value(),
+                        getattr(rainbow_binder, "c%s" % i)[2],
+                    ]
+                )
+            )
+            B_SB = getattr(self, "C%sB_SB" % i)
+            B_SB.setValue(lambda: getattr(rainbow_binder, "c%s" % i)[2] * 1)
+            B_SB.editingFinished.connect(
+                lambda: getattr(rainbow_binder, "c%s" % i)
+                >> Anim(
+                    [
+                        getattr(rainbow_binder, "c%s" % i)[0],
+                        getattr(rainbow_binder, "c%s" % i)[1],
+                        B_SB.value(),
+                    ]
+                )
+            )
+
+        for i in range(7):
+            anim_color_channel(i)
+
+        self.Color_Frame.setFixedHeight(lambda: rainbow_binder.height)
+        self.ColorInfo_BTN.clicked.connect(
+            lambda: rainbow_binder.height
+            >> Anim(
+                0 if rainbow_binder.height else self.Color_Frame.sizeHint().height()
+            )
+        )
+
         self.ColorIncrement_BTN.clicked.connect(rainbow_binder.rainbow_increment)
         self.ColorDecrement_BTN.clicked.connect(rainbow_binder.rainbow_decrement)
 
@@ -146,9 +199,15 @@ class AnimWidget(QtWidgets.QWidget):
         timer.setInterval(1000)
         timer.timeout.connect(rainbow_binder.rainbow_increment)
         self.AnimStart_BTN.clicked.connect(rainbow_binder.rainbow_increment)
-        self.AnimStart_BTN.clicked.connect(timer.start)
-        self.AnimStop_BTN.clicked.connect(timer.stop)
-        timer.start()
+        self.AnimStart_BTN.clicked.connect(
+            lambda: rainbow_binder.start_flag >> Set(True)
+        )
+        self.AnimStop_BTN.clicked.connect(
+            lambda: rainbow_binder.start_flag >> Set(False)
+        )
+        rainbow_binder["start_flag"].connect(
+            lambda: timer.start() if rainbow_binder.start_flag else timer.stop()
+        )
 
     def progress_initialize(self):
         progress_binder = ProgressBinder()
@@ -160,13 +219,6 @@ class AnimWidget(QtWidgets.QWidget):
         self.Progress_Slider.setValue(lambda: progress_binder.progress)
         self.ProgressBar.setValue(lambda: progress_binder.progress)
 
-        timer = QtCore.QTimer(self)
-        timer.setInterval(lambda: progress_binder.timeout)
-        timer.timeout.connect(progress_binder.progress_increment)
-        self.ProgressStart_BTN.clicked.connect(progress_binder.progress_increment)
-        self.ProgressStart_BTN.clicked.connect(timer.start)
-        self.ProgressStop_BTN.clicked.connect(timer.stop)
-
         self.Time_SB.setValue(lambda: progress_binder.timeout * 1)
         self.Time_SB.editingFinished.connect(
             lambda: progress_binder.timeout >> Set(self.Time_SB.value())
@@ -175,7 +227,21 @@ class AnimWidget(QtWidgets.QWidget):
         self.Step_SB.editingFinished.connect(
             lambda: progress_binder.step >> Set(self.Step_SB.value())
         )
-        timer.start()
+
+        timer = QtCore.QTimer(self)
+        timer.setInterval(lambda: progress_binder.timeout)
+        timer.timeout.connect(progress_binder.progress_increment)
+        self.ProgressStart_BTN.clicked.connect(progress_binder.progress_increment)
+
+        self.ProgressStart_BTN.clicked.connect(
+            lambda: progress_binder.start_flag >> Set(True)
+        )
+        self.ProgressStop_BTN.clicked.connect(
+            lambda: progress_binder.start_flag >> Set(False)
+        )
+        progress_binder["start_flag"].connect(
+            lambda: timer.start() if progress_binder.start_flag else timer.stop()
+        )
 
 
 if __name__ == "__main__":
