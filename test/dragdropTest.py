@@ -25,28 +25,29 @@ DIR = os.path.dirname(__file__)
 
 MODULE = os.path.join(DIR, "..")
 if MODULE not in sys.path:
-    sys.path.insert(0,MODULE)
+    sys.path.insert(0, MODULE)
 
 from QBinder import Binder, QEventHook
 import Qt
+
 print(Qt.__binding__)
 from Qt import QtWidgets, QtCore, QtGui
 
-event_hook = QEventHook()
+event_hook = QEventHook.instance()
+
 
 class DragDropListWidget(QtWidgets.QListWidget):
-    
     def __init__(self, parent=None):
         super(DragDropListWidget, self).__init__(parent)
         self.setAcceptDrops(True)
         app = QtWidgets.QApplication.instance()
         app.installEventFilter(self)
 
-    def eventFilter(self,receiver, event):
+    def eventFilter(self, receiver, event):
         if event.type() == QtCore.QEvent.DragMove:
-            print("filter",receiver,receiver.parent(),type(receiver))
+            print("filter", receiver, receiver.parent(), type(receiver))
         return False
-    
+
     def dragEnterEvent(self, event):
         event.accept() if event.mimeData().hasUrls() else event.ignore()
 
@@ -73,24 +74,24 @@ class DragDropWidget(QtWidgets.QWidget):
         super(DragDropWidget, self).__init__(parent)
         layout = QtWidgets.QVBoxLayout(self)
         self.setObjectName("DragDropWidget")
-        
+
         # self.list_widget = DragDropListWidget()
         self.list_widget = QtWidgets.QListWidget()
         self.list_widget.setAcceptDrops(True)
-        
+
         # TODO eventhook limitations
         self.list_widget.dragEnterEvent = self.dragEnterEvent
         self.list_widget.dragMoveEvent = self.dragMoveEvent
         # self.list_widget.dropEvent = self.dropEvent
-        
+
         # self.list_widget >> event_hook("DragEnter",self.dragEnterEvent)
         # self.list_widget >> event_hook("DragMove",self.dragMoveEvent)
-        self.list_widget >> event_hook("Drop",self.dropEvent)
-        
+        self.list_widget >> event_hook("Drop", self.dropEvent)
+
         layout.addWidget(self.list_widget)
-        
+
     def dragEnterEvent(self, event):
-        print(event,event.mimeData().hasUrls(),type(event))
+        print(event, event.mimeData().hasUrls(), type(event))
         event.accept() if event.mimeData().hasUrls() else event.ignore()
 
     def dropEvent(self, event):

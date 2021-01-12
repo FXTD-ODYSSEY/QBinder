@@ -14,9 +14,9 @@ __date__ = "2020-11-04 15:30:25"
 import os
 import six
 import sys
-import time
 import uuid
 import json
+import ctypes
 import random
 import hashlib
 import inspect
@@ -28,7 +28,7 @@ from .binding import Binding, FnBinding, BindingProxy
 from .util import nestdict
 from .eventhook import QEventHook, Iterable
 
-event_hook = QEventHook()
+event_hook = QEventHook.instance()
 
 
 class BinderCollector(QtCore.QObject):
@@ -63,18 +63,18 @@ class BinderDumper(QtCore.QObject):
     _dumper_dict_ = {}
     __init_flag = False
 
-    def __new__(cls, binder, *args, **kwargs):
+    @classmethod
+    def instance(cls, binder, *args, **kwargs):
         instance = cls._dumper_dict_.get(id(binder))
-        cls.__init_flag = not instance
-        if cls.__init_flag:
-            instance = super(BinderDumper, cls).__new__(cls, binder, *args, **kwargs)
+        if not instance:
+            instance = cls(binder, *args, **kwargs)
             cls._dumper_dict_[id(binder)] = instance
 
         return instance
 
     def __init__(self, binder, db_name, filters=None):
-        if not self.__init_flag:
-            return
+        if self._dumper_dict_.get(id(binder)):
+            raise Exception("This class is a singleton!")
         super(BinderDumper, self).__init__()
         self.binder = binder
         self.db_name = db_name
@@ -99,8 +99,8 @@ class BinderDumper(QtCore.QObject):
 
         self.auto_load = True
 
-    def set_auto_load(self, enabeld):
-        self.auto_load = enabeld
+    def set_auto_load(self, enabled):
+        self.auto_load = enabled
 
     def __prepare__(self):
         if self.auto_load:
@@ -118,7 +118,7 @@ class BinderDumper(QtCore.QObject):
         self._filters_.update(BinderBase._trace_setattr_)
 
     def __del__(self):
-        self.__dumper_list.remove(self)
+        self._dumper_dict_.pop(self)
         super(BinderDumper, self).__del__()
 
     def save(self, path="", indent=None):
@@ -138,35 +138,34 @@ class BinderDumper(QtCore.QObject):
     def read(self, path):
         try:
             with open(path, "r") as f:
-                data = json.load(f, object_pairs_hook =OrderedDict,encoding="utf-8")
+                data = json.load(f, object_pairs_hook=OrderedDict, encoding="utf-8")
             for k, v in data.items():
                 setattr(self.binder, k, v)
         except:
             # NOTE May be the file broken for some reason.
             os.remove(path)
-    
+
     def clear(self):
         if os.path.exists(self.path):
             os.remove(self.path)
 
+
 class BinderDispatcher(QtCore.QObject):
     _trace_dict_ = nestdict()
     __instance = None
-    __init_flag = False
 
-    def __new__(cls, binder):
+    @classmethod
+    def instance(cls, binder):
         cls.binder = binder
-        if cls.__instance is None:
-            cls.__instance = super(BinderDispatcher, cls).__new__(cls)
-            cls.__init_flag = True
-
+        if not cls.__instance:
+            cls.__instance = cls()
         return cls.__instance
 
-    def __init__(self, binder):
-        if self.__init_flag:
-            self.__init_flag = False
-            super(BinderDispatcher, self).__init__()
-            self >> event_hook(QtCore.QEvent.User, self.__bind_cls__)
+    def __init__(self):
+        if self.__instance:
+            raise Exception("This class is a singleton!")
+        super(BinderDispatcher, self).__init__()
+        self >> event_hook(QtCore.QEvent.User, self.__bind_cls__)
         event = QtCore.QEvent(QtCore.QEvent.User)
         QtWidgets.QApplication.postEvent(self, event)
 
@@ -201,7 +200,7 @@ class BinderDispatcher(QtCore.QObject):
             md5 = hashlib.md5("".join((path, hex)).encode("utf-8")).hexdigest()
             db_name = md5
 
-        return BinderDumper(self.binder, db_name, filters)
+        return BinderDumper.instance(self.binder, db_name, filters)
 
     def fn_bind(self, attr=None):
         """fn_bind
@@ -281,7 +280,7 @@ class BinderBase(object):
 
     def __call__(self, *args):
         # NOTE __call__ dispatch function avoid polluting local scope
-        return BinderDispatcher(self).dispatch(*args)
+        return BinderDispatcher.instance(self).dispatch(*args)
 
     def __enter__(self):
         # NOTE support with statement for group indent
@@ -305,7 +304,7 @@ class BinderBase(object):
 
 class Binder(BinderBase):
     def __new__(cls, *args, **kw):
-        # NOTE spawn differenct class instance to contain static member
+        # NOTE spawn different class instance to contain static member
         class BinderInstance(BinderBase):
             _var_dict_ = {}
 
@@ -339,8 +338,8 @@ class BinderTemplateMeta(type):
                 attrs[name] = staticmethod(member)
         return type.__new__(cls, name, bases, attrs)
 
-
-class BinderTemplate(object, six.with_metaclass(BinderTemplateMeta)):
+# NOTE with_metaclass make staticmethod work
+class BinderTemplate(six.with_metaclass(BinderTemplateMeta,object)):
     def __new__(cls, *args, **kwargs):
         binder = Binder()
         for name, member in inspect.getmembers(cls):
@@ -350,5 +349,5 @@ class BinderTemplate(object, six.with_metaclass(BinderTemplateMeta)):
                 setattr(binder, name, partial(member, binder))
             else:
                 setattr(binder, name, member)
-        cls.__init__(binder)
+        cls.__init__(binder,*args, **kwargs)
         return binder

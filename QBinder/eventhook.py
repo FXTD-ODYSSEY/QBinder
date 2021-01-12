@@ -21,32 +21,31 @@ import six
 import inspect
 from functools import partial
 
-from Qt import QtCore,QtWidgets,QtGui
+from Qt import QtCore, QtWidgets, QtGui
 
 
 class QEventHook(QtCore.QObject):
 
     __invert_flag = False
     __instance = None
-    __init_flag = False
     __hook = {}
     __invert_hook = {}
     __event = None
     __callbacks = None
 
-    def __new__(cls):
-        if cls.__instance is None:
-            cls.__instance = super(QEventHook, cls).__new__(cls)
-            cls.__init_flag = True
+    @classmethod
+    def instance(cls, *args, **kwargs):
+        if not cls.__instance:
+            cls.__instance = cls(*args, **kwargs)
         return cls.__instance
 
     def __init__(self):
-        if self.__init_flag:
-            self.__init_flag = False
-            super(QEventHook, self).__init__()
-            self.installEventFilter(self)
-            event = QtCore.QEvent(QtCore.QEvent.User)
-            QtCore.QCoreApplication.postEvent(self, event)
+        if self.__instance:
+            raise Exception("This class is a singleton!")
+        super(QEventHook, self).__init__()
+        self.installEventFilter(self)
+        event = QtCore.QEvent(QtCore.QEvent.User)
+        QtCore.QCoreApplication.postEvent(self, event)
 
     def eventFilter(self, receiver, event):
         data = self.__hook.get(receiver)

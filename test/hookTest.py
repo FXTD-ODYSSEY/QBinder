@@ -7,9 +7,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
-__author__ = 'timmyliang'
-__email__ = '820472580@qq.com'
-__date__ = '2020-11-11 13:49:53'
+__author__ = "timmyliang"
+__email__ = "820472580@qq.com"
+__date__ = "2020-11-11 13:49:53"
 
 
 import os
@@ -17,7 +17,7 @@ import sys
 
 from functools import wraps, partial
 
-os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PySide2'
+os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PySide2"
 # os.environ['QT_PREFERRED_BINDING'] = 'PyQt4;PyQt5'
 
 DIR = os.path.dirname(__file__)
@@ -26,11 +26,12 @@ if MODULE not in sys.path:
     sys.path.append(MODULE)
 
 
-from QBinder import Binder,QEventHook
-from Qt import QtWidgets,QtCore,QtGui
+from QBinder import Binder, QEventHook
+from Qt import QtWidgets, QtCore, QtGui
 from QBinder.handler import Set
 
-event_hook = QEventHook()
+event_hook = QEventHook.instance()
+
 class WidgetTest(QtWidgets.QWidget):
     state = Binder()
     state.text = "aasdsd"
@@ -42,7 +43,6 @@ class WidgetTest(QtWidgets.QWidget):
     def __init__(self):
         super(WidgetTest, self).__init__()
         self.initialize()
-        
 
     def initialize(self):
         layout = QtWidgets.QVBoxLayout()
@@ -55,13 +55,17 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         layout.addWidget(self.button)
 
-        self.button.clicked.connect(lambda:self.state.text >> Set("asd"))
+        self.button.clicked.connect(lambda: self.state.text >> Set("asd"))
         self.edit.setText(lambda: self.state.text)
         self.label.setText(lambda: "message is %s" % self.state.text)
-        
-        event_hook.add_hook(self.edit,QtCore.QEvent.FocusIn,lambda:self.state.color >> Set("red"))
-        event_hook.add_hook(self.edit,QtCore.QEvent.FocusOut,lambda:self.state.color >> Set("black"))
-        self.label.setStyleSheet(lambda:"color:%s" % self.state.color)
+
+        event_hook.add_hook(
+            self.edit, QtCore.QEvent.FocusIn, lambda: self.state.color >> Set("red")
+        )
+        event_hook.add_hook(
+            self.edit, QtCore.QEvent.FocusOut, lambda: self.state.color >> Set("black")
+        )
+        self.label.setStyleSheet(lambda: "color:%s" % self.state.color)
 
         self.spin = QtWidgets.QSpinBox(self)
         self.label = QtWidgets.QLabel()
@@ -69,17 +73,22 @@ class WidgetTest(QtWidgets.QWidget):
         layout.addWidget(self.label)
         self.spin.setValue(lambda: self.state.num)
         self.label.setText(lambda: "num is %s" % self.state.num)
-        
-        self.spin >> event_hook("HoverEnter",lambda:self.state.spin_color >> Set("pink"))
-        self.spin >> event_hook("HoverLeave",lambda:self.state.spin_color >> Set("blue"))
-        self.label.setStyleSheet(lambda:"color:%s" % self.state.spin_color)
-        
+
+        self.spin >> event_hook(
+            "HoverEnter", lambda: self.state.spin_color >> Set("pink")
+        )
+        self.spin >> event_hook(
+            "HoverLeave", lambda: self.state.spin_color >> Set("blue")
+        )
+        self.label.setStyleSheet(lambda: "color:%s" % self.state.spin_color)
+
         self.spin = QtWidgets.QDoubleSpinBox(self)
         self.label = QtWidgets.QLabel()
         layout.addWidget(self.spin)
         layout.addWidget(self.label)
         self.spin.setValue(lambda: self.state.val)
         self.label.setText(lambda: "val is %s" % self.state.val)
+
 
 if __name__ == "__main__":
 

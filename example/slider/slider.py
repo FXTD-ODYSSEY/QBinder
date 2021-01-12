@@ -60,7 +60,6 @@ class SliderBinder(BinderTemplate):
         if v < self.min_value:
             self.min_value = v
 
-
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")

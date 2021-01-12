@@ -21,7 +21,7 @@ from Qt import QtCore, QtGui, QtWidgets
 from .eventhook import QEventHook
 
 
-event_hook = QEventHook()
+event_hook = QEventHook.instance()
 
 
 class BindingBase(object):

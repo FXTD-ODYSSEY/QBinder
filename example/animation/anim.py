@@ -96,6 +96,7 @@ class ProgressBinder(BinderTemplate):
             self.progress = 0
             self.timeout = 200
             self.step = 1
+            self.visible = True
 
     def progress_increment(self):
         self.progress += self.step
@@ -190,6 +191,10 @@ class AnimWidget(QtWidgets.QWidget):
             >> Anim(
                 0 if rainbow_binder.height else self.Color_Frame.sizeHint().height()
             )
+        )
+
+        rainbow_binder["height"].connect(
+            lambda: self.Color_Frame.setVisible(bool(rainbow_binder.height))
         )
 
         self.ColorIncrement_BTN.clicked.connect(rainbow_binder.rainbow_increment)

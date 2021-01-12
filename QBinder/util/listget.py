@@ -20,13 +20,13 @@ class ListGet(object):
     3
     """
 
-    def __init__(self, index, defualt=None):
+    def __init__(self, index, default=None):
         self.index = index
-        self.defualt = defualt
+        self.default = default
 
     def __rrshift__(self, d):
         d = d if isinstance(d, list) else [d]
-        return next(iter(d[self.index :]), self.defualt)
+        return next(iter(d[self.index :]), self.default)
 
 
 if __name__ == "__main__":

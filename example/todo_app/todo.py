@@ -35,11 +35,12 @@ from QBinder.mixin import ItemMixin
 from QBinder.decorator import inject
 
 import Qt
-print("__binding__",Qt.__binding__)
+
+print("__binding__", Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi
 
-event_hook = QEventHook()
+event_hook = QEventHook.instance()
 gstate = Binder()
 
 with gstate("dumper") as dumper:
@@ -60,7 +61,9 @@ gstate.update_count = FnBinding()
 
 @gstate.update_count
 def _():
-    gstate.item_count = len([todo for todo in gstate.todo_data if not todo["completed"]])
+    gstate.item_count = len(
+        [todo for todo in gstate.todo_data if not todo["completed"]]
+    )
 
 
 class EditableLabel(QtWidgets.QLabel):
@@ -101,6 +104,8 @@ class EditableLabel(QtWidgets.QLabel):
 
     def bind(self, item):
         self.item = item
+
+
 class TodoItem(QtWidgets.QWidget):
 
     state = Binder()
@@ -110,7 +115,7 @@ class TodoItem(QtWidgets.QWidget):
         super(TodoItem, self).__init__()
 
         # NOTE disable auto load feature
-        dumper = self.state('dumper')
+        dumper = self.state("dumper")
         dumper.set_auto_load(False)
         self.state.text = "a"
         self.state.completed = False
@@ -118,7 +123,6 @@ class TodoItem(QtWidgets.QWidget):
         self.state.text_style = "none"
         self.state.text_color = "black"
 
-        
         # TODO uifile loading custom module not compatible in DCC
         ui_file = os.path.join(__file__, "..", "item.ui")
         loadUi(ui_file, self)
@@ -137,6 +141,9 @@ class TodoItem(QtWidgets.QWidget):
         self.state["completed"].connect(gstate.update_count)
 
         self.ItemDelete.clicked.connect(lambda: gstate.todo_data.pop(self.__index__))
+
+    def __item__(self, index, data):
+        self.__index__ = index
 
     def completedChanged(self):
         completed = self.state.completed
@@ -208,7 +215,7 @@ class TodoWidget(QtWidgets.QWidget):
 
         # NOTE filter radiobutton handler
         gstate.selected >> GroupBoxBind(self.StateGroup)
-        
+
         gstate["selected"].connect(self.update_item)
         gstate["todo_data"].connect(self.update_item)
         self.update_item()
@@ -240,7 +247,7 @@ class TodoWidget(QtWidgets.QWidget):
             "Completed": lambda data: [d for d in data if d["completed"]],
         }
 
-        # TODO unify handler 
+        # TODO unify handler
         gstate.todo_data >> ItemConstructor[TodoItem](
             __layout__=self.TodoList.layout(),
             __binder__="state",
@@ -266,7 +273,7 @@ if __name__ == "__main__":
     gstate.todo_app = TodoWidget()
     gstate.todo_app.show()
     sys.exit(app.exec_())
-    
+
 # import sys
 # MODULE = r"G:\repo\QBinder\example\todo_app"
 # sys.path.insert(0,MODULE) if MODULE not in sys.path else None

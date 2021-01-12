@@ -30,8 +30,8 @@ class ItemMeta(type):
         cls.item = item
         return cls
 
-
-class ItemConstructor(HandlerBase, six.with_metaclass(ItemMeta)):
+@six.add_metaclass(ItemMeta)
+class ItemConstructor(HandlerBase):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -57,7 +57,8 @@ class ItemConstructor(HandlerBase, six.with_metaclass(ItemMeta)):
                 widget = self.item(*self.args, **self.kwargs)
                 layout.addWidget(widget)
                 layout.__items__.append(widget)
-                widget.__index__ = i
+                if hasattr(widget,"__item__"):
+                    widget.__item__(i,item_data)
 
             widget.setVisible(i in filters)
 

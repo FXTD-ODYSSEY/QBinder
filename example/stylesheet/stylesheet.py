@@ -92,8 +92,12 @@ class StyleSheetBinder(BinderTemplate):
 class StyleWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(StyleWidget, self).__init__(parent)
-
-        self.state = StyleSheetBinder()
+        try:
+            self.state = StyleSheetBinder()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise e
         # self.setupUi(self)
 
         ui_file = os.path.join(__file__, "..", "stylesheet.ui")
