@@ -12,11 +12,8 @@ __email__ = "820472580@qq.com"
 __date__ = "2020-11-19 00:05:51"
 
 import six
-import inspect
-from .binding import Binding
 from .binder import Binder, BinderBase
-from .util import ListGet
-from Qt import QtCore, QtWidgets
+from Qt import QtCore
 
 
 class ItemMeta(type(QtCore.QObject)):

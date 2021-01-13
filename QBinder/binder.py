@@ -13,10 +13,8 @@ __date__ = "2020-11-04 15:30:25"
 
 import os
 import six
-import sys
 import uuid
 import json
-import ctypes
 import random
 import hashlib
 import inspect
@@ -24,12 +22,12 @@ import tempfile
 from functools import partial
 from collections import OrderedDict
 from Qt import QtCore, QtWidgets
-from .binding import Binding, FnBinding, BindingProxy
+
 from .util import nestdict
+from .binding import Binding, FnBinding, BindingProxy
 from .eventhook import QEventHook, Iterable
 
 event_hook = QEventHook.instance()
-
 
 class BinderCollector(QtCore.QObject):
     Binders = OrderedDict()
@@ -61,7 +59,6 @@ class BinderCollector(QtCore.QObject):
 
 class BinderDumper(QtCore.QObject):
     _dumper_dict_ = {}
-    __init_flag = False
 
     @classmethod
     def instance(cls, binder, *args, **kwargs):
@@ -74,7 +71,7 @@ class BinderDumper(QtCore.QObject):
 
     def __init__(self, binder, db_name, filters=None):
         if self._dumper_dict_.get(id(binder)):
-            raise Exception("This class is a singleton!")
+            raise Exception("This class is a singleton! Use `instance` method instead.")
         super(BinderDumper, self).__init__()
         self.binder = binder
         self.db_name = db_name
@@ -163,7 +160,7 @@ class BinderDispatcher(QtCore.QObject):
 
     def __init__(self):
         if self.__instance:
-            raise Exception("This class is a singleton!")
+            raise Exception("This class is a singleton! Use `instance` method instead.")
         super(BinderDispatcher, self).__init__()
         self >> event_hook(QtCore.QEvent.User, self.__bind_cls__)
         event = QtCore.QEvent(QtCore.QEvent.User)

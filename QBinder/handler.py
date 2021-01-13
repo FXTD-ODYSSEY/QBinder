@@ -30,16 +30,13 @@ class ItemMeta(type):
         cls.item = item
         return cls
 
-@six.add_metaclass(ItemMeta)
-class ItemConstructor(HandlerBase):
+class ItemConstructor(six.with_metaclass(ItemMeta)):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
 
     def __rrshift__(self, item_data):
-        # binding = Binding._inst_.pop()
-
-        # NOTE trace lamda function
+        # NOTE trace lambda function
         filters = self.kwargs.pop("__filters__", [i for i in range(len(item_data))])
         if callable(filters):
             # NOTE make sure handle list data
@@ -47,6 +44,7 @@ class ItemConstructor(HandlerBase):
 
         layout = self.kwargs.pop("__layout__")
         binder_name = self.kwargs.pop("__binder__")
+        index = self.kwargs.pop("__index__",0)
 
         if not hasattr(layout, "__items__"):
             layout.__items__ = []
@@ -55,25 +53,30 @@ class ItemConstructor(HandlerBase):
             widget = layout.__items__ >> ListGet(i)
             if not widget:
                 widget = self.item(*self.args, **self.kwargs)
-                layout.addWidget(widget)
+                layout.insertWidget(i+index,widget)
                 layout.__items__.append(widget)
                 if hasattr(widget,"__item__"):
-                    widget.__item__(i,item_data)
+                    widget.__item__(i,item_data,layout)
 
             widget.setVisible(i in filters)
 
             if hasattr(widget, binder_name):
-                binder = getattr(widget, binder_name)
-                for k, v in data.items():
-                    val = getattr(binder, k)
-                    setattr(binder, k, v)
+                # NOTE delay update
+                QtCore.QTimer.singleShot(0,partial(self._update_value_,data,widget,binder_name))
 
-        for i in range(len(item_data), len(layout.__items__)):
+        for i in reversed(range(len(item_data), len(layout.__items__))):
             widget = layout.__items__[i]
-            widget.deleteLater()
-        layout.__items__ = layout.__items__[: len(item_data)]
-
-
+            widget.hide()
+        # layout.__items__ = layout.__items__[: len(item_data)]
+    
+    def _update_value_(self,data,widget,binder_name):
+        binder = getattr(widget, binder_name)
+        for k, v in data.items():
+            val = getattr(binder, k)
+            # NOTE avoid infinite loop
+            if val != v:
+                setattr(binder, k, v)
+                
 class GroupBoxBind(HandlerBase):
     def __init__(self, group):
         self.group = group

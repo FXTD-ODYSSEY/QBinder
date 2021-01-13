@@ -14,7 +14,6 @@ __date__ = "2020-11-15 20:56:50"
 import six
 import inspect
 from .binder import Binder
-from functools import wraps
 
 
 def inject(binder):

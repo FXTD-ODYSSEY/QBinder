@@ -12,10 +12,8 @@ __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-02 23:47:53"
 
-import os
 import sys
 import six
-import json
 import types
 import inspect
 from functools import partial
@@ -24,7 +22,7 @@ import Qt
 from Qt import QtCore, QtWidgets, QtGui
 
 from .binding import Binding
-from .util import nestdict, defaultdict
+from .util import nestdict
 from .hookconfig import CONFIG
 
 HOOKS = nestdict()

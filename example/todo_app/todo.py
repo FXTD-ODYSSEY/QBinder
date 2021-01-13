@@ -142,7 +142,7 @@ class TodoItem(QtWidgets.QWidget):
 
         self.ItemDelete.clicked.connect(lambda: gstate.todo_data.pop(self.__index__))
 
-    def __item__(self, index, data):
+    def __item__(self, index, data, layout):
         self.__index__ = index
 
     def completedChanged(self):

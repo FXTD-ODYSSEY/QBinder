@@ -12,12 +12,10 @@ __date__ = "2020-05-06 23:02:37"
 
 import six
 import sys
-import time
 import inspect
-from functools import partial, wraps
 from collections import OrderedDict
 from contextlib import contextmanager
-from Qt import QtCore, QtGui, QtWidgets
+from Qt import QtCore, QtGui
 from .eventhook import QEventHook
 
 
