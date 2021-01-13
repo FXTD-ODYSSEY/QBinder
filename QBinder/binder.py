@@ -29,6 +29,7 @@ from .eventhook import QEventHook, Iterable
 
 event_hook = QEventHook.instance()
 
+
 class BinderCollector(QtCore.QObject):
     Binders = OrderedDict()
     __flag__ = True
@@ -335,8 +336,9 @@ class BinderTemplateMeta(type):
                 attrs[name] = staticmethod(member)
         return type.__new__(cls, name, bases, attrs)
 
+
 # NOTE with_metaclass make staticmethod work
-class BinderTemplate(six.with_metaclass(BinderTemplateMeta,object)):
+class BinderTemplate(six.with_metaclass(BinderTemplateMeta, object)):
     def __new__(cls, *args, **kwargs):
         binder = Binder()
         for name, member in inspect.getmembers(cls):
@@ -346,5 +348,5 @@ class BinderTemplate(six.with_metaclass(BinderTemplateMeta,object)):
                 setattr(binder, name, partial(member, binder))
             else:
                 setattr(binder, name, member)
-        cls.__init__(binder,*args, **kwargs)
+        cls.__init__(binder, *args, **kwargs)
         return binder

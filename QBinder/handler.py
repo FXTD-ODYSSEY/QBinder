@@ -30,6 +30,7 @@ class ItemMeta(type):
         cls.item = item
         return cls
 
+
 class ItemConstructor(six.with_metaclass(ItemMeta)):
     def __init__(self, *args, **kwargs):
         self.args = args
@@ -44,7 +45,7 @@ class ItemConstructor(six.with_metaclass(ItemMeta)):
 
         layout = self.kwargs.pop("__layout__")
         binder_name = self.kwargs.pop("__binder__")
-        index = self.kwargs.pop("__index__",0)
+        index = self.kwargs.pop("__index__", 0)
 
         if not hasattr(layout, "__items__"):
             layout.__items__ = []
@@ -53,30 +54,33 @@ class ItemConstructor(six.with_metaclass(ItemMeta)):
             widget = layout.__items__ >> ListGet(i)
             if not widget:
                 widget = self.item(*self.args, **self.kwargs)
-                layout.insertWidget(i+index,widget)
+                layout.insertWidget(i + index, widget)
                 layout.__items__.append(widget)
-                if hasattr(widget,"__item__"):
-                    widget.__item__(i,item_data,layout)
+                if hasattr(widget, "__item__"):
+                    widget.__item__(i, item_data, layout)
 
             widget.setVisible(i in filters)
 
             if hasattr(widget, binder_name):
                 # NOTE delay update
-                QtCore.QTimer.singleShot(0,partial(self._update_value_,data,widget,binder_name))
+                QtCore.QTimer.singleShot(
+                    0, partial(self._update_value_, data, widget, binder_name)
+                )
 
         for i in reversed(range(len(item_data), len(layout.__items__))):
             widget = layout.__items__[i]
             widget.hide()
         # layout.__items__ = layout.__items__[: len(item_data)]
-    
-    def _update_value_(self,data,widget,binder_name):
+
+    def _update_value_(self, data, widget, binder_name):
         binder = getattr(widget, binder_name)
         for k, v in data.items():
             val = getattr(binder, k)
             # NOTE avoid infinite loop
             if val != v:
                 setattr(binder, k, v)
-                
+
+
 class GroupBoxBind(HandlerBase):
     def __init__(self, group):
         self.group = group
@@ -151,12 +155,12 @@ class Anim(HandlerBase):
         data_list = data if isinstance(data, Iterable) else [data]
 
         anim_list = []
-        for i, (start,value) in enumerate(zip(data_list,self.value_list)):
+        for i, (start, value) in enumerate(zip(data_list, self.value_list)):
             anim = QAnim()
             anim_list.append(anim)
             anim.setDuration(self.duration)
-            
-            def value_change(i,v):
+
+            def value_change(i, v):
                 value = binding.get()
                 if not isinstance(value, Iterable):
                     binding.set(v)
@@ -164,7 +168,7 @@ class Anim(HandlerBase):
                     value[i] = v
                     binding.set(value)
 
-            anim.valueChanged.connect(partial(value_change,i))
+            anim.valueChanged.connect(partial(value_change, i))
             anim.finished.connect(anim.deleteLater)
             anim.setEasingCurve(self.easing)
 

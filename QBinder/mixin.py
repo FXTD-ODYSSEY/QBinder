@@ -46,6 +46,7 @@ class ItemMeta(type(QtCore.QObject)):
 
         return wrapper
 
+
 @six.add_metaclass(ItemMeta)
 class ItemMixin(object):
     __binder__ = ""
