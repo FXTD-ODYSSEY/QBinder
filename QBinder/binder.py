@@ -142,7 +142,8 @@ class BinderDumper(QtCore.QObject):
         except:
             # NOTE May be the file broken for some reason.
             os.remove(path)
-
+        # TODO add read hook
+        
     def clear(self):
         if os.path.exists(self.path):
             os.remove(self.path)

@@ -6,7 +6,7 @@
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
-from types import BuiltinMethodType
+from types import BuiltinMethodType, MethodType
 
 __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
@@ -18,7 +18,6 @@ import types
 import inspect
 from functools import partial
 
-import Qt
 from Qt import QtCore, QtWidgets, QtGui
 
 from .binding import Binding
@@ -86,7 +85,28 @@ for name, member in qt_dict.items():
                 data.update({"updater": updater, "property": property_name})
 
 
-class FuncHook(object):
+class HookMeta(type):
+    def __call__(self, func=None):
+        if callable(func):
+            return self()(func)
+        else:
+            return super(HookMeta, self).__call__(func)
+
+
+class HookBase(six.with_metaclass(HookMeta, object)):
+    def __init__(self, options=None):
+        options = options if options else {}
+        self.options = options
+
+    @classmethod
+    def combine_args(cls, val, args):
+        if isinstance(val, tuple):
+            return val + args[1:]
+        else:
+            return (val,) + args[1:]
+
+
+class MethodHook(HookBase):
     @classmethod
     def fix_cursor_position(cls, func, widget):
         """maintain the Qt edit cusorPosition after setting a new value"""
@@ -116,16 +136,6 @@ class FuncHook(object):
                 dumper._filters_.add(k)
                 break
 
-    @classmethod
-    def combine_args(cls, val, args):
-        if isinstance(val, tuple):
-            return val + args[1:]
-        else:
-            return (val,) + args[1:]
-
-    def __init__(self, options):
-        self.options = options
-
     def __call__(cls, func):
         @six.wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -136,7 +146,7 @@ class FuncHook(object):
 
             if isinstance(callback, types.LambdaType):
 
-                # NOTE get the running bindings (with __get__ method) add to Binding.TRACE_LIST
+                # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
                 with Binding.set_trace():
                     val = callback()
 
@@ -182,6 +192,37 @@ class FuncHook(object):
         return wrapper
 
 
+class FuncHook(HookBase):
+    def __call__(cls, func):
+        @six.wraps(func)
+        def wrapper(*args, **kwargs):
+            if len(args) != 1:
+                return func(*args, **kwargs)
+
+            callback = args[0]
+
+            if isinstance(callback, types.LambdaType):
+
+                # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
+                with Binding.set_trace():
+                    val = callback()
+
+                def connect_callback(callback, args):
+                    val = callback()
+                    args = cls.combine_args(val, args)
+                    func(*args, **kwargs)
+
+                # NOTE register auto update
+                _callback_ = partial(connect_callback, callback, args[1:])
+                for binding in Binding._trace_list_:
+                    binding.connect(_callback_)
+
+                args = cls.combine_args(val, args[1:])
+            return func(*args, **kwargs)
+
+        return wrapper
+
+
 def hook_initialize(hooks):
     """
     # NOTE Dynamic wrap the Qt Widget setter base on the HOOKS Definition
@@ -191,4 +232,4 @@ def hook_initialize(hooks):
         widget = getattr(getattr(Qt, lib), widget)
         for setter, options in setters.items():
             func = getattr(widget, setter)
-            setattr(widget, setter, FuncHook(options)(func))
+            setattr(widget, setter, MethodHook(options)(func))
