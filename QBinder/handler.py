@@ -21,7 +21,12 @@ from Qt import QtWidgets, QtCore
 
 
 class HandlerBase(object):
-    pass
+    def __rrshift__(self, _):
+        binding = Binding._inst_.pop()
+        self.handle(binding)
+
+    def handle(self, binding):
+        raise NotImplementedError
 
 
 class ItemMeta(type):
@@ -31,7 +36,7 @@ class ItemMeta(type):
         return cls
 
 
-class ItemConstructor(six.with_metaclass(ItemMeta)):
+class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -85,8 +90,8 @@ class GroupBoxBind(HandlerBase):
     def __init__(self, group):
         self.group = group
 
-    def __rrshift__(self, binding):
-        self.binding = Binding._inst_.pop()
+    def handle(self, binding):
+        self.binding = binding
         for rb in self.group.findChildren(QtWidgets.QRadioButton):
             rb.toggled.connect(partial(self.filter_state, rb))
         self.binding.connect(self.check_state) >> Call()
@@ -116,8 +121,7 @@ class Set(HandlerBase):
     def __init__(self, val):
         self.val = val
 
-    def __rrshift__(self, binding):
-        binding = Binding._inst_.pop()
+    def handle(self, binding):
         binding.set(self.val)
         return binding
 
@@ -149,8 +153,7 @@ class Anim(HandlerBase):
         self.finished = finished
         self.easing = easing
 
-    def __rrshift__(self, binding):
-        binding = Binding._inst_.pop()
+    def handle(self, binding):
         data = binding.get()
         data_list = data if isinstance(data, Iterable) else [data]
 

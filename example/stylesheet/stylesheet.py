@@ -30,12 +30,13 @@ sys.path.insert(0, repo) if repo not in sys.path else None
 # os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 
 from QBinder import BinderTemplate, Binder
-from QBinder.handler import Set,Anim
+from QBinder.handler import Set, Anim
 import Qt
 
 print("__binding__", Qt.__binding__)
 from Qt import QtGui, QtWidgets, QtCore
 from Qt.QtCompat import loadUi, translate
+
 
 class StyleSheetBinder(BinderTemplate):
     def __init__(self):
@@ -60,7 +61,7 @@ class StyleSheetBinder(BinderTemplate):
             self.through = False
 
             self.decoration = "none"
-            
+
         self["underline"].connect(self.decoration_change)
         self["through"].connect(self.decoration_change)
 
@@ -73,21 +74,22 @@ class StyleSheetBinder(BinderTemplate):
         if not decoration:
             decoration = "none"
         self.decoration = decoration
-        
+
     def to_red(self):
         self.r >> Anim(255)
         self.g >> Anim(0)
         self.b >> Anim(0)
-        
+
     def to_green(self):
         self.r >> Anim(0)
         self.g >> Anim(255)
         self.b >> Anim(0)
-        
+
     def to_blue(self):
         self.r >> Anim(0)
         self.g >> Anim(0)
         self.b >> Anim(255)
+
 
 class StyleWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -96,6 +98,7 @@ class StyleWidget(QtWidgets.QWidget):
             self.state = StyleSheetBinder()
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             raise e
         # self.setupUi(self)
@@ -113,7 +116,7 @@ class StyleWidget(QtWidgets.QWidget):
         self.R_Slider.setValue(lambda: self.state.r)
         self.G_Slider.setValue(lambda: self.state.g)
         self.B_Slider.setValue(lambda: self.state.b)
-        
+
         # NOTE Animation Color
         self.Red_BTN.clicked.connect(self.state.to_red)
         self.Green_BTN.clicked.connect(self.state.to_green)

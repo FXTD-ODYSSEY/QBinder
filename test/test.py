@@ -35,7 +35,7 @@ from Qt import QtWidgets
 from Qt import QtCore
 from Qt import QtGui
 
-event_hook = QEventHook()
+event_hook = QEventHook.instance()
 
 app = QtWidgets.QApplication([])
 

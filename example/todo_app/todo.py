@@ -29,9 +29,8 @@ sys.path.insert(0, repo) if repo not in sys.path else None
 
 # os.environ["QT_PREFERRED_BINDING"] = "PyQt4;PyQt5;PySide;PySide2"
 
-from QBinder import Binder, GBinder, QEventHook, FnBinding
-from QBinder.handler import Set, Call, ItemConstructor, GroupBoxBind
-from QBinder.mixin import ItemMixin
+from QBinder import Binder, QEventHook, FnBinding
+from QBinder.handler import Set, ItemConstructor, GroupBoxBind
 from QBinder.decorator import inject
 
 import Qt
