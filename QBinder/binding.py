@@ -17,7 +17,7 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui
 from .eventhook import QEventHook
-
+from .hook import MethodHook
 
 event_hook = QEventHook.instance()
 
@@ -341,6 +341,7 @@ class Model(QtGui.QStandardItemModel):
     def dataChangedEmit(self):
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
 
+    @MethodHook
     def setSource(self, source):
         # NOTE update source data remove old callback
         [

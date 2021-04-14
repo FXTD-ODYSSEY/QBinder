@@ -18,9 +18,9 @@ import types
 import inspect
 from functools import partial
 
+import Qt
 from Qt import QtCore, QtWidgets, QtGui
 
-from .binding import Binding
 from .util import nestdict
 from .hookconfig import CONFIG
 
@@ -137,6 +137,8 @@ class MethodHook(HookBase):
                 break
 
     def __call__(cls, func):
+        from .binding import Binding
+        
         @six.wraps(func)
         def wrapper(self, *args, **kwargs):
             if len(args) != 1:
@@ -194,6 +196,7 @@ class MethodHook(HookBase):
 
 class FuncHook(HookBase):
     def __call__(cls, func):
+        from .binding import Binding
         @six.wraps(func)
         def wrapper(*args, **kwargs):
             if len(args) != 1:
