@@ -55,7 +55,6 @@ for name, member in qt_dict.items():
     # NOTE filter qt related func
     if name == "QtGui.QMatrix" or not hasattr(member, "staticMetaObject"):
         continue
-    meta_obj = getattr(member, "staticMetaObject")
     data = CONFIG.get(name, {})
     for method_name, method in inspect.getmembers(member, inspect.isroutine):
         if data.get(method_name):
@@ -72,6 +71,9 @@ for name, member in qt_dict.items():
     #             _HOOKS_REL[name][method_name.lower()] = method_name
 
     # NOTE auto bind updater
+    meta_obj = getattr(member, "staticMetaObject")
+    if not meta_obj:
+        continue
     for i in range(meta_obj.propertyCount()):
         property = meta_obj.property(i)
         if not property.hasNotifySignal():
@@ -124,7 +126,6 @@ class MethodHook(HookBase):
     @classmethod
     def auto_dump(cls, binding):
         """auto dump for two way binding"""
-
         from .constant import AUTO_DUMP
 
         binder = binding.__binder__
@@ -138,7 +139,7 @@ class MethodHook(HookBase):
 
     def __call__(cls, func):
         from .binding import Binding
-        
+
         @six.wraps(func)
         def wrapper(self, *args, **kwargs):
             if len(args) != 1:
@@ -176,8 +177,8 @@ class MethodHook(HookBase):
                 if (
                     updater
                     and getter
-                    and len(Binding._trace_list_)
-                    == 1  # NOTE only bind one response variable
+                    # NOTE only bind one response variable
+                    and len(Binding._trace_list_) == 1
                     and len(code.co_consts) == 1  # NOTE only bind directly variable
                 ):
                     updater = getattr(self, updater)
@@ -197,6 +198,7 @@ class MethodHook(HookBase):
 class FuncHook(HookBase):
     def __call__(cls, func):
         from .binding import Binding
+
         @six.wraps(func)
         def wrapper(*args, **kwargs):
             if len(args) != 1:

@@ -19,10 +19,10 @@ except ImportError:
     import Qt
     import six
 
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 from .util import ListGet
-from .hook import HOOKS, hook_initialize
+from .hook import HOOKS, hook_initialize, MethodHook, FuncHook
 from .binding import Model, Binding, FnBinding
 from .binder import GBinder, Binder, BinderCollector, BinderTemplate
 from .eventhook import QEventHook
