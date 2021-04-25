@@ -97,8 +97,7 @@ class HookMeta(type):
 
 class HookBase(six.with_metaclass(HookMeta, object)):
     def __init__(self, options=None):
-        options = options if options else {}
-        self.options = options
+        self.options = options if options else {}
 
     @classmethod
     def combine_args(cls, val, args):
@@ -109,22 +108,8 @@ class HookBase(six.with_metaclass(HookMeta, object)):
 
 
 class MethodHook(HookBase):
-    @classmethod
-    def fix_cursor_position(cls, func, widget):
-        """maintain the Qt edit cusorPosition after setting a new value"""
-
-        def wrapper(*args, **kwargs):
-            pos = widget.property("cursorPosition")
-            res = func(*args, **kwargs)
-            QtCore.QTimer.singleShot(
-                0, lambda: widget.setProperty("cursorPosition", pos)
-            ) if pos else None
-            return res
-
-        return wrapper
-
-    @classmethod
-    def auto_dump(cls, binding):
+    @staticmethod
+    def auto_dump(binding):
         """auto dump for two way binding"""
         from .constant import AUTO_DUMP
 
@@ -136,6 +121,38 @@ class MethodHook(HookBase):
             if v is binding:
                 dumper._filters_.add(k)
                 break
+
+    @staticmethod
+    def remember_cursor_position(callback):
+        """maintain the Qt edit cusorPosition after setting a new value"""
+
+        def wrapper(self, *args, **kwargs):
+            setter = None
+            cursor_pos = 0
+            pos = self.property("cursorPosition")
+            # NOTE for editable combobox
+            if pos and isinstance(self, QtWidgets.QComboBox):
+                edit = self.lineEdit()
+                pos = edit.property("cursorPosition")
+            elif isinstance(self, QtWidgets.QTextEdit):
+                cursor = self.textCursor()
+                cursor_pos = cursor.position()
+
+            callback(self, *args, **kwargs)
+
+            # NOTE wait for two event call
+            if cursor_pos:
+                total = len(self.toPlainText())
+                cursor.setPosition(total if cursor_pos > total else cursor_pos)
+                setter = partial(self.setTextCursor, cursor)
+            elif not pos is None:
+                setter = partial(self.setProperty, "cursorPosition", pos)
+
+            if callable(setter):
+                timer_callback = partial(QtCore.QTimer.singleShot, 0, setter)
+                QtCore.QTimer.singleShot(0, timer_callback)
+
+        return wrapper
 
     def __call__(cls, func):
         from .binding import Binding
@@ -156,7 +173,7 @@ class MethodHook(HookBase):
                 def connect_callback(callback, args):
                     val = callback()
                     args = cls.combine_args(val, args)
-                    func(self, *args, **kwargs)
+                    cls.remember_cursor_position(func)(self, *args, **kwargs)
 
                 # NOTE register auto update
                 _callback_ = partial(connect_callback, callback, args)
@@ -182,11 +199,7 @@ class MethodHook(HookBase):
                     and len(code.co_consts) == 1  # NOTE only bind directly variable
                 ):
                     updater = getattr(self, updater)
-                    updater.connect(
-                        cls.fix_cursor_position(
-                            lambda *args: binding.set(getter()), self
-                        )
-                    )
+                    updater.connect(lambda *args: binding.set(getter()))
                     binding = Binding._trace_list_.pop()
                     QtCore.QTimer.singleShot(0, partial(cls.auto_dump, binding))
 

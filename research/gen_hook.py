@@ -86,10 +86,19 @@ for name, member in pyside_dict.items():
             and "event" not in method_name.lower()
             # NOTE filter readData avoid DataStream Error #issue5
             and "readData" not in method_name 
+            # NOTE maya with Qt loadUi crash #issue9
+            and "itemAt" not in method_name 
         ):
             # if type(method).__name__ == "method_descriptor":
             result_dict[name][method_name] = True
 
-path = "%s.json" % os.path.splitext(__file__)[0]
-with open(path, "w") as f:
-    json.dump(result_dict, f, indent=4, ensure_ascii=False)
+DIR = os.path.dirname(__file__)
+QBinder = os.path.join(os.path.dirname(DIR),"QBinder")
+hookconfig = os.path.join(QBinder,"hookconfig.py")
+with open(hookconfig,'w') as f:
+    data = json.dumps(result_dict,indent=4)
+    f.write("CONFIG = %s" % data.replace("true","True"))
+
+# path = "%s.json" % os.path.splitext(__file__)[0]
+# with open(path, "w") as f:
+#     json.dump(result_dict, f, indent=4, ensure_ascii=False)

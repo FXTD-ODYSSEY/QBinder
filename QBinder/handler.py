@@ -36,7 +36,7 @@ class ItemMeta(type):
         return cls
 
 
-class ItemConstructor(HandlerBase,six.with_metaclass(ItemMeta)):
+class ItemConstructor(HandlerBase, six.with_metaclass(ItemMeta)):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -99,8 +99,7 @@ class GroupBoxBind(HandlerBase):
         return self.binding
 
     def filter_state(self, rb, state):
-        if state:
-            self.binding.set(rb.text().strip())
+        state and self.binding.set(rb.text().strip())
 
     def check_state(self):
         for rb in self.group.findChildren(QtWidgets.QRadioButton):

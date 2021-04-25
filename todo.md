@@ -48,6 +48,10 @@
 - [x] 修复 DataStream 错误 #issue5
 - [x] 修复 BinderTemplate Python 2 & 3 兼容问题
 
+- [ ] binding.connect 传入 func 参数用于控制变化前和变化后
+- [x] 修复 TextEdit 问题
+- [ ] QBinder QCombobox setCurrentText 无法记录 cursorPosition | 折中方案是获取 lineEdit() 然后用 setText 方法
+
 [Qt 文档索引](https://github.com/FXTD-ODYSSEY/MayaScript/blob/master/_QtDemo/_QtDoc/overviews.md)    
 [PyQt mvc 教程](https://www.youtube.com/watch?v=2sRoLN337cs&list=PL8B63F2091D787896&index=2)    
 

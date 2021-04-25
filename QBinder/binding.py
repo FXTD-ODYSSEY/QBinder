@@ -258,8 +258,9 @@ class Binding(QtGui.QStandardItem, BindingBase):
         return d
 
     def set(self, value):
-        # if value == self.get():
-        #     return
+        # NOTE prevent infinite changed 
+        if value == self.get():
+            return
         self.val = self.retrieve2Notify(value)
         self.overrideOperator(value)
         self.emitDataChanged()
@@ -267,7 +268,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
 
     def get(self):
         self.__class__._inst_ = [self]
-        self._trace_list_.append(self) if self.__trace else None
+        self.__trace and self._trace_list_.append(self)
         return self.val
 
     @classmethod
@@ -363,7 +364,10 @@ class Model(QtGui.QStandardItemModel):
         )
 
         self.setRowCount(len(self._source))
-        self.setColumnCount(max([len(row) for row in self._source]))
+        columns = [len(row) for row in self._source]
+        column_count = max(columns) if columns else 0
+
+        self.setColumnCount(column_count)
 
         # NOTE add data update callback
         for row in self._source:
@@ -372,11 +376,10 @@ class Model(QtGui.QStandardItemModel):
                     item.connect(self.dataChangedEmit)
 
         # NOTE fill None to the empty cell
-        columnCount = max([len(row) for row in self._source])
         for row in self._source:
-            rowCount = len(row)
-            if rowCount < columnCount:
-                row.extend([None for i in range(columnCount - rowCount)])
+            row_count = len(row)
+            if row_count < column_count:
+                row.extend([None for i in range(column_count - row_count)])
 
     # def index(self, row, column, parent=QtCore.QModelIndex()):
     #     return self.createIndex(row, column)
