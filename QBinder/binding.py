@@ -241,6 +241,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
         self.overrideOperator(self.val)
         self.event_loop = []
         self.__binder__ = None
+        self.__set_flag__ = False
 
     @classmethod
     @contextmanager
@@ -258,9 +259,13 @@ class Binding(QtGui.QStandardItem, BindingBase):
         return d
 
     def set(self, value):
-        # NOTE prevent infinite changed 
-        if value == self.get():
+        # NOTE set value for the first time but block infinite setter
+        if value == self.get() and self.__set_flag__:
+            self.__set_flag__ = False
             return
+        else:
+            self.__set_flag__ = True
+
         self.val = self.retrieve2Notify(value)
         self.overrideOperator(value)
         self.emitDataChanged()
