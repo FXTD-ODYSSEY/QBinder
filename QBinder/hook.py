@@ -158,55 +158,51 @@ class MethodHook(HookBase):
 
         @six.wraps(func)
         def wrapper(self, *args, **kwargs):
-            if len(args) != 1:
+            callback = args[0] if args else None
+            if not isinstance(callback, types.LambdaType):
                 return func(self, *args, **kwargs)
 
-            callback = args[0]
+            # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
+            with Binding.set_trace():
+                val = callback()
 
-            if isinstance(callback, types.LambdaType):
-
-                # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
-                with Binding.set_trace():
-                    val = callback()
-
-                def connect_callback(callback, args):
-                    val = callback()
-                    args = cls.combine_args(val, args)
-                    # cls.remember_cursor_position(func)(self, *args, **kwargs)
-                    QtCore.QTimer.singleShot(
-                        0,
-                        lambda: cls.remember_cursor_position(func)(
-                            self, *args, **kwargs
-                        ),
-                    )
-
-                # NOTE register auto update
-                _callback_ = partial(connect_callback, callback, args)
-                for binding in Binding._trace_list_:
-                    binding.connect(_callback_)
-
+            # NOTE *_args, **_kwargs for custom argument 
+            def connect_callback(callback, args, *_args, **_kwargs):
+                val = callback()
                 args = cls.combine_args(val, args)
+                # cls.remember_cursor_position(func)(self, *args, **kwargs)
+                QtCore.QTimer.singleShot(
+                    0,
+                    lambda: cls.remember_cursor_position(func)(self, *args, **kwargs),
+                )
 
-                # NOTE Single binding connect to the updater
-                updater = cls.options.get("updater")
-                prop = cls.options.get("property")
-                getter = cls.options.get("getter")
-                _getter_1 = getattr(self, getter) if getter else None
-                _getter_2 = lambda: self.property(prop) if prop else None
-                getter = _getter_1 if _getter_1 else _getter_2
-                code = callback.__code__
+            # NOTE register auto update
+            _callback_ = partial(connect_callback, callback, args)
+            for binding in Binding._trace_list_:
+                binding.connect(_callback_)
 
-                if (
-                    updater
-                    and getter
-                    # NOTE only bind one response variable
-                    and len(Binding._trace_list_) == 1
-                    and len(code.co_consts) == 1  # NOTE only bind directly variable
-                ):
-                    updater = getattr(self, updater)
-                    updater.connect(lambda *args: binding.set(getter()))
-                    binding = Binding._trace_list_.pop()
-                    QtCore.QTimer.singleShot(0, partial(cls.auto_dump, binding))
+            args = cls.combine_args(val, args)
+
+            # NOTE Single binding connect to the updater
+            updater = cls.options.get("updater")
+            prop = cls.options.get("property")
+            getter = cls.options.get("getter")
+            _getter_1 = getattr(self, getter) if getter else None
+            _getter_2 = lambda: self.property(prop) if prop else None
+            getter = _getter_1 if _getter_1 else _getter_2
+            code = callback.__code__
+
+            if (
+                updater
+                and getter
+                # NOTE only bind one response variable
+                and len(Binding._trace_list_) == 1
+                and len(code.co_consts) == 1  # NOTE only bind directly variable
+            ):
+                updater = getattr(self, updater)
+                updater.connect(lambda *args: binding.set(getter()))
+                binding = Binding._trace_list_.pop()
+                QtCore.QTimer.singleShot(0, partial(cls.auto_dump, binding))
 
             return func(self, *args, **kwargs)
 

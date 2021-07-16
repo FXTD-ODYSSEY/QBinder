@@ -13,6 +13,7 @@ __date__ = "2020-05-06 23:02:37"
 import six
 import sys
 import inspect
+import traceback
 from collections import OrderedDict
 from contextlib import contextmanager
 from Qt import QtCore, QtGui
@@ -336,6 +337,8 @@ class Binding(QtGui.QStandardItem, BindingBase):
                     try:
                         callback(*args, **kwargs)
                     except:
+                        # TODO QBinder logger
+                        traceback.print_exc()
                         self.event_loop.remove(callback)
 
 
