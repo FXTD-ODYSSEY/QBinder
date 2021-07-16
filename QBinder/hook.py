@@ -170,11 +170,12 @@ class MethodHook(HookBase):
             def connect_callback(callback, args, *_args, **_kwargs):
                 val = callback()
                 args = cls.combine_args(val, args)
-                # cls.remember_cursor_position(func)(self, *args, **kwargs)
-                QtCore.QTimer.singleShot(
-                    0,
-                    lambda: cls.remember_cursor_position(func)(self, *args, **kwargs),
-                )
+                cls.remember_cursor_position(func)(self, *args, **kwargs)
+                # TODO some case need to delay for cursor position but it would broke the slider sync effect
+                # QtCore.QTimer.singleShot(
+                #     0,
+                #     lambda: cls.remember_cursor_position(func)(self, *args, **kwargs),
+                # )
 
             # NOTE register auto update
             _callback_ = partial(connect_callback, callback, args)
