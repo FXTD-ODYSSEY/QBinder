@@ -166,7 +166,7 @@ class MethodHook(HookBase):
             with Binding.set_trace():
                 val = callback()
 
-            # NOTE *_args, **_kwargs for custom argument 
+            # NOTE *_args, **_kwargs for custom argument
             def connect_callback(callback, args, *_args, **_kwargs):
                 val = callback()
                 args = cls.combine_args(val, args)
@@ -179,7 +179,11 @@ class MethodHook(HookBase):
 
             # NOTE register auto update
             _callback_ = partial(connect_callback, callback, args)
+            binding_list = []
             for binding in Binding._trace_list_:
+                if binding in binding_list:
+                    continue
+                binding_list.append(binding)
                 binding.connect(_callback_)
 
             args = cls.combine_args(val, args)
