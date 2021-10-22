@@ -351,3 +351,11 @@ class BinderTemplate(six.with_metaclass(BinderTemplateMeta, object)):
                 setattr(binder, name, member)
         cls.__init__(binder, *args, **kwargs)
         return binder
+
+    def __getitem__(self, key):
+        """stub method for pylint & autocomplete"""
+        return Binding()
+        
+    def __setitem__(self, key, value):
+        """stub method for pylint & autocomplete"""
+        return Binding()
