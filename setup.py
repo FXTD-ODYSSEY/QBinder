@@ -14,11 +14,11 @@ __date__ = '2020-11-28 10:38:36'
 
 import os
 import sys
-import requests
 from setuptools import setup, find_packages
 from QBinder import __version__
-if sys.version_info[0] < 3:
-    from codecs import open
+# import requests
+# if sys.version_info[0] < 3:
+#     from codecs import open
 
 # # NOTE 将markdown格式转换为rst格式
 # def md_to_rst(from_file, to_file):
