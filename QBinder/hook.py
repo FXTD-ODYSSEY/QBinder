@@ -6,12 +6,13 @@
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
-from types import BuiltinMethodType, MethodType
+from __future__ import unicode_literals
 
 __author__ = "timmyliang"
 __email__ = "820472580@qq.com"
 __date__ = "2020-11-02 23:47:53"
 
+import re
 import sys
 import six
 import types
@@ -29,6 +30,15 @@ _HOOKS_REL = nestdict()
 qt_dict = {"QtWidgets.%s" % n: m for n, m in inspect.getmembers(QtWidgets)}
 qt_dict.update({"QtCore.%s" % n: m for n, m in inspect.getmembers(QtCore)})
 qt_dict.update({"QtGui.%s" % n: m for n, m in inspect.getmembers(QtGui)})
+
+
+def _cell_factory():
+    a = 1
+    f = lambda: a + 1
+    return f.__closure__[0]
+
+
+CellType = type(_cell_factory())
 
 
 def byte2str(text):
@@ -51,40 +61,41 @@ def get_method_name(method):
     return byte2str(name), count
 
 
-for name, member in qt_dict.items():
-    # NOTE filter qt related func
-    if name == "QtGui.QMatrix" or not hasattr(member, "staticMetaObject"):
-        continue
-    data = CONFIG.get(name, {})
-    for method_name, method in inspect.getmembers(member, inspect.isroutine):
-        if data.get(method_name):
-            HOOKS[name][method_name] = {}
-            if method_name.startswith("set"):
-                _HOOKS_REL[method_name.lower()] = method_name
-
-    # for i in range(meta_obj.methodCount()):
-    #     method = meta_obj.method(i)
-    #     method_name, count = get_method_name(method)
-    #     if count and method.methodType() != QtCore.QMetaMethod.Signal:
-    #         if hasattr(member, method_name):
-    #             HOOKS[name][method_name] = {}
-    #             _HOOKS_REL[name][method_name.lower()] = method_name
-
-    # NOTE auto bind updater
-    meta_obj = getattr(member, "staticMetaObject")
-    if not meta_obj:
-        continue
-    for i in range(meta_obj.propertyCount()):
-        property = meta_obj.property(i)
-        if not property.hasNotifySignal():
+def _initialize():
+    for name, member in qt_dict.items():
+        # NOTE filter qt related func
+        if name == "QtGui.QMatrix" or not hasattr(member, "staticMetaObject"):
             continue
-        property_name = property.name()
-        method_name = _HOOKS_REL.get("set%s" % property_name.lower())
-        data = HOOKS[name].get(method_name)
-        if isinstance(data, dict):
-            updater, _ = get_method_name(property.notifySignal())
-            if updater:
-                data.update({"updater": updater, "property": property_name})
+        data = CONFIG.get(name, {})
+        for method_name, _ in inspect.getmembers(member, inspect.isroutine):
+            if data.get(method_name):
+                HOOKS[name][method_name] = {}
+                if method_name.startswith("set"):
+                    _HOOKS_REL[method_name.lower()] = method_name
+
+        # for i in range(meta_obj.methodCount()):
+        #     method = meta_obj.method(i)
+        #     method_name, count = get_method_name(method)
+        #     if count and method.methodType() != QtCore.QMetaMethod.Signal:
+        #         if hasattr(member, method_name):
+        #             HOOKS[name][method_name] = {}
+        #             _HOOKS_REL[name][method_name.lower()] = method_name
+
+        # NOTE auto bind updater
+        meta_obj = getattr(member, "staticMetaObject")
+        if not meta_obj:
+            continue
+        for i in range(meta_obj.propertyCount()):
+            prop = meta_obj.property(i)
+            if not prop.hasNotifySignal():
+                continue
+            property_name = prop.name()
+            method_name = _HOOKS_REL.get("set%s" % property_name.lower())
+            data = HOOKS[name].get(method_name)
+            if isinstance(data, dict):
+                updater, _ = get_method_name(prop.notifySignal())
+                if updater:
+                    data.update({"updater": updater, "property": property_name})
 
 
 class HookMeta(type):
@@ -105,6 +116,30 @@ class HookBase(six.with_metaclass(HookMeta, object)):
             return val + args[1:]
         else:
             return (val,) + args[1:]
+
+    @classmethod
+    def trace_callback(cls, callback, self=None):
+        """trigger all possible binder binding __get__ call"""
+        pattern = "QBinder.binder.*BinderInstance"
+        closure = getattr(callback, "__closure__", None)
+        closure = closure if closure else [self] if self else []
+        code = callback.__code__
+        names = code.co_names
+
+        for cell in closure:
+            self = cell.cell_contents if isinstance(cell, CellType) else cell
+            # print(type(cell))
+            # print(dir(cell))
+            for name in names:
+                binder = getattr(self, name, None)
+                if not binder:
+                    continue
+                if re.search(pattern, str(binder.__class__)):
+                    for _name in names:
+                        getattr(binder, _name, None)
+                # NOTE `lambda: self.callback()` hook class callback
+                elif callable(binder):
+                    cls.trace_callback(binder, self)
 
 
 class MethodHook(HookBase):
@@ -153,69 +188,63 @@ class MethodHook(HookBase):
 
         return wrapper
 
-    def __call__(cls, func):
+    def __call__(self, func):
         from .binding import Binding
 
         @six.wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(_self, *args, **kwargs):
             callback = args[0] if args else None
-            if not isinstance(callback, types.LambdaType):
-                return func(self, *args, **kwargs)
+            if isinstance(callback, types.LambdaType):
 
-            # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
-            with Binding.set_trace():
-                val = callback()
+                # NOTE get the running bindings (with __get__ method) add to Binding._trace_dict_
+                with Binding.set_trace():
+                    val = callback()
+                    self.trace_callback(callback)
 
-            # NOTE *_args, **_kwargs for custom argument
-            def connect_callback(callback, args, *_args, **_kwargs):
-                val = callback()
-                args = cls.combine_args(val, args)
-                cls.remember_cursor_position(func)(self, *args, **kwargs)
-                # TODO some case need to delay for cursor position but it would broke the slider sync effect
-                # QtCore.QTimer.singleShot(
-                #     0,
-                #     lambda: cls.remember_cursor_position(func)(self, *args, **kwargs),
-                # )
+                # NOTE *_args, **_kwargs for custom argument
+                def connect_callback(callback, args, *_args, **_kwargs):
+                    args = self.combine_args(callback(), args)
+                    self.remember_cursor_position(func)(_self, *args, **kwargs)
+                    # TODO some case need to delay for cursor position but it would broke the slider sync effect
+                    # QtCore.QTimer.singleShot(
+                    #     0,
+                    #     lambda: cls.remember_cursor_position(func)(self, *args, **kwargs),
+                    # )
 
-            # NOTE register auto update
-            _callback_ = partial(connect_callback, callback, args)
-            binding_list = []
-            for binding in Binding._trace_list_:
-                if binding in binding_list:
-                    continue
-                binding_list.append(binding)
-                binding.connect(_callback_)
+                # NOTE register auto update
+                _callback_ = partial(connect_callback, callback, args)
+                for binding in Binding._trace_dict_.values():
+                    binding.connect(_callback_)
+                args = self.combine_args(val, args)
 
-            args = cls.combine_args(val, args)
+                # NOTE Single binding connect to the updater
+                updater = self.options.get("updater")
+                prop = self.options.get("property")
+                getter = self.options.get("getter")
+                _getter_1 = getattr(_self, getter) if getter else None
+                _getter_2 = lambda: _self.property(prop) if prop else None
+                getter = _getter_1 if _getter_1 else _getter_2
+                code = callback.__code__
 
-            # NOTE Single binding connect to the updater
-            updater = cls.options.get("updater")
-            prop = cls.options.get("property")
-            getter = cls.options.get("getter")
-            _getter_1 = getattr(self, getter) if getter else None
-            _getter_2 = lambda: self.property(prop) if prop else None
-            getter = _getter_1 if _getter_1 else _getter_2
-            code = callback.__code__
+                if (
+                    updater
+                    and getter
+                    # NOTE only bind one response variable
+                    and len(Binding._trace_dict_) == 1
+                    and len(code.co_consts) == 1  # NOTE only bind directly variable
+                ):
+                    updater = getattr(_self, updater)
+                    updater.connect(lambda *args: binding.set(getter()))
+                    binding = list(Binding._trace_dict_.values())[0]
+                    QtCore.QTimer.singleShot(0, partial(self.auto_dump, binding))
 
-            if (
-                updater
-                and getter
-                # NOTE only bind one response variable
-                and len(Binding._trace_list_) == 1
-                and len(code.co_consts) == 1  # NOTE only bind directly variable
-            ):
-                updater = getattr(self, updater)
-                updater.connect(lambda *args: binding.set(getter()))
-                binding = Binding._trace_list_.pop()
-                QtCore.QTimer.singleShot(0, partial(cls.auto_dump, binding))
-
-            return func(self, *args, **kwargs)
+            return func(_self, *args, **kwargs)
 
         return wrapper
 
 
 class FuncHook(HookBase):
-    def __call__(cls, func):
+    def __call__(self, func):
         from .binding import Binding
 
         @six.wraps(func)
@@ -227,21 +256,22 @@ class FuncHook(HookBase):
 
             if isinstance(callback, types.LambdaType):
 
-                # NOTE get the running bindings (with __get__ method) add to Binding._trace_list_
+                # NOTE get the running bindings (with __get__ method) add to Binding._trace_dict_
                 with Binding.set_trace():
                     val = callback()
+                    self.trace_callback(callback)
 
                 def connect_callback(callback, args):
                     val = callback()
-                    args = cls.combine_args(val, args)
+                    args = self.combine_args(val, args)
                     func(*args, **kwargs)
 
                 # NOTE register auto update
                 _callback_ = partial(connect_callback, callback, args[1:])
-                for binding in Binding._trace_list_:
+                for binding in Binding._trace_dict_.values():
                     binding.connect(_callback_)
 
-                args = cls.combine_args(val, args[1:])
+                args = self.combine_args(val, args[1:])
             return func(*args, **kwargs)
 
         return wrapper
@@ -257,3 +287,6 @@ def hook_initialize(hooks):
         for setter, options in setters.items():
             func = getattr(widget, setter)
             setattr(widget, setter, MethodHook(options)(func))
+
+
+_initialize()

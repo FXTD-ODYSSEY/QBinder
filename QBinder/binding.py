@@ -187,7 +187,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
 
     __trace = False
     __emit_flag = False
-    _trace_list_ = []
+    _trace_dict_ = {}
     _inst_ = []
 
     __repr__ = lambda self: repr(self.val)
@@ -247,7 +247,7 @@ class Binding(QtGui.QStandardItem, BindingBase):
     @classmethod
     @contextmanager
     def set_trace(cls):
-        del cls._trace_list_[:]
+        cls._trace_dict_.clear()
         cls.__trace = True
         yield
         cls.__trace = False
@@ -274,7 +274,9 @@ class Binding(QtGui.QStandardItem, BindingBase):
 
     def get(self):
         self.__class__._inst_ = [self]
-        self.__trace and self._trace_list_.append(self)
+        hash_code = id(self)
+        if self.__trace and not hash_code in self._trace_dict_:
+            self._trace_dict_[hash_code] = self
         return self.val
 
     @classmethod
