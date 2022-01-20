@@ -113,8 +113,8 @@ class QEventHook(QtCore.QObject):
     def check_callback(self, callback):
         if inspect.ismethod(callback):
             callback = callback.__func__
-        if not inspect.isfunction(callback):
-            raise TypeError("{!r} is not a Python function".format(callback))
+        if not callable(callback):
+            raise TypeError("{!r} is not Callable".format(callback))
 
     def add_hook(self, receiver, event, callbacks):
         """add_hook global hook
