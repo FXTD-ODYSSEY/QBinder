@@ -20,7 +20,10 @@ import inspect
 from functools import partial
 
 import Qt
-from Qt import QtCore, QtWidgets, QtGui
+from Qt import QtCore
+from Qt import QtWidgets
+from Qt import QtGui
+from Qt.QtCompat import isValid
 
 from .util import nestdict
 from .hookconfig import CONFIG
@@ -128,8 +131,6 @@ class HookBase(six.with_metaclass(HookMeta, object)):
 
         for cell in closure:
             self = cell.cell_contents if isinstance(cell, CellType) else cell
-            # print(type(cell))
-            # print(dir(cell))
             for name in names:
                 binder = getattr(self, name, None)
                 if not binder:
@@ -162,6 +163,9 @@ class MethodHook(HookBase):
         """maintain the Qt edit cusorPosition after setting a new value"""
 
         def wrapper(self, *args, **kwargs):
+            if self and not isValid(self):
+                del self
+                return
             setter = None
             cursor_pos = 0
             pos = self.property("cursorPosition")
