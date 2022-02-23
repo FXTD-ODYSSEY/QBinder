@@ -359,3 +359,7 @@ class BinderTemplate(six.with_metaclass(BinderTemplateMeta, object)):
     def __setitem__(self, key, value):
         """stub method for pylint & autocomplete"""
         return Binding()
+    
+    def __call__(self, key):
+        """stub method for pylint & autocomplete"""
+        return
