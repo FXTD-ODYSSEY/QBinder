@@ -23,7 +23,6 @@ import Qt
 from Qt import QtCore
 from Qt import QtWidgets
 from Qt import QtGui
-from Qt.QtCompat import isValid
 
 from .util import nestdict
 from .hookconfig import CONFIG
@@ -163,9 +162,6 @@ class MethodHook(HookBase):
         """maintain the Qt edit cusorPosition after setting a new value"""
 
         def wrapper(self, *args, **kwargs):
-            if self and not isValid(self):
-                del self
-                return
             setter = None
             cursor_pos = 0
             pos = self.property("cursorPosition")
@@ -286,11 +282,22 @@ def hook_initialize(hooks):
     # NOTE Dynamic wrap the Qt Widget setter base on the HOOKS Definition
     """
     for widget, setters in hooks.items():
-        lib, widget = widget.split(".")
-        widget = getattr(getattr(Qt, lib), widget)
-        for setter, options in setters.items():
-            func = getattr(widget, setter)
-            setattr(widget, setter, MethodHook(options)(func))
+        lib_name, cls_name = widget.split(".")
+        qt_library = getattr(Qt, lib_name)
+        qt_class = getattr(qt_library, cls_name)
+
+        try:
+            new_class = type(
+                qt_class.__name__,
+                (qt_class,),
+                {
+                    setter: MethodHook(options)(getattr(qt_class, setter))
+                    for setter, options in setters.items()
+                },
+            )
+            setattr(qt_library, cls_name, new_class)
+        except TypeError:
+            pass
 
 
 _initialize()
