@@ -126,14 +126,10 @@ class Set(HandlerBase):
 
 
 class QAnim(QtCore.QVariantAnimation):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,*args,**kwargs):
         # NOTE avoid gc
         parent = parent if parent else QtWidgets.QApplication.activeWindow()
-        super(QAnim, self).__init__(parent)
-
-    def updateCurrentValue(self, v):
-        pass
-        # return super(QAnim, self).updateCurrentValue(v)
+        super(QAnim, self).__init__(parent=parent,*args, **kwargs)
 
 
 class Anim(HandlerBase):
@@ -174,8 +170,9 @@ class Anim(HandlerBase):
             anim.finished.connect(anim.deleteLater)
             anim.setEasingCurve(self.easing)
 
-            anim.setStartValue(start)
-            anim.setEndValue(value)
+            # NOTES(timmyliang): fix maya 2020 not animated bug
+            anim.setStartValue(float(start))
+            anim.setEndValue(float(value))
             anim.start()
 
             if callable(self.finished):
