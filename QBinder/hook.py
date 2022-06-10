@@ -65,6 +65,9 @@ def get_method_name(method):
 
 
 def _initialize():
+    global HOOKS
+    global _HOOKS_REL
+
     for name, member in qt_dict.items():
         # NOTE filter qt related func
         if name == "QtGui.QMatrix" or not hasattr(member, "staticMetaObject"):
@@ -76,19 +79,17 @@ def _initialize():
                 if method_name.startswith("set"):
                     _HOOKS_REL[method_name.lower()] = method_name
 
-        # for i in range(meta_obj.methodCount()):
-        #     method = meta_obj.method(i)
-        #     method_name, count = get_method_name(method)
-        #     if count and method.methodType() != QtCore.QMetaMethod.Signal:
-        #         if hasattr(member, method_name):
-        #             HOOKS[name][method_name] = {}
-        #             _HOOKS_REL[name][method_name.lower()] = method_name
-
         # NOTE auto bind updater
         meta_obj = getattr(member, "staticMetaObject")
         if not meta_obj:
             continue
-        for i in range(meta_obj.propertyCount()):
+        try:
+            counts = meta_obj.propertyCount()
+        except RuntimeError:
+            # Ignore RuntimeError: Internal C++ object (PySide2.QtCore.QMetaObject) already deleted.
+            # issue: https://github.com/FXTD-ODYSSEY/QBinder/issues/13
+            continue
+        for i in range(counts):
             prop = meta_obj.property(i)
             if not prop.hasNotifySignal():
                 continue
@@ -231,11 +232,11 @@ class MethodHook(HookBase):
                 code = callback.__code__
 
                 if (
-                    updater
-                    and getter
-                    # NOTE only bind one response variable
-                    and len(Binding._trace_dict_) == 1
-                    and len(code.co_consts) == 1  # NOTE only bind directly variable
+                        updater
+                        and getter
+                        # NOTE only bind one response variable
+                        and len(Binding._trace_dict_) == 1
+                        and len(code.co_consts) == 1  # NOTE only bind directly variable
                 ):
                     updater = getattr(_self, updater)
                     updater.connect(lambda *args: binding.set(getter()))
