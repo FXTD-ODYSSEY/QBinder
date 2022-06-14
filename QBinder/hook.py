@@ -64,6 +64,16 @@ def get_method_name(method):
     return byte2str(name), count
 
 
+def get_property_count(meta_obj):
+    if not isinstance(meta_obj, QtCore.QMetaObject):
+        return
+    try:
+        count = meta_obj.propertyCount()
+        return count
+    except RuntimeError:
+        pass
+
+
 def _initialize():
     for name, member in qt_dict.items():
         # NOTE filter qt related func
@@ -85,10 +95,13 @@ def _initialize():
         #             _HOOKS_REL[name][method_name.lower()] = method_name
 
         # NOTE auto bind updater
-        meta_obj = getattr(member, "staticMetaObject")
-        if not meta_obj:
-            continue
-        for i in range(meta_obj.propertyCount()):
+        meta_obj = getattr(member, "staticMetaObject", None)
+        count = get_property_count(meta_obj)
+        if count is None and issubclass(member, QtCore.QObject):
+            meta_obj = member().metaObject()
+            count = get_property_count(meta_obj)
+
+        for i in range(count or 0):
             prop = meta_obj.property(i)
             if not prop.hasNotifySignal():
                 continue
